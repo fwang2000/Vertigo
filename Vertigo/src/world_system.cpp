@@ -72,7 +72,7 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Chicken Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(window_width_px, window_height_px, "Vertigo", nullptr, nullptr);
 	if (window == nullptr) {
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
@@ -154,15 +154,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		// Reset timer
 		next_eagle_spawn = (EAGLE_DELAY_MS / 2) + uniform_dist(rng) * (EAGLE_DELAY_MS / 2);
 		// Create eagle with random initial position
-        createEagle(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), -25.f));
+        createEagle(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
 	}
 
 	// Spawning new bug
 	next_bug_spawn -= elapsed_ms_since_last_update * current_speed;
 	if (registry.eatables.components.size() <= MAX_BUG && next_bug_spawn < 0.f) {
-		next_bug_spawn = (BUG_DELAY_MS / 2) + uniform_dist(rng) * (BUG_DELAY_MS / 2);
-		// Create bug with random initial position
-		createBug(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), -25.f));
 		// !!!  TODO A1: Create new bug with createBug({0,0}), as for the Eagles above
 	}
 
@@ -218,8 +215,8 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create a new chicken
-	player_chicken = createChicken(renderer, { window_width_px/2, window_height_px - 200 });
-	registry.colors.insert(player_chicken, {1, 0.8f, 0.8f});
+	player_explorer = createExplorer(renderer, { window_width_px/2, window_height_px - 200 });
+	registry.colors.insert(player_explorer, {1, 0.8f, 0.8f});
 
 	// !! TODO A3: Enable static eggs on the ground
 	// Create eggs on the floor for reference
@@ -257,8 +254,6 @@ void WorldSystem::handle_collisions() {
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, chicken_dead_sound, 0);
 
-					Motion* chickenMotion = &registry.motions.get(player_chicken);
-					chickenMotion->angle = -90.f;
 					// !!! TODO A1: change the chicken orientation and color on death
 				}
 			}
@@ -293,32 +288,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	Motion* chicken_motion = &registry.motions.get(player_chicken);
-
-	if (registry.deathTimers.has(player_chicken)) {
-		chicken_motion->velocity = vec2(0, 300);
-	}
-	else {
-
-		switch (key)
-		{
-		case GLFW_KEY_UP:
-			move(action, vec2(0, -250));
-			break;
-		case GLFW_KEY_DOWN:
-			move(action, vec2(0, 250));
-			break;
-		case GLFW_KEY_LEFT:
-			move(action, rotateVecByAngle(vec2(-250, 0)));
-			break;
-		case GLFW_KEY_RIGHT:
-			move(action, rotateVecByAngle(vec2(250, 0)));
-			break;
-		default:
-			break;
-		}
-	}
-
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -347,36 +316,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	current_speed = fmax(0.f, current_speed);
 }
 
-void WorldSystem::move(int action , vec2 velocity) {
-	Motion* chicken_motion = &registry.motions.get(player_chicken);
-	if (action == GLFW_RELEASE)
-		chicken_motion->velocity = vec2(0, 0);
-	else if (action == GLFW_PRESS)
-		chicken_motion->velocity = velocity;
-}
-
-vec2 WorldSystem::rotateVecByAngle(vec2 oldVector) {
-
-	Motion* chicken_motion = &registry.motions.get(player_chicken);
-	double angle = chicken_motion->angle;
-	double newX = oldVector.x * cos(angle) - oldVector.y * sin(angle);
-	double newY = oldVector.x * sin(angle) + oldVector.y * cos(angle);
-	return vec2(newX, newY);
-}
-
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	// TODO A1: HANDLE CHICKEN ROTATION HERE
 	// xpos and ypos are relative to the top-left of the window, the chicken's
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Motion* chicken_motion = &registry.motions.get(player_chicken);
-	double angle = atan2(
-		chicken_motion->position.y - mouse_position.y,
-		chicken_motion->position.x - mouse_position.x
-	);
-
-	chicken_motion->angle = angle;
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }

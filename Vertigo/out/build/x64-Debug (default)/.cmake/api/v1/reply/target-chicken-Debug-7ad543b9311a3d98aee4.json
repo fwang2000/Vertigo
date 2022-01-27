@@ -115,28 +115,28 @@
 			[
 				{
 					"backtrace" : 5,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/src"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/src"
 				},
 				{
 					"backtrace" : 6,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/ext/stb_image"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/ext/stb_image"
 				},
 				{
 					"backtrace" : 7,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/ext/gl3w"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/ext/gl3w"
 				},
 				{
 					"backtrace" : 8,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/ext/glfw/include"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/ext/glfw/include"
 				},
 				{
 					"backtrace" : 9,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/ext/sdl/include/SDL"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/ext/sdl/include/SDL"
 				},
 				{
 					"backtrace" : 3,
 					"isSystem" : true,
-					"path" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/ext/glm"
+					"path" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/ext/glm"
 				}
 			],
 			"language" : "CXX",

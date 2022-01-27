@@ -38,7 +38,7 @@
 				{
 					"directoryIndex" : 0,
 					"id" : "chicken::@6890427a1f51a3e7e1df",
-					"jsonFile" : "target-chicken-Debug-6cbb7e699cf20449623f.json",
+					"jsonFile" : "target-chicken-Debug-7ad543b9311a3d98aee4.json",
 					"name" : "chicken",
 					"projectIndex" : 0
 				}
@@ -48,8 +48,8 @@
 	"kind" : "codemodel",
 	"paths" : 
 	{
-		"build" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/out/build/x64-Debug (default)",
-		"source" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template"
+		"build" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/out/build/x64-Debug (default)",
+		"source" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo"
 	},
 	"version" : 
 	{

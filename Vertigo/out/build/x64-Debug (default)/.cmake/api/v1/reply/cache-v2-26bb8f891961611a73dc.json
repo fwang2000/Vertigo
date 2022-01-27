@@ -23,7 +23,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "c:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/out/build/x64-Debug (default)"
+			"value" : "c:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/out/build/x64-Debug (default)"
 		},
 		{
 			"name" : "CMAKE_CACHE_MAJOR_VERSION",
@@ -499,7 +499,7 @@
 				}
 			],
 			"type" : "INTERNAL",
-			"value" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template"
+			"value" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo"
 		},
 		{
 			"name" : "CMAKE_INSTALL_PREFIX",
@@ -511,7 +511,7 @@
 				}
 			],
 			"type" : "PATH",
-			"value" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/out/install/x64-Debug (default)"
+			"value" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/out/install/x64-Debug (default)"
 		},
 		{
 			"name" : "CMAKE_LINKER",
@@ -1079,7 +1079,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/out/build/x64-Debug (default)"
+			"value" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/out/build/x64-Debug (default)"
 		},
 		{
 			"name" : "chicken_SOURCE_DIR",
@@ -1091,7 +1091,7 @@
 				}
 			],
 			"type" : "STATIC",
-			"value" : "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template"
+			"value" : "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo"
 		},
 		{
 			"name" : "glm_DIR",

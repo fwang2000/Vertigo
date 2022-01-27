@@ -4,6 +4,12 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+
+struct Position
+{
+	vec2 coordinates = { 0, 0 };
+};
+
 // Player component
 struct Player
 {
@@ -113,7 +119,8 @@ struct Mesh
 enum class TEXTURE_ASSET_ID {
 	BUG = 0,
 	EAGLE = BUG + 1,
-	TEXTURE_COUNT = EAGLE + 1
+	EXPLORER = EAGLE + 1,
+	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

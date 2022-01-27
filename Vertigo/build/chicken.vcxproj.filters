@@ -1,78 +1,78 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\ai_system.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\ai_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\common.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\common.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\components.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\components.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\main.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\physics_system.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\physics_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\render_system.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\render_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\render_system_init.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\render_system_init.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\tiny_ecs.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\tiny_ecs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\tiny_ecs_registry.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\tiny_ecs_registry.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\world_init.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\world_init.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\world_system.cpp">
+    <ClCompile Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\world_system.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\ai_system.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\ai_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\common.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\common.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\components.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\components.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\physics_system.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\physics_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\render_system.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\render_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\tiny_ecs.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\tiny_ecs.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\tiny_ecs_registry.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\tiny_ecs_registry.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\world_init.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\world_init.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\src\world_system.hpp">
+    <ClInclude Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\src\world_system.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <CustomBuild Include="C:\Users\fwang\OneDrive\Documents\UBC22W2\CPSC 427\Assignments\A1_A3_student_template\cpsc-427-dev\template\CMakeLists.txt" />
+    <CustomBuild Include="C:\Users\fwang\OneDrive\Documents\GitHub\Vertigo\Vertigo\CMakeLists.txt" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Header Files">
-      <UniqueIdentifier>{79F9AD1F-9F8B-312F-8D03-4554725B1EFB}</UniqueIdentifier>
+      <UniqueIdentifier>{AB7D61CC-1413-3B0C-9F44-FBD81F08D75C}</UniqueIdentifier>
     </Filter>
     <Filter Include="Source Files">
-      <UniqueIdentifier>{0CB1FE6D-2654-3F2A-B7DC-51324A8051A8}</UniqueIdentifier>
+      <UniqueIdentifier>{BCB0726E-0B5C-3B30-B588-084231AA80DB}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

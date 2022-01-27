@@ -1,4 +1,4 @@
-# Install script for directory: C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template
+# Install script for directory: C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -40,5 +40,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "C:/Users/fwang/OneDrive/Documents/UBC22W2/CPSC 427/Assignments/A1_A3_student_template/cpsc-427-dev/template/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

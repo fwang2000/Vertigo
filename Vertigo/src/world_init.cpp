@@ -1,6 +1,15 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+Entity createExplorer(RenderSystem* renderer, vec2 pos) {
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+
+	registry.players.emplace(entity);
+	return entity;
+}
+
 Entity createChicken(RenderSystem* renderer, vec2 pos)
 {
 	auto entity = Entity();
