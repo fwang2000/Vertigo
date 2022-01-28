@@ -74,11 +74,15 @@ public:
 	void draw();
 
 	mat3 createProjectionMatrix();
+	mat4 create3dProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
+
+	// Internal function for drawing cube
+	void drawCube(const mat4& projection);
 
 	// Window handle
 	GLFWwindow* window;

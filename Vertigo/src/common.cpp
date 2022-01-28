@@ -21,6 +21,38 @@ void Transform::translate(vec2 offset)
 	mat = mat * T;
 }
 
+void Transform::rotate3D(ROTATION_AXIS axis, bool negative) {
+
+	float s = (negative) ? -sinf(M_PI / 2) : sinf(M_PI / 2);
+	
+	switch (axis)
+	{
+	case ROTATION_AXIS::X_AXIS:
+		mat4 r_x = { { 1.f, 0.f, 0.f, 0.f },
+					 { 0.f, 0.f, s, 0.f } ,
+					 { 0.f, -s, 0.f, 0.f } ,
+					 { 0.f, 0.f, 0.f, 1.f } };
+		mat3D = mat3D * r_x;
+		break;
+	case ROTATION_AXIS::Y_AXIS:
+		mat4 r_y = { { 0.f, 0.f, -s, 0.f },
+					 { 0.f, 1.f, 0.f, 0.f } ,
+					 { s, 0.f, 0.f, 0.f } ,
+					 { 0.f, 0.f, 0.f, 1.f } };
+		mat3D = mat3D * r_y;
+		break;
+	case ROTATION_AXIS::Z_AXIS:
+		mat4 r_z = { { 0.f, -s, 0.f, 0.f },
+					 { s, 0.f, 0.f, 0.f } ,
+					 { 0.f, 0.f, 1.f, 0.f } ,
+					 { 0.f, 0.f, 0.f, 1.f } };
+		mat3D = mat3D * r_z;
+		break;
+	default:
+		break;
+	}
+}
+
 bool gl_has_errors()
 {
 	GLenum error = glGetError();
