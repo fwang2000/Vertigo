@@ -10,30 +10,68 @@ struct Position
 	vec2 coordinates = { 0, 0 };
 };
 
+//6 cube faces
+enum CubeFace
+{
+	SIDE_0 = 0,
+	SIDE_1 = 1,
+	SIDE_2 = 2,
+	SIDE_3 = 3,
+	SIDE_4 = 4,
+	SIDE_5 = 5
+};
+
+//object moving directions
+enum Direction
+{
+	LEFT = 0,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = 3,
+};
+
+struct Object
+{
+	vec2 position = {0,0};
+	int cubeFace = CubeFace :: SIDE_0;
+	bool alive;
+	bool interactible;
+	bool fireInteractible;
+};
+
+struct Burning
+{
+	bool burning;
+};
+
+struct Fire 
+{
+	bool active = false;
+	//whether fire is currently used to solving puzzle
+	bool inUse = false;
+	//if fire is inUse, the position where the fire is used
+	vec2 position;
+};
+
 // Player component
 struct Player
 {
-
+	//TODO
 };
 
-// Eagles have a hard shell
-struct Deadly
-{
-
-};
-
-// Bug and Chicken have a soft shell
-struct Eatable
-{
-
-};
 
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
-	float angle = 0;
 	vec2 velocity = { 0, 0 };
+	float angle = 0;
 	vec2 scale = { 10, 10 };
+	int direction = Direction::DOWN;
+};
+
+struct Tile 
+{
+	//TODO
 };
 
 // Stucture to store collision information
@@ -44,29 +82,10 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
-// Data structure for toggling debug mode
-struct Debug {
-	bool in_debug_mode = 0;
-	bool in_freeze_mode = 0;
-};
-extern Debug debugging;
-
 // Sets the brightness of the screen
 struct ScreenState
 {
 	float darken_screen_factor = -1;
-};
-
-// A struct to refer to debugging graphics in the ECS
-struct DebugComponent
-{
-	// Note, an empty struct has size 1
-};
-
-// A timer that will be associated to dying chicken
-struct DeathTimer
-{
-	float counter_ms = 3000;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
@@ -117,29 +136,25 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	BUG = 0,
-	EAGLE = BUG + 1,
-	EXPLORER = EAGLE + 1,
+	FIRE = 0,
+	TILE = FIRE + 1,
+	EXPLORER = TILE + 1,
 	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	EGG = COLOURED + 1,
-	CHICKEN = EGG + 1,
-	TEXTURED = CHICKEN + 1,
-	WIND = TEXTURED + 1,
-	EFFECT_COUNT = WIND + 1
+	TEXTURED = COLOURED + 1,
+	LIGHT = TEXTURED + 1,
+	EFFECT_COUNT = LIGHT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	CHICKEN = 0,
-	SPRITE = CHICKEN + 1,
-	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
+	EXPLORER = 0,
+	CUBE = EXPLORER + 1,
+	SCREEN_TRIANGLE = CUBE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
