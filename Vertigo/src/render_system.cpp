@@ -4,6 +4,11 @@
 
 #include "tiny_ecs_registry.hpp"
 
+void RenderSystem::drawCube(const mat4& projection) 
+{
+	Entity cube = registry.cube.entities[0];
+}
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 									const mat3 &projection)
 {
@@ -219,6 +224,9 @@ void RenderSystem::draw()
 		drawTexturedMesh(entity, projection_2D);
 	}
 
+	mat4 projection_3D = create3dProjectionMatrix();
+	drawCube(projection_3D);
+	
 	// Truely render to the screen
 	drawToScreen();
 
@@ -242,4 +250,9 @@ mat3 RenderSystem::createProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+mat4 RenderSystem::create3dProjectionMatrix() 
+{
+
 }

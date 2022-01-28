@@ -42,6 +42,10 @@ private:
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 
+	// Movement Functions
+	void move(int action, vec2 velocity);
+	bool checkForTile();
+
 	// restart level
 	void restart_game();
 
@@ -58,7 +62,9 @@ private:
 	float current_speed;
 	float next_eagle_spawn;
 	float next_bug_spawn;
+	Entity player_chicken;
 	Entity player_explorer;
+	Entity cube;
 
 	// music references
 	Mix_Music* background_music;

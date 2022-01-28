@@ -215,8 +215,10 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create a new chicken
-	player_explorer = createExplorer(renderer, { window_width_px/2, window_height_px - 200 });
-	registry.colors.insert(player_explorer, {1, 0.8f, 0.8f});
+	player_chicken = createChicken(renderer, { window_width_px / 2, window_height_px - 200 });
+	player_explorer = createExplorer(renderer, { window_width_px/2, window_height_px/2 });
+	cube = createCube(renderer);
+	registry.colors.insert(player_explorer, {1, 1, 1});
 
 	// !! TODO A3: Enable static eggs on the ground
 	// Create eggs on the floor for reference
@@ -283,11 +285,31 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE CHICKEN MOVEMENT HERE
-	// key is of 'type' GLFW_KEY_
-	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
+	// TODO: Control player such that one click will make the player
+	//		 to the next tile. 
+	// IDEA: boolean to check if movement is allowed. With each step,
+	//		 decrease the distance between the expected destination,
+	//		 and current position by some velocity. Once it has passed,
+	//		 untick the boolean and reset the explorer position to the
+	//		 exact tile position to account for any lag.
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+	switch (key)
+	{
+		case GLFW_KEY_W:
+			move(action, vec2(0, -250));
+			break;
+		case GLFW_KEY_S:
+			move(action, vec2(0, 250));
+			break;
+		case GLFW_KEY_A:
+			move(action, vec2(-250, 0));
+			break;
+		case GLFW_KEY_D:
+			move(action, vec2(250, 0));
+			break;
+		default:
+			break;
+	}
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -297,7 +319,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Debugging
-	if (key == GLFW_KEY_D) {
+	if (key == GLFW_KEY_F) {
 		if (action == GLFW_RELEASE)
 			debugging.in_debug_mode = false;
 		else
@@ -314,6 +336,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		printf("Current speed = %f\n", current_speed);
 	}
 	current_speed = fmax(0.f, current_speed);
+}
+
+void WorldSystem::move(int action, vec2 velocity) {
+	Motion* explorer_motion = &registry.motions.get(player_explorer);
+	if (action == GLFW_RELEASE)
+		explorer_motion->velocity = vec2(0, 0);
+	else if (action == GLFW_PRESS)
+		explorer_motion->velocity = velocity;
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
