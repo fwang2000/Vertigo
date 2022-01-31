@@ -5,8 +5,10 @@
 #include "../ext/stb_image/stb_image.h"
 
 struct Cube {
-
+	std::vector<Tile> tiles;
+	CubeFace cubeface; // only in 3D
 };
+
 
 struct Position
 {
@@ -72,9 +74,19 @@ struct Motion {
 	int direction = Direction::DOWN;
 };
 
+enum TileState
+{
+	S = 0,
+	F = 1,
+	V = 2,
+	O = 3, // possible types of object in future milestone
+	E = 99,
+};
+
 struct Tile 
 {
-	//TODO
+	vec2 position = { 0, 0 };
+	int tileState = TileState::E;
 };
 
 // Stucture to store collision information
@@ -108,6 +120,11 @@ struct TexturedVertex
 // Mesh datastructure for storing vertex and index buffers
 struct Mesh
 {
+	//added
+	bool loadFromExcelFile(std::string filename, std::vector<Tile>& out_tiles);
+	std::vector<Tile> tiles;
+
+	//original
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
 	vec2 original_size = {1,1};
 	std::vector<ColoredVertex> vertices;

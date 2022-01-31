@@ -1,0 +1,3 @@
+C:/Users/dddnn/Desktop/2021 W2/CS 427/team project/milestone 1/vertico/Vertigo/out/build/x64-Debug/CMakeFiles/chicken.dir
+C:/Users/dddnn/Desktop/2021 W2/CS 427/team project/milestone 1/vertico/Vertigo/out/build/x64-Debug/CMakeFiles/edit_cache.dir
+C:/Users/dddnn/Desktop/2021 W2/CS 427/team project/milestone 1/vertico/Vertigo/out/build/x64-Debug/CMakeFiles/rebuild_cache.dir

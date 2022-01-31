@@ -12,6 +12,29 @@
 
 float death_timer_counter_ms = 3000;
 
+bool Mesh::loadFromExcelFile(std::string filename, std::vector<Tile>& out_tiles) {
+	std::ifstream file(filename);
+	std::string line;
+
+	while (std::getline(file, line)) {
+		std::string value;
+		std::stringstream ss(line);
+		int x = 0;
+		while (std::getline(ss, value, ','))
+		{
+			for (int i = 0; i < value.length(); i++) {
+				char ch = line[i];
+				Tile tile;
+				tile.position = { x,i };
+				tile.tileState = ch;
+				out_tiles.push_back(tile);
+			}
+			x++;
+		}
+	}
+	return true;
+}
+
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7
 // (modified to also read vertex color and omit uv and normals)
 bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size)
