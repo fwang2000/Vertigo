@@ -17,14 +17,8 @@ Entity createCube(RenderSystem* renderer);
 // the explorer
 Entity createExplorer(RenderSystem* renderer, vec2 pos);
 // the player
-Entity createChicken(RenderSystem* renderer, vec2 pos);
-// the prey
-Entity createBug(RenderSystem* renderer, vec2 position);
-// the enemy
-Entity createEagle(RenderSystem* renderer, vec2 position);
-// a red line for debugging purposes
-Entity createLine(vec2 position, vec2 size);
-// a egg
-Entity createEgg(vec2 pos, vec2 size);
+Entity createFire(RenderSystem* renderer, vec2 pos);
+// the fire
+
 
 

@@ -16,9 +16,9 @@ const size_t BUG_DELAY_MS = 5000 * 3;
 
 // Create the bug world
 WorldSystem::WorldSystem()
-	: points(0)
-	, next_eagle_spawn(0.f)
-	, next_bug_spawn(0.f) {
+	: points(0),
+    //start with level 1
+    level(1){
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -130,9 +130,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	title_ss << "Points: " << points;
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
-	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -147,52 +144,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
-
-	// Spawning new eagles
-	next_eagle_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.deadlys.components.size() <= MAX_EAGLES && next_eagle_spawn < 0.f) {
-		// Reset timer
-		next_eagle_spawn = (EAGLE_DELAY_MS / 2) + uniform_dist(rng) * (EAGLE_DELAY_MS / 2);
-		// Create eagle with random initial position
-        createEagle(renderer, vec2(50.f + uniform_dist(rng) * (window_width_px - 100.f), 100.f));
-	}
-
-	// Spawning new bug
-	next_bug_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.eatables.components.size() <= MAX_BUG && next_bug_spawn < 0.f) {
-		// !!!  TODO A1: Create new bug with createBug({0,0}), as for the Eagles above
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE EGG SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Processing the chicken state
-	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
-
-    float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if(counter.counter_ms < min_counter_ms){
-		    min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-            restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
 
 	return true;
 }
@@ -214,25 +165,16 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new chicken
-	player_chicken = createChicken(renderer, { window_width_px / 2, window_height_px - 200 });
+	// Create a new player
 	player_explorer = createExplorer(renderer, { window_width_px/2, window_height_px/2 });
 	cube = createCube(renderer);
 	registry.colors.insert(player_explorer, {1, 1, 1});
 
-	// !! TODO A3: Enable static eggs on the ground
-	// Create eggs on the floor for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-			         { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(egg, { brightness, brightness, brightness});
-	}
-	*/
+    //if player has already get fire, also create the fire
+    if(registry.players.get(player_explorer).hasFire){
+        fire = createFire(renderer, { window_width_px/2+10, window_height_px/2 });
+    }
+
 }
 
 // Compute collisions between entities
@@ -245,30 +187,12 @@ void WorldSystem::handle_collisions() {
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		// For now, we are only interested in collisions that involve the chicken
-		if (registry.players.has(entity)) {
+		if (registry.fire.has(entity)) {
 			//Player& player = registry.players.get(entity);
 
-			// Checking Player - Deadly collisions
-			if (registry.deadlys.has(entity_other)) {
-				// initiate death unless already dying
-				if (!registry.deathTimers.has(entity)) {
-					// Scream, reset timer, and make the chicken sink
-					registry.deathTimers.emplace(entity);
-					Mix_PlayChannel(-1, chicken_dead_sound, 0);
-
-					// !!! TODO A1: change the chicken orientation and color on death
-				}
-			}
-			// Checking Player - Eatable collisions
-			else if (registry.eatables.has(entity_other)) {
-				if (!registry.deathTimers.has(entity)) {
-					// chew, count points, and set the LightUp timer
-					registry.remove_all_components_of(entity_other);
-					Mix_PlayChannel(-1, chicken_eat_sound, 0);
-					++points;
-
-					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the chicken entity by modifying the ECS registry
-				}
+			// if fire collide with other object which fire interactible, the object will be removed
+			if (registry.objects.has(entity_other) && registry.objects.get(entity_other).fireInteractible) {
+				registry.objects.remove(entity_other);
 			}
 		}
 	}
@@ -318,13 +242,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
         restart_game();
 	}
 
-	// Debugging
-	if (key == GLFW_KEY_F) {
-		if (action == GLFW_RELEASE)
-			debugging.in_debug_mode = false;
-		else
-			debugging.in_debug_mode = true;
-	}
+
 
 	// Control the current speed with `<` `>`
 	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {

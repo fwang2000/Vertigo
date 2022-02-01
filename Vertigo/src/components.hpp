@@ -42,11 +42,6 @@ struct Object
 	bool fireInteractible;
 };
 
-struct Burning
-{
-	bool burning;
-};
-
 struct Fire 
 {
 	bool active = false;
@@ -59,7 +54,10 @@ struct Fire
 // Player component
 struct Player
 {
-	//TODO
+    vec2 position = {0,0};
+    int cubeFace = CubeFace :: SIDE_0;
+    bool alive = true;
+    bool hasFire = false;
 };
 
 
@@ -70,11 +68,6 @@ struct Motion {
 	float angle = 0;
 	vec2 scale = { 10, 10 };
 	int direction = Direction::DOWN;
-};
-
-struct Tile 
-{
-	//TODO
 };
 
 // Stucture to store collision information
@@ -105,7 +98,7 @@ struct TexturedVertex
 	vec2 texcoord;
 };
 
-// Mesh datastructure for storing vertex and index buffers
+// Mesh data structure for storing vertex and index buffers
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
@@ -157,7 +150,8 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 enum class GEOMETRY_BUFFER_ID {
 	EXPLORER = 0,
 	CUBE = EXPLORER + 1,
-	SCREEN_TRIANGLE = CUBE + 1,
+    SPRITE = CUBE + 1,
+	SCREEN_TRIANGLE = SPRITE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

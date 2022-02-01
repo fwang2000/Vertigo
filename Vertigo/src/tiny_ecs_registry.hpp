@@ -13,18 +13,14 @@ public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
 	ComponentContainer<Object> objects;
-	ComponentContainer<Burning> burning;
 	ComponentContainer<Fire> fire;
-	ComponentContainer<Tile> tile;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
 	ComponentContainer<Mesh*> meshPtrs;
 	ComponentContainer<RenderRequest> renderRequests;
 	ComponentContainer<ScreenState> screenStates;
-//	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
-
 	ComponentContainer<Cube> cube;
 
 	// constructor that adds all containers for looping over them
@@ -33,16 +29,13 @@ public:
 	{
 		// TODO: A1 add a LightUp component
 		registry_list.push_back(&objects);
-		registry_list.push_back(&burning);
 		registry_list.push_back(&fire);
-		registry_list.push_back(&tile);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
 		registry_list.push_back(&meshPtrs);
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
-//		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&cube);
 	}
