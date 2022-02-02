@@ -192,7 +192,8 @@ void WorldSystem::handle_collisions() {
 
 			// if fire collide with other object which fire interactible, the object will be removed
 			if (registry.objects.has(entity_other) && registry.objects.get(entity_other).fireInteractible) {
-				registry.objects.remove(entity_other);
+                Object * object = &registry.objects.get(entity_other);
+				object ->alive = false;
 			}
 		}
 	}
@@ -220,16 +221,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	switch (key)
 	{
 		case GLFW_KEY_W:
-			move(action, vec2(0, -250));
+			move(action, vec2(0, -250), Direction::UP);
 			break;
 		case GLFW_KEY_S:
-			move(action, vec2(0, 250));
+			move(action, vec2(0, 250), Direction::DOWN);
 			break;
 		case GLFW_KEY_A:
-			move(action, vec2(-250, 0));
+			move(action, vec2(-250, 0),Direction::LEFT);
 			break;
 		case GLFW_KEY_D:
-			move(action, vec2(250, 0));
+			move(action, vec2(250, 0), Direction::RIGHT);
 			break;
 		default:
 			break;
@@ -256,20 +257,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	current_speed = fmax(0.f, current_speed);
 }
 
-void WorldSystem::move(int action, vec2 velocity) {
+void WorldSystem::move(int action, vec2 velocity, Direction direction) {
 	Motion* explorer_motion = &registry.motions.get(player_explorer);
+    explorer_motion ->direction =direction;
 	if (action == GLFW_RELEASE)
 		explorer_motion->velocity = vec2(0, 0);
 	else if (action == GLFW_PRESS)
 		explorer_motion->velocity = velocity;
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE CHICKEN ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the chicken's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
-}
