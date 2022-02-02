@@ -2,6 +2,7 @@
 #include "tiny_ecs_registry.hpp"
 
 Entity createExplorer(RenderSystem* renderer, vec2 pos) {
+  
 	auto entity = Entity();
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);

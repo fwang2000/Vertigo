@@ -133,9 +133,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 	// reduce window brightness if any of the present chickens is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
-
 	return true;
 }
 
@@ -153,7 +150,7 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new explorer
+  // Create a new explorer
 	player_explorer = createExplorer(renderer, { window_width_px/2, window_height_px/2 });
 	registry.colors.insert(player_explorer, {1, 1, 1});
 }
@@ -166,11 +163,6 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-
-		// For now, we are only interested in collisions that involve the chicken
-		if (registry.players.has(entity)) {
-			//Player& player = registry.players.get(entity);
-		}
 	}
 
 	// Remove all collisions from this simulation step
@@ -196,16 +188,16 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	switch (key)
 	{
 		case GLFW_KEY_W:
-			move(action, vec2(0, -250));
+			move(action, vec2(0, -250), Direction::UP);
 			break;
 		case GLFW_KEY_S:
-			move(action, vec2(0, 250));
+			move(action, vec2(0, 250), Direction::DOWN);
 			break;
 		case GLFW_KEY_A:
-			move(action, vec2(-250, 0));
+			move(action, vec2(-250, 0),Direction::LEFT);
 			break;
 		case GLFW_KEY_D:
-			move(action, vec2(250, 0));
+			move(action, vec2(250, 0), Direction::RIGHT);
 			break;
 		default:
 			break;
@@ -219,20 +211,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 }
 
-void WorldSystem::move(int action, vec2 velocity) {
+void WorldSystem::move(int action, vec2 velocity, Direction direction) {
 	Motion* explorer_motion = &registry.motions.get(player_explorer);
+    explorer_motion ->direction =direction;
 	if (action == GLFW_RELEASE)
 		explorer_motion->velocity = vec2(0, 0);
 	else if (action == GLFW_PRESS)
 		explorer_motion->velocity = velocity;
 }
 
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A1: HANDLE CHICKEN ROTATION HERE
-	// xpos and ypos are relative to the top-left of the window, the chicken's
-	// default facing direction is (1, 0)
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	(vec2)mouse_position; // dummy to avoid compiler warning
-}

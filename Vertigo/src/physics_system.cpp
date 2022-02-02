@@ -54,8 +54,8 @@ void PhysicsSystem::step(float elapsed_ms)
 			if (collides(motion_i, motion_j))
 			{
 				Entity entity_j = motion_container.entities[j];
-				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+				// Create a collision event
+				// We are abusing the ECS system a bit in that we potentially insert multiple collisions for the same entity
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 			}

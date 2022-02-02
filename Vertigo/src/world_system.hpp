@@ -40,10 +40,9 @@ public:
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
-	void on_mouse_move(vec2 pos);
-
+    
 	// Movement Functions
-	void move(int action, vec2 velocity);
+	void move(int action, vec2 velocity, Direction direction);
 	bool checkForTile();
 
 	// restart level

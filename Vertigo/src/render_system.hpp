@@ -36,7 +36,7 @@ class RenderSystem {
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("textured"),
-		shader_path("wind") };
+		shader_path("light") };
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;

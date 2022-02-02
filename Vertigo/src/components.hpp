@@ -46,17 +46,10 @@ struct Position
 // Player component
 struct Player
 {
-	vec2 position;
-	int face = CubeFace::SIDE_0;
-	bool alive = true;
-	bool hasFire = false;
-};
-
-struct Tile 
-{
-	int x;
-	int y;
-	int face;
+    vec2 position = {0,0};
+    int cubeFace = CubeFace :: SIDE_0;
+    bool alive = true;
+    bool hasFire = false;
 };
 
 
@@ -65,6 +58,7 @@ struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 1, 1 };
+	int direction = Direction::DOWN;
 };
 
 // Stucture to store collision information
@@ -86,7 +80,6 @@ struct DeathTimer
 {
 	float counter_ms = 3000;
 };
-
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex
 {
@@ -136,7 +129,9 @@ struct Mesh
 
 enum class TEXTURE_ASSET_ID {
 	EXPLORER = 0,
-	TEXTURE_COUNT = EXPLORER + 1
+	FIRE = EXPLORER + 1,
+	TILE = FIRE + 1,
+	TEXTURE_COUNT =  TILE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -150,6 +145,8 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
+	CUBE = EXPLORER + 1,
+  SPRITE = CUBE + 1,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };

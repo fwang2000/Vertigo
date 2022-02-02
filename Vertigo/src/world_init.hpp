@@ -10,5 +10,7 @@ const float EXPLORER_BB_HEIGHT = 0.6f * 488.f;
 
 // the explorer
 Entity createExplorer(RenderSystem* renderer, vec2 pos);
+// the fire
+Entity createFire(RenderSystem* renderer, vec2 pos);
 
 
