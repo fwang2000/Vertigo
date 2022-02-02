@@ -4,16 +4,6 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
-struct Cube {
-
-};
-
-struct Position
-{
-	vec2 coordinates = { 0, 0 };
-};
-
-//6 cube faces
 enum CubeFace
 {
 	SIDE_0 = 0,
@@ -21,34 +11,36 @@ enum CubeFace
 	SIDE_2 = 2,
 	SIDE_3 = 3,
 	SIDE_4 = 4,
-	SIDE_5 = 5
+	SIDE_5 = 5,
 };
 
-//object moving directions
 enum Direction
 {
 	LEFT = 0,
 	RIGHT = 1,
 	UP = 2,
-	DOWN = 3,
+	DOWN = 3
 };
 
 struct Object
 {
-	vec2 position = {0,0};
-	int cubeFace = CubeFace :: SIDE_0;
+	vec2 position = { 0, 0 };
+	int cubeFace = CubeFace::SIDE_0;
 	bool alive;
 	bool interactible;
 	bool fireInteractible;
 };
 
-struct Fire 
+struct Fire
 {
-	bool active = false;
-	//whether fire is currently used to solving puzzle
-	bool inUse = false;
-	//if fire is inUse, the position where the fire is used
 	vec2 position;
+	bool active = false;
+	bool inUse = false;
+};
+
+struct Position
+{
+	vec2 coordinates = { 0, 0 };
 };
 
 // Player component
@@ -65,8 +57,7 @@ struct Player
 struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
-	float angle = 0;
-	vec2 scale = { 10, 10 };
+	vec2 scale = { 1, 1 };
 	int direction = Direction::DOWN;
 };
 
@@ -84,6 +75,11 @@ struct ScreenState
 	float darken_screen_factor = -1;
 };
 
+// A timer that will be associated to dying chicken
+struct DeathTimer
+{
+	float counter_ms = 3000;
+};
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex
 {
@@ -132,25 +128,25 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	FIRE = 0,
+	EXPLORER = 0,
+	FIRE = EXPLORER + 1,
 	TILE = FIRE + 1,
-	EXPLORER = TILE + 1,
-	TEXTURE_COUNT = EXPLORER + 1
+	TEXTURE_COUNT =  TILE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
 	TEXTURED = COLOURED + 1,
-	LIGHT = TEXTURED + 1,
-	EFFECT_COUNT = LIGHT + 1
+	WIND = TEXTURED + 1,
+	EFFECT_COUNT = WIND + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	EXPLORER = 0,
+	SPRITE = 0,
 	CUBE = EXPLORER + 1,
-    SPRITE = CUBE + 1,
+  SPRITE = CUBE + 1,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };

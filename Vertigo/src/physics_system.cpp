@@ -33,18 +33,12 @@ void PhysicsSystem::step(float elapsed_ms)
 	auto& motion_registry = registry.motions;
 	for(uint i = 0; i< motion_registry.size(); i++)
 	{
-		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
 		motion.position = motion.position + motion.velocity * step_seconds;
 		(void)elapsed_ms; // placeholder to silence unused warning until implemented
 	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE EGG UPDATES HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	// Check for collisions between all moving entities
     ComponentContainer<Motion> &motion_container = registry.motions;
@@ -69,6 +63,4 @@ void PhysicsSystem::step(float elapsed_ms)
 	}
 	// you may need the following quantities to compute wall positions
 	(float)window_width_px; (float)window_height_px;
-
-
 }
