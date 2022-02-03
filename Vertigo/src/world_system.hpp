@@ -40,9 +40,10 @@ public:
 private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
-    
+	void on_mouse_move(vec2 pos);
+
 	// Movement Functions
-	void move(int action, vec2 velocity, Direction direction);
+	void move(int action, vec2 velocity);
 	bool checkForTile();
 
 	// restart level
@@ -54,11 +55,21 @@ private:
 	// Current level the player is on.
 	unsigned int level;
 
+	unsigned int points;
+
 	// Game state
 	RenderSystem* renderer;
+	float current_speed;
+	float next_eagle_spawn;
+	float next_bug_spawn;
+	Entity player_chicken;
 	Entity player_explorer;
 	Entity cube;
-	Entity fire;
+
+	// music references
+	Mix_Music* background_music;
+	Mix_Chunk* chicken_dead_sound;
+	Mix_Chunk* chicken_eat_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

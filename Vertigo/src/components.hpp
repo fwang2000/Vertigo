@@ -4,38 +4,8 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
-enum CubeFace
-{
-	SIDE_0 = 0,
-	SIDE_1 = 1,
-	SIDE_2 = 2,
-	SIDE_3 = 3,
-	SIDE_4 = 4,
-	SIDE_5 = 5,
-};
+struct Cube {
 
-enum Direction
-{
-	LEFT = 0,
-	RIGHT = 1,
-	UP = 2,
-	DOWN = 3
-};
-
-struct Object
-{
-	vec2 position = { 0, 0 };
-	int cubeFace = CubeFace::SIDE_0;
-	bool alive;
-	bool interactible;
-	bool fireInteractible;
-};
-
-struct Fire
-{
-	vec2 position;
-	bool active = false;
-	bool inUse = false;
 };
 
 struct Position
@@ -46,19 +16,27 @@ struct Position
 // Player component
 struct Player
 {
-    vec2 position = {0,0};
-    int cubeFace = CubeFace :: SIDE_0;
-    bool alive = true;
-    bool hasFire = false;
+
 };
 
+// Eagles have a hard shell
+struct Deadly
+{
+
+};
+
+// Bug and Chicken have a soft shell
+struct Eatable
+{
+
+};
 
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
+	float angle = 0;
 	vec2 velocity = { 0, 0 };
-	vec2 scale = { 1, 1 };
-	int direction = Direction::DOWN;
+	vec2 scale = { 10, 10 };
 };
 
 // Stucture to store collision information
@@ -69,10 +47,23 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
+
 // Sets the brightness of the screen
 struct ScreenState
 {
 	float darken_screen_factor = -1;
+};
+
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent
+{
+	// Note, an empty struct has size 1
 };
 
 // A timer that will be associated to dying chicken
@@ -80,6 +71,7 @@ struct DeathTimer
 {
 	float counter_ms = 3000;
 };
+
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex
 {
@@ -94,11 +86,11 @@ struct TexturedVertex
 	vec2 texcoord;
 };
 
-// Mesh data structure for storing vertex and index buffers
+// Mesh datastructure for storing vertex and index buffers
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = {1,1};
+	vec2 original_size = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
@@ -128,26 +120,29 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	EXPLORER = 0,
-	FIRE = EXPLORER + 1,
-	TILE = FIRE + 1,
-	TEXTURE_COUNT =  TILE + 1
+	BUG = 0,
+	EAGLE = BUG + 1,
+	EXPLORER = EAGLE + 1,
+	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	TEXTURED = COLOURED + 1,
+	EGG = COLOURED + 1,
+	CHICKEN = EGG + 1,
+	TEXTURED = CHICKEN + 1,
 	WIND = TEXTURED + 1,
 	EFFECT_COUNT = WIND + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SPRITE = 0,
-	CUBE = EXPLORER + 1,
-  SPRITE = CUBE + 1,
-	SCREEN_TRIANGLE = SPRITE + 1,
+	CHICKEN = 0,
+	SPRITE = CHICKEN + 1,
+	EGG = SPRITE + 1,
+	DEBUG_LINE = EGG + 1,
+	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
@@ -157,4 +152,3 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
-
