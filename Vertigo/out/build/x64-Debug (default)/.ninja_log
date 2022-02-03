@@ -59,3 +59,13 @@
 18	6529	665560978	CMakeFiles/chicken.dir/src/main.cpp.obj	b29609ae0332eda5
 1644	6839	665560978	CMakeFiles/chicken.dir/src/world_system.cpp.obj	f5e747c96d9bdcf0
 6839	7841	665560979	chicken.exe	85d6978743a3a1fe
+3	2482	665572138	CMakeFiles/chicken.dir/src/ai_system.cpp.obj	9b7e9cd7859aacf8
+35	2581	665572138	CMakeFiles/chicken.dir/src/tiny_ecs_registry.cpp.obj	5443a497715da2de
+8	2756	665572138	CMakeFiles/chicken.dir/src/components.cpp.obj	4987efdc7e1364b1
+19	2789	665572138	CMakeFiles/chicken.dir/src/physics_system.cpp.obj	dfb858e4149bdb18
+26	2848	665572138	CMakeFiles/chicken.dir/src/render_system_init.cpp.obj	b5a9ca9619bc3b79
+40	2966	665572138	CMakeFiles/chicken.dir/src/world_system.cpp.obj	f5e747c96d9bdcf0
+12	2970	665572138	CMakeFiles/chicken.dir/src/render_system.cpp.obj	165f9a716f32b2a3
+16	3138	665572138	CMakeFiles/chicken.dir/src/main.cpp.obj	b29609ae0332eda5
+2	1102	665572149	CMakeFiles/chicken.dir/src/world_init.cpp.obj	37374df58a92e250
+1103	1503	665572149	chicken.exe	85d6978743a3a1fe

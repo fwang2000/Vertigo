@@ -4,6 +4,24 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
+enum CubeFace
+{
+	SIDE_0 = 0,
+	SIDE_1 = 1,
+	SIDE_2 = 2,
+	SIDE_3 = 3,
+	SIDE_4 = 4,
+	SIDE_5 = 5,
+};
+
+enum Direction
+{
+	LEFT = 0,
+	RIGHT = 1,
+	UP = 2,
+	DOWN = 3
+};
+
 struct Cube {
 
 };
@@ -19,12 +37,33 @@ struct Player
 
 };
 
+struct Object
+{
+	vec2 position;
+	int cubeFace;
+	bool alive;
+	bool interactible;
+	bool fireInteactible;
+};
+
+struct Fire
+{
+	bool active = false;
+	bool inUse = false;
+	vec2 position;
+};
+
+struct Tile
+{
+	// TODO
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
-	float angle = 0;
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
+	int direction = Direction::DOWN;
 };
 
 // Stucture to store collision information
@@ -62,7 +101,7 @@ struct TexturedVertex
 	vec2 texcoord;
 };
 
-// Mesh datastructure for storing vertex and index buffers
+// Mesh data structure for storing vertex and index buffers
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
