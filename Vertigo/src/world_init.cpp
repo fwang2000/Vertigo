@@ -1,6 +1,17 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
+Entity createBox(RenderSystem* renderer)
+{
+	auto entity = Entity();
+
+	MeshBox& meshbox = renderer->getMeshBox(GEOMETRY_BUFFER_ID::CUBE);
+	registry.meshPtrs.emplace(entity, &meshbox);
+	registry.box.emplace(entity);
+
+	return entity;
+}
+
 Entity createCube(RenderSystem* renderer) {
 
 	auto entity = Entity();

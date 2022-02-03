@@ -4,15 +4,15 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
-enum CubeFace
-{
-	SIDE_0 = 0,
-	SIDE_1 = 1,
-	SIDE_2 = 2,
-	SIDE_3 = 3,
-	SIDE_4 = 4,
-	SIDE_5 = 5,
-};
+//enum CubeFace
+//{
+//	SIDE_0 = 0,
+//	SIDE_1 = 1,
+//	SIDE_2 = 2,
+//	SIDE_3 = 3,
+//	SIDE_4 = 4,
+//	SIDE_5 = 5,
+//};
 
 enum class Direction
 {
@@ -54,11 +54,38 @@ struct Fire
 	vec2 position;
 };
 
+//struct Tile
+//{
+//	int x;
+//	int y;
+//};
+
+enum TileState
+{
+	S = 0,
+	F = 1,
+	V = 2,
+	O = 3, // possible types of object in future milestone
+	E = 99,
+};
+
 struct Tile
 {
-	int x;
-	int y;
+	int tileState = TileState::E;
 };
+
+struct Box {
+	std::vector <std::vector<Tile>> tiles;
+};
+
+// Mesh datastructure for cube
+struct MeshBox
+{
+	//added
+	bool loadFromExcelFile(std::string filename, std::vector <std::vector<Tile>>& out_tiles);
+	std::vector <std::vector<Tile>> tiles;
+};
+
 
 // All data relevant to the shape and motion of entities
 // TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
@@ -158,7 +185,8 @@ const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+	CUBE = SCREEN_TRIANGLE + 1,
+	GEOMETRY_COUNT = CUBE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
