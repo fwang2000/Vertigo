@@ -1,3 +1,0 @@
-C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/build/CMakeFiles/chicken.dir
-C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/build/CMakeFiles/ALL_BUILD.dir
-C:/Users/fwang/OneDrive/Documents/GitHub/Vertigo/Vertigo/build/CMakeFiles/ZERO_CHECK.dir
