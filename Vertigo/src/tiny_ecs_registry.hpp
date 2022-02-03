@@ -22,6 +22,7 @@ public:
 	ComponentContainer<vec3> colors;
 
 	ComponentContainer<Cube> cube;
+	ComponentContainer<Box> box;
 	ComponentContainer<Tile> tiles;
 
 	// constructor that adds all containers for looping over them

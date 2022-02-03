@@ -45,6 +45,7 @@ class RenderSystem {
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
+	std::array<MeshBox, geometry_count> meshboxs;
 
 public:
 	// Initialize the window
@@ -59,6 +60,7 @@ public:
 
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
+	MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
