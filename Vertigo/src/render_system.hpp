@@ -24,22 +24,17 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
 		  // specify meshes of other assets here
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("bug.png"),
-			textures_path("eagle.png"),
 			textures_path("explorer.png") };
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
-		shader_path("egg"),
-		shader_path("chicken"),
 		shader_path("textured"),
 		shader_path("wind") };
 
@@ -74,15 +69,11 @@ public:
 	void draw();
 
 	mat3 createProjectionMatrix();
-	mat4 create3dProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat3& projection);
 	void drawToScreen();
-
-	// Internal function for drawing cube
-	void drawCube(const mat4& projection);
 
 	// Window handle
 	GLFWwindow* window;

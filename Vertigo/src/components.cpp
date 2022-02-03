@@ -8,7 +8,6 @@
 #include <iostream>
 #include <sstream>
 
-Debug debugging;
 float death_timer_counter_ms = 3000;
 
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7

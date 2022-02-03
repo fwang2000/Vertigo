@@ -19,18 +19,6 @@ struct Player
 
 };
 
-// Eagles have a hard shell
-struct Deadly
-{
-
-};
-
-// Bug and Chicken have a soft shell
-struct Eatable
-{
-
-};
-
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
@@ -47,24 +35,12 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
-// Data structure for toggling debug mode
-struct Debug {
-	bool in_debug_mode = 0;
-	bool in_freeze_mode = 0;
-};
-extern Debug debugging;
-
 // Sets the brightness of the screen
 struct ScreenState
 {
 	float darken_screen_factor = -1;
 };
 
-// A struct to refer to debugging graphics in the ECS
-struct DebugComponent
-{
-	// Note, an empty struct has size 1
-};
 
 // A timer that will be associated to dying chicken
 struct DeathTimer
@@ -120,29 +96,22 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	BUG = 0,
-	EAGLE = BUG + 1,
-	EXPLORER = EAGLE + 1,
+	EXPLORER = 0,
 	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	EGG = COLOURED + 1,
-	CHICKEN = EGG + 1,
-	TEXTURED = CHICKEN + 1,
+	TEXTURED = COLOURED + 1,
 	WIND = TEXTURED + 1,
 	EFFECT_COUNT = WIND + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	CHICKEN = 0,
-	SPRITE = CHICKEN + 1,
-	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
-	SCREEN_TRIANGLE = DEBUG_LINE + 1,
+	SPRITE = 0,
+	SCREEN_TRIANGLE = SPRITE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

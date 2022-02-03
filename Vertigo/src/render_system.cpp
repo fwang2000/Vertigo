@@ -4,11 +4,6 @@
 
 #include "tiny_ecs_registry.hpp"
 
-void RenderSystem::drawCube(const mat4& projection)
-{
-	Entity cube = registry.cube.entities[0];
-}
-
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
 {
@@ -71,33 +66,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::CHICKEN || render_request.used_effect == EFFECT_ASSET_ID::EGG)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)sizeof(vec3));
-		gl_has_errors();
-
-		if (render_request.used_effect == EFFECT_ASSET_ID::CHICKEN)
-		{
-			// Light up?
-			GLint light_up_uloc = glGetUniformLocation(program, "light_up");
-			assert(light_up_uloc >= 0);
-
-			// !!! TODO A1: set the light_up shader variable using glUniform1i,
-			// similar to the glUniform1f call below. The 1f or 1i specified the type, here a single int.
-			gl_has_errors();
-		}
 	}
 	else
 	{
@@ -224,9 +192,6 @@ void RenderSystem::draw()
 		drawTexturedMesh(entity, projection_2D);
 	}
 
-	mat4 projection_3D = create3dProjectionMatrix();
-	drawCube(projection_3D);
-
 	// Truely render to the screen
 	drawToScreen();
 
@@ -250,9 +215,4 @@ mat3 RenderSystem::createProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
-}
-
-mat4 RenderSystem::create3dProjectionMatrix()
-{
-
 }
