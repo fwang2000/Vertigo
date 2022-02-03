@@ -14,7 +14,7 @@ enum CubeFace
 	SIDE_5 = 5,
 };
 
-enum Direction
+enum class Direction
 {
 	LEFT = 0,
 	RIGHT = 1,
@@ -24,6 +24,7 @@ enum Direction
 
 struct Cube {
 
+	int dimension;
 };
 
 struct Position
@@ -55,15 +56,17 @@ struct Fire
 
 struct Tile
 {
-	// TODO
+	int x;
+	int y;
 };
 
 // All data relevant to the shape and motion of entities
+// TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
 struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
-	int direction = Direction::DOWN;
+	Direction direction = Direction::DOWN;
 };
 
 // Stucture to store collision information
@@ -135,8 +138,12 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	EXPLORER = 0,
-	TEXTURE_COUNT = EXPLORER + 1
+	EXPLORER_DOWN = 0,
+	EXPLORER_UP = EXPLORER_DOWN + 1,
+	EXPLORER_LEFT = EXPLORER_UP + 1,
+	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
+	TILE = EXPLORER_RIGHT + 1,
+	TEXTURE_COUNT = TILE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

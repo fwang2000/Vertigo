@@ -10,7 +10,7 @@
 
 // Game configuration
 
-// Create the bug world
+// Create the world
 WorldSystem::WorldSystem()
 	: level(0) {
 	// Seeding rng with random device
@@ -106,11 +106,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
+	
+	Motion* player_motion = &motions_registry.get(player_explorer);
 
-	// Processing the chicken state
+	// Processing the explorer state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
 
+	if (moving) {
+		if ((destination.y >= player_motion->position.y && currDirection == Direction::UP) ||
+			(destination.y <= player_motion->position.y && currDirection == Direction::DOWN) ||
+			(destination.x <= player_motion->position.x && currDirection == Direction::RIGHT) ||
+			(destination.x >= player_motion->position.x && currDirection == Direction::LEFT))
+		{
+			player_motion->velocity = vec2(0, 0);
+			player_motion->position = destination;
+			moving = false;
+		}
+	}
+
+	/*
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
 		// progress timer
@@ -130,6 +145,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 	// reduce window brightness if any of the present chickens is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
+	*/
 
 	return true;
 }
@@ -152,6 +169,8 @@ void WorldSystem::restart_game() {
 	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
 	cube = createCube(renderer);
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
+
+	// initTileCreation();
 }
 
 // Compute collisions between entities
@@ -189,24 +208,41 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	//		 and current position by some velocity. Once it has passed,
 	//		 untick the boolean and reset the explorer position to the
 	//		 exact tile position to account for any lag.
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!	
+	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (moving) {
+		return;
+	}
+
+	Direction dir = Direction::DOWN;
+
 	switch (key)
 	{
+		if (action != GLFW_PRESS) {
+			break;
+		}
 	case GLFW_KEY_W:
-		move(action, vec2(0, -250));
+		dir = Direction::UP;
+		move(vec2(0, -250), vec2(0, -100));
 		break;
 	case GLFW_KEY_S:
-		move(action, vec2(0, 250));
+		dir = Direction::DOWN;
+		move(vec2(0, 250), vec2(0, 100));
 		break;
 	case GLFW_KEY_A:
-		move(action, vec2(-250, 0));
+		dir = Direction::LEFT;
+		move(vec2(-250, 0), vec2(-100, 0));
 		break;
 	case GLFW_KEY_D:
-		move(action, vec2(250, 0));
+		dir = Direction::RIGHT;
+		move(vec2(250, 0), vec2(100, 0));
 		break;
 	default:
 		break;
 	}
+
+	SetSprite(dir);
+
+	/*
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
@@ -214,17 +250,69 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		restart_game();
 	}
+	*/
 }
 
-void WorldSystem::move(int action, vec2 velocity) {
-	Motion* explorer_motion = &registry.motions.get(player_explorer);
-	if (action == GLFW_RELEASE)
-		explorer_motion->velocity = vec2(0, 0);
-	else if (action == GLFW_PRESS)
-		explorer_motion->velocity = velocity;
-}
-
-void WorldSystem::on_mouse_move(vec2 mouse_position) {
-
+void WorldSystem::on_mouse_move(vec2 mouse_position) 
+{
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::move(vec2 velocity, vec2 distanceTo) 
+{
+	Motion* explorer_motion = &registry.motions.get(player_explorer);
+	explorer_motion->velocity = velocity;
+	destination = vec2(explorer_motion->position.x, explorer_motion->position.y) + distanceTo;
+	moving = true;
+}
+
+void WorldSystem::SetSprite(Direction direction) {
+
+	if (direction == currDirection) {
+		return;
+	}
+
+	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
+	switch (direction) {
+	case Direction::UP:
+		id = TEXTURE_ASSET_ID::EXPLORER_UP;
+		break;
+	case Direction::DOWN:
+		id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
+		break;
+	case Direction::LEFT:
+		id = TEXTURE_ASSET_ID::EXPLORER_LEFT;
+		break;
+	case Direction::RIGHT:
+		id = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
+		break;
+	default:
+		break;
+	}
+
+	registry.renderRequests.remove(player_explorer);
+
+	registry.renderRequests.insert(
+		player_explorer,
+		{
+			id,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+
+	currDirection = direction;
+}
+
+void WorldSystem::initTileCreation() {
+
+	int distance = 300;
+
+	for (int i = -1; i < 2; i++) 
+	{
+		for (int j = -1; j < 2; j++) 
+		{
+			createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance));
+		}
+	}
 }
