@@ -19,9 +19,22 @@ struct Player
 
 };
 
+// Eagles have a hard shell
+struct Deadly
+{
+
+};
+
+// Bug and Chicken have a soft shell
+struct Eatable
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
+	float angle = 0;
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
 };
@@ -34,10 +47,23 @@ struct Collision
 	Collision(Entity& other) { this->other = other; };
 };
 
+// Data structure for toggling debug mode
+struct Debug {
+	bool in_debug_mode = 0;
+	bool in_freeze_mode = 0;
+};
+extern Debug debugging;
+
 // Sets the brightness of the screen
 struct ScreenState
 {
 	float darken_screen_factor = -1;
+};
+
+// A struct to refer to debugging graphics in the ECS
+struct DebugComponent
+{
+	// Note, an empty struct has size 1
 };
 
 // A timer that will be associated to dying chicken
@@ -64,7 +90,7 @@ struct TexturedVertex
 struct Mesh
 {
 	static bool loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size);
-	vec2 original_size = {1,1};
+	vec2 original_size = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
 };
@@ -94,22 +120,29 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	EXPLORER = 0,
+	BUG = 0,
+	EAGLE = BUG + 1,
+	EXPLORER = EAGLE + 1,
 	TEXTURE_COUNT = EXPLORER + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	TEXTURED = COLOURED + 1,
+	EGG = COLOURED + 1,
+	CHICKEN = EGG + 1,
+	TEXTURED = CHICKEN + 1,
 	WIND = TEXTURED + 1,
 	EFFECT_COUNT = WIND + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	SPRITE = 0,
-	SCREEN_TRIANGLE = SPRITE + 1,
+	CHICKEN = 0,
+	SPRITE = CHICKEN + 1,
+	EGG = SPRITE + 1,
+	DEBUG_LINE = EGG + 1,
+	SCREEN_TRIANGLE = DEBUG_LINE + 1,
 	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
@@ -119,4 +152,3 @@ struct RenderRequest {
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 };
-

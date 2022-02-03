@@ -42,6 +42,12 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 		printf("window width_height = %d,%d\n", window_width_px, window_height_px);
 	}
 
+	// Hint: Ask your TA for how to setup pretty OpenGL error callbacks. 
+	// This can not be done in mac os, so do not enable
+	// it unless you are on Linux or Windows. You will need to change the window creation
+	// code to use OpenGL 4.3 (not suported on mac) and add additional .h and .cpp
+	// glDebugMessageCallback((GLDEBUGPROC)errorCallback, nullptr);
+
 	// We are not really using VAO's but without at least one bound we will crash in
 	// some systems.
 	GLuint vao;
@@ -50,7 +56,7 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 	gl_has_errors();
 
 	initScreenTexture();
-    initializeGlTextures();
+	initializeGlTextures();
 	initializeGlEffects();
 	initializeGlGeometryBuffers();
 
@@ -59,10 +65,10 @@ bool RenderSystem::init(GLFWwindow* window_arg)
 
 void RenderSystem::initializeGlTextures()
 {
-    glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
+	glGenTextures((GLsizei)texture_gl_handles.size(), texture_gl_handles.data());
 
-    for(uint i = 0; i < texture_paths.size(); i++)
-    {
+	for (uint i = 0; i < texture_paths.size(); i++)
+	{
 		const std::string& path = texture_paths[i];
 		ivec2& dimensions = texture_dimensions[i];
 
@@ -81,13 +87,13 @@ void RenderSystem::initializeGlTextures()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		gl_has_errors();
 		stbi_image_free(data);
-    }
+	}
 	gl_has_errors();
 }
 
 void RenderSystem::initializeGlEffects()
 {
-	for(uint i = 0; i < effect_paths.size(); i++)
+	for (uint i = 0; i < effect_paths.size(); i++)
 	{
 		const std::string vertex_shader_name = effect_paths[i] + ".vs.glsl";
 		const std::string fragment_shader_name = effect_paths[i] + ".fs.glsl";
@@ -119,13 +125,13 @@ void RenderSystem::initializeGlMeshes()
 		// Initialize meshes
 		GEOMETRY_BUFFER_ID geom_index = mesh_paths[i].first;
 		std::string name = mesh_paths[i].second;
-		Mesh::loadFromOBJFile(name, 
+		Mesh::loadFromOBJFile(name,
 			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices,
 			meshes[(int)geom_index].original_size);
 
 		bindVBOandIBO(geom_index,
-			meshes[(int)geom_index].vertices, 
+			meshes[(int)geom_index].vertices,
 			meshes[(int)geom_index].vertex_indices);
 	}
 }
@@ -144,10 +150,10 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Initialize sprite
 	// The position corresponds to the center of the texture.
 	std::vector<TexturedVertex> textured_vertices(4);
-	textured_vertices[0].position = { -1.f/2, +1.f/2, 0.f };
-	textured_vertices[1].position = { +1.f/2, +1.f/2, 0.f };
-	textured_vertices[2].position = { +1.f/2, -1.f/2, 0.f };
-	textured_vertices[3].position = { -1.f/2, -1.f/2, 0.f };
+	textured_vertices[0].position = { -1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[1].position = { +1.f / 2, +1.f / 2, 0.f };
+	textured_vertices[2].position = { +1.f / 2, -1.f / 2, 0.f };
+	textured_vertices[3].position = { -1.f / 2, -1.f / 2, 0.f };
 	textured_vertices[0].texcoord = { 0.f, 1.f };
 	textured_vertices[1].texcoord = { 1.f, 1.f };
 	textured_vertices[2].texcoord = { 1.f, 0.f };
@@ -156,6 +162,56 @@ void RenderSystem::initializeGlGeometryBuffers()
 	// Counterclockwise as it's the default opengl front winding direction.
 	const std::vector<uint16_t> textured_indices = { 0, 3, 1, 1, 3, 2 };
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
+
+	////////////////////////
+	// Initialize egg
+	std::vector<ColoredVertex> egg_vertices;
+	std::vector<uint16_t> egg_indices;
+	constexpr float z = -0.1f;
+	constexpr int NUM_TRIANGLES = 62;
+
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		const float t = float(i) * M_PI * 2.f / float(NUM_TRIANGLES - 1);
+		egg_vertices.push_back({});
+		egg_vertices.back().position = { 0.5 * cos(t), 0.5 * sin(t), z };
+		egg_vertices.back().color = { 0.8, 0.8, 0.8 };
+	}
+	egg_vertices.push_back({});
+	egg_vertices.back().position = { 0, 0, 0 };
+	egg_vertices.back().color = { 1, 1, 1 };
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		egg_indices.push_back((uint16_t)i);
+		egg_indices.push_back((uint16_t)((i + 1) % NUM_TRIANGLES));
+		egg_indices.push_back((uint16_t)NUM_TRIANGLES);
+	}
+	int geom_index = (int)GEOMETRY_BUFFER_ID::EGG;
+	meshes[geom_index].vertices = egg_vertices;
+	meshes[geom_index].vertex_indices = egg_indices;
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::EGG, meshes[geom_index].vertices, meshes[geom_index].vertex_indices);
+
+	//////////////////////////////////
+	// Initialize debug line
+	std::vector<ColoredVertex> line_vertices;
+	std::vector<uint16_t> line_indices;
+
+	constexpr float depth = 0.5f;
+	constexpr vec3 red = { 0.8,0.1,0.1 };
+
+	// Corner points
+	line_vertices = {
+		{{-0.5,-0.5, depth}, red},
+		{{-0.5, 0.5, depth}, red},
+		{{ 0.5, 0.5, depth}, red},
+		{{ 0.5,-0.5, depth}, red},
+	};
+
+	// Two triangles
+	line_indices = { 0, 1, 3, 1, 2, 3 };
+
+	geom_index = (int)GEOMETRY_BUFFER_ID::DEBUG_LINE;
+	meshes[geom_index].vertices = line_vertices;
+	meshes[geom_index].vertex_indices = line_indices;
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::DEBUG_LINE, line_vertices, line_indices);
 
 	///////////////////////////////////////////////////////
 	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
@@ -180,7 +236,7 @@ RenderSystem::~RenderSystem()
 	glDeleteRenderbuffers(1, &off_screen_render_buffer_depth);
 	gl_has_errors();
 
-	for(uint i = 0; i < effect_count; i++) {
+	for (uint i = 0; i < effect_count; i++) {
 		glDeleteProgram(effects[i]);
 	}
 	// delete allocated resources
@@ -189,7 +245,7 @@ RenderSystem::~RenderSystem()
 
 	// remove all entities created by the render system
 	while (registry.renderRequests.entities.size() > 0)
-	    registry.remove_all_components_of(registry.renderRequests.entities.back());
+		registry.remove_all_components_of(registry.renderRequests.entities.back());
 }
 
 // Initialize the screen texture from a standard sprite
@@ -320,4 +376,3 @@ bool loadEffectFromFile(
 
 	return true;
 }
-

@@ -55,10 +55,21 @@ private:
 	// Current level the player is on.
 	unsigned int level;
 
+	unsigned int points;
+
 	// Game state
 	RenderSystem* renderer;
+	float current_speed;
+	float next_eagle_spawn;
+	float next_bug_spawn;
+	Entity player_chicken;
 	Entity player_explorer;
 	Entity cube;
+
+	// music references
+	Mix_Music* background_music;
+	Mix_Chunk* chicken_dead_sound;
+	Mix_Chunk* chicken_eat_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;

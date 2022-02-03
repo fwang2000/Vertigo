@@ -24,7 +24,7 @@ void Transform::translate(vec2 offset)
 void Transform::rotate3D(ROTATION_AXIS axis, bool negative) {
 
 	float s = (negative) ? -sinf(M_PI / 2) : sinf(M_PI / 2);
-	
+
 	switch (axis)
 	{
 	case ROTATION_AXIS::X_AXIS:
