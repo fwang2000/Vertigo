@@ -22,12 +22,12 @@ public:
 	ComponentContainer<vec3> colors;
 
 	ComponentContainer<Cube> cube;
+	ComponentContainer<Tile> tiles;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		// TODO: A1 add a LightUp component
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&collisions);
@@ -37,6 +37,7 @@ public:
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&cube);
+		registry_list.push_back(&tiles);
 	}
 
 	void clear_all_components() {

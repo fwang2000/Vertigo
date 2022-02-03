@@ -43,8 +43,13 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	void move(int action, vec2 velocity);
+	void move(vec2 velocity, vec2 distanceTo);
 	bool checkForTile();
+	bool moving = false;
+	vec2 destination;
+
+	// Render Player
+	void SetSprite(Direction direction);
 
 	// restart level
 	void restart_game();
@@ -59,6 +64,10 @@ private:
 	RenderSystem* renderer;
 	Entity player_explorer;
 	Entity cube;
+
+	Direction currDirection = Direction::DOWN;
+
+	void initTileCreation();
 
 	// C++ random number generator
 	std::default_random_engine rng;
