@@ -65,7 +65,8 @@ enum class TileState
 	S = 0,
 	F = 1,
 	V = 2,
-	O = 3, // possible types of object in future milestone
+	O = 3,
+	FIRE = 4,// possible types of object in future milestone
 	E = 99,
 };
 

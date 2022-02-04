@@ -46,15 +46,22 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	void move(vec2 velocity, vec2 distanceTo, Direction direction);
+	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
+	void fire_move(vec2 velocity, vec2 distanceTo);
+	void Interact(Direction direction);
 	bool checkForTile(Direction direction);
 	bool moving = false;
-	vec2 destination;
+	bool interacting = false;
 	float count = 0;
-	vec2 fire_spot;
 
-	// Render Player
+	// Fire Attributes
+	vec2 fire_spot;
+	bool obtainedFire;
+
+	// Player Attributes
 	void SetSprite(Direction direction);
+	void UpdatePlayerCoordinates(Direction direction);
+	vec2 player_destination;
 
 	// restart level
 	void restart_game();
