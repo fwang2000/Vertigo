@@ -106,32 +106,40 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
-	
-	Motion* player_motion = &motions_registry.get(player_explorer);
 
 	// Processing the explorer state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
 
+	Motion* player_motion = &motions_registry.get(player_explorer);
+
 	if (moving) {
-		if ((destination.y >= player_motion->position.y && currDirection == Direction::UP) ||
-			(destination.y <= player_motion->position.y && currDirection == Direction::DOWN) ||
-			(destination.x <= player_motion->position.x && currDirection == Direction::RIGHT) ||
-			(destination.x >= player_motion->position.x && currDirection == Direction::LEFT))
+		if ((player_destination.y >= player_motion->position.y && currDirection == Direction::UP) ||
+			(player_destination.y <= player_motion->position.y && currDirection == Direction::DOWN) ||
+			(player_destination.x <= player_motion->position.x && currDirection == Direction::RIGHT) ||
+			(player_destination.x >= player_motion->position.x && currDirection == Direction::LEFT))
 		{
 			player_motion->velocity = vec2(0, 0);
-			player_motion->position = destination;
+			player_motion->position = player_destination;
+			
+			if (obtainedFire) {
+				Motion& fire_motion = motions_registry.get(fire);
+				fire_motion.velocity = vec2(0, 0);
+				fire_motion.position = player_destination + vec2(40, -40);
+			}
 			moving = false;
 		}
 	}
-
-	Motion& fire_motion = motions_registry.get(fire);
-	fire_motion.position.y = fire_spot.y + 10*(-sinf(count));
-	count += 0.1;
-	if (count == 360) {
-		count = 0;
+	
+	if (!obtainedFire) {
+		Motion& fire_motion = motions_registry.get(fire);
+		fire_motion.position.y = fire_spot.y + 10 * (-sinf(count));
+		count += 0.1;
+		if (count == 360) {
+			count = 0;
+		}
 	}
-
+	
 	/*
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -177,6 +185,8 @@ void WorldSystem::restart_game() {
 	cube = createCube(renderer);
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
+	obtainedFire = false;
+
 	initTileCreation();
 }
 
@@ -189,11 +199,22 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.players.has(entity) && registry.tiles.has(entity_other)){
-            // handle_player_tile_collisions(&entity, &entity_other);
+		if (registry.fire.has(entity) && registry.objects.has(entity_other)){
+            
+			Motion& motion = registry.motions.get(entity_other);
+			motion.angle = 10;
         }
-		if (registry.players.has(entity)) {
+
+		if (registry.players.has(entity) && registry.fire.has(entity_other)) 
+		{
 			//Player& player = registry.players.get(entity);
+			if (!obtainedFire) 
+			{
+				obtainedFire = true;
+				Motion& motion = registry.motions.get(entity_other);
+				motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
+				motion.position = motion.position + vec2(40, -40);
+			}
 		}
 	}
 
@@ -235,20 +256,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	case GLFW_KEY_W:
 		dir = Direction::UP;
-		move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
+		player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
 		break;
 	case GLFW_KEY_S:
 		dir = Direction::DOWN;
-		move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
+		player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
 		break;
 	case GLFW_KEY_A:
 		dir = Direction::LEFT;
-		move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
+		player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
 		break;
 	case GLFW_KEY_D:
 		dir = Direction::RIGHT;
-		move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
+		player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 		break;
+	case GLFW_KEY_ENTER:
+		Interact(currDirection);
 	default:
 		break;
 	}
@@ -271,20 +294,35 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::move(vec2 velocity, vec2 distanceTo, Direction direction) 
+void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction direction) 
 {
 	if (!checkForTile(direction)) {
 		return;
 	}
 
-	Motion* explorer_motion = &registry.motions.get(player_explorer);
-	explorer_motion->velocity = velocity;
-	destination = vec2(explorer_motion->position.x, explorer_motion->position.y) + distanceTo;
+	Motion& motion = registry.motions.get(player_explorer);
+	motion.velocity = velocity;
+	player_destination = motion.position + distanceTo;
 	moving = true;
+	UpdatePlayerCoordinates(direction);
 
+	if (obtainedFire) 
+	{
+		fire_move(velocity, distanceTo);
+	}
+}
+
+void WorldSystem::fire_move(vec2 velocity, vec2 distanceTo)
+{
+	Motion& motion = registry.motions.get(fire);
+	motion.velocity = velocity;
+}
+
+void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
+	
 	vec2 playerPosShift;
 
-	switch (direction) 
+	switch (direction)
 	{
 	case Direction::DOWN:
 		playerPosShift = vec2(0, 1);
@@ -352,6 +390,54 @@ bool WorldSystem::checkForTile(Direction direction)
 	return true;
 }
 
+void WorldSystem::Interact(Direction direction) 
+{
+	Player& player = registry.players.get(player_explorer);
+	vec2 coords = player.playerPos.coordinates;
+
+	int index = 0;
+
+	switch (direction)
+	{
+	case Direction::DOWN:
+		if (coords.y == 2) {
+			return;
+		}
+		index = (coords.y + 1) + 3 * (coords.x);
+		break;
+	case Direction::UP:
+		if (coords.y == 0) {
+			return;
+		}
+		index = (coords.y - 1) + 3 * (coords.x);
+		break;
+	case Direction::LEFT:
+		if (coords.x == 0) {
+			return;
+		}
+		index = (coords.y) + 3 * (coords.x - 1);
+		break;
+	case Direction::RIGHT:
+		if (coords.x == 2) {
+			return;
+		}
+		index = (coords.y) + 3 * (coords.x + 1);
+		break;
+	default:
+		break;
+	}
+
+	Tile tile = registry.tiles.components.at(index);
+
+	if (tile.tileState == TileState::O) {
+		
+		if (obtainedFire) {
+			// Motion& fire_motion
+			// fire_move(vec2(tile.tilePos.coordinates.x - ))
+		}
+	}
+}
+
 void WorldSystem::SetSprite(Direction direction) {
 
 	if (direction == currDirection) {
@@ -402,7 +488,7 @@ void WorldSystem::initTileCreation()
             }
 			else if (i == -1 && j == -1) 
 			{
-				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::F);
+				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::FIRE);
 				fire = createFire(renderer, TilePosition{ vec2(i, j) });
 				fire_spot = vec2(
 					window_width_px / 2 + i * window_height_px / 3,
