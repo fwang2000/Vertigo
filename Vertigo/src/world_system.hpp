@@ -50,6 +50,8 @@ private:
 	bool checkForTile(Direction direction);
 	bool moving = false;
 	vec2 destination;
+	float count = 0;
+	vec2 fire_spot;
 
 	// Render Player
 	void SetSprite(Direction direction);
@@ -67,6 +69,7 @@ private:
 	RenderSystem* renderer;
 	Entity player_explorer;
 	Entity cube;
+	Entity fire;
 
 	Direction currDirection = Direction::DOWN;
 
