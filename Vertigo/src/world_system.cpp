@@ -125,6 +125,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	Motion& fire_motion = motions_registry.get(fire);
+	fire_motion.position.y = fire_spot.y + 10*(-sinf(count));
+	count += 0.1;
+	if (count == 360) {
+		count = 0;
+	}
+
 	/*
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -304,7 +311,7 @@ bool WorldSystem::checkForTile(Direction direction)
 	Player& player = registry.players.get(player_explorer);
 	vec2 coords = player.playerPos.coordinates;
 
-	int index;
+	int index = 0;
 
 	switch (direction)
 	{
@@ -338,7 +345,7 @@ bool WorldSystem::checkForTile(Direction direction)
 	
 	Tile tile = registry.tiles.components.at(index);
 
-	if (tile.tileState == TileState::E) {
+	if (tile.tileState == TileState::E || tile.tileState == TileState::O) {
 		return false;
 	}
 	
@@ -389,9 +396,22 @@ void WorldSystem::initTileCreation()
 	{
 		for (int j = -1; j < 2; j++) 
 		{
-            if (i==1 && j==1){//hard code an empty tile
+            if (i==1 && j==1)
+			{
 				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::E);
-            }else{
+            }
+			else if (i == -1 && j == -1) 
+			{
+				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::F);
+				fire = createFire(renderer, TilePosition{ vec2(i, j) });
+				fire_spot = vec2(
+					window_width_px / 2 + i * window_height_px / 3,
+					window_height_px / 2 + j * window_height_px / 3
+				);
+				registry.colors.insert(fire, vec3{ 1, 0, 0 });
+			}
+			else
+			{
                 createTile(renderer, TilePosition{ vec2(i, j) }, TileState::V);
             }
 		}

@@ -51,7 +51,7 @@ struct Fire
 {
 	bool active = false;
 	bool inUse = false;
-	vec2 position;
+	TilePosition firePos;
 };
 
 //struct Tile
@@ -171,7 +171,8 @@ enum class TEXTURE_ASSET_ID {
 	EXPLORER_LEFT = EXPLORER_UP + 1,
 	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
 	TILE = EXPLORER_RIGHT + 1,
-	TEXTURE_COUNT = TILE + 1
+	FIRE = TILE + 1,
+	TEXTURE_COUNT = FIRE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

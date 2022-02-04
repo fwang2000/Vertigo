@@ -36,7 +36,6 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT });
 
-
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos.coordinates = vec2(1, 1);
 
@@ -68,8 +67,7 @@ void createTile(RenderSystem* renderer, TilePosition pos, TileState state) {
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ TILE_BB_WIDTH, TILE_BB_HEIGHT });
 
-	registry.tiles.emplace(entity);
-    Tile& tile = registry.tiles.get(entity);
+	Tile& tile = registry.tiles.emplace(entity);
 	tile.tileState = state;
 	tile.tilePos = TilePosition{ vec2(pos.coordinates.x + 1, pos.coordinates.y + 1) };
 
@@ -83,5 +81,35 @@ void createTile(RenderSystem* renderer, TilePosition pos, TileState state) {
                 }
         );
     }
+}
 
+Entity createFire(RenderSystem* renderer, TilePosition pos)
+{
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	int distance = window_height_px / 3;
+
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec2(
+		window_width_px / 2 + pos.coordinates.x * distance,
+		window_height_px / 2 + pos.coordinates.y * distance
+	);
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
+
+	Fire& fire = registry.fire.emplace(entity);
+	fire.firePos = TilePosition{ vec2(pos.coordinates.x + 1, pos.coordinates.y + 1) };
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::FIRE,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+	return entity;
 }
