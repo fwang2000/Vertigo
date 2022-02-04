@@ -24,7 +24,7 @@ bool MeshBox::loadFromExcelFile(std::string filename, std::vector<std::vector<Ti
 			for (int i = 0; i < value.length(); i++) {
 				char ch = line[i];
 				Tile tile;
-				tile.tileState = ch;
+				tile.tileState = (TileState)ch;
 				temp_tiles.push_back(tile);
 			}
 			x++;
