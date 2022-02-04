@@ -35,6 +35,9 @@ public:
 	// Check for collisions
 	void handle_collisions();
 
+    //
+    void handle_player_tile_collisions(Entity * player, Entity * tile);
+
 	// Should the game be over ?
 	bool is_over()const;
 private:

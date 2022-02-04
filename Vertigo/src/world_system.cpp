@@ -182,7 +182,9 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		// For now, we are only interested in collisions that involve the chicken
+		if (registry.players.has(entity) && registry.tiles.has(entity_other)){
+            handle_player_tile_collisions(&entity, &entity_other);
+        }
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
 
@@ -192,7 +194,14 @@ void WorldSystem::handle_collisions() {
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
-
+void WorldSystem::handle_player_tile_collisions(Entity * player, Entity * tile) {
+    Direction tempDirection = currDirection;
+    if (registry.tiles.get(*tile).tileState == E){
+        //if player collides with the empty tile, stop moving, unless changing direction
+        Motion * motion = &registry.motions.get(*player);
+        motion->velocity =vec2(0,0);
+    }
+}
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
