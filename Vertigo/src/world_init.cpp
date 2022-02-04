@@ -38,7 +38,6 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 
 	// Add oscillation
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
-	oscillate.max_amplitude = {0.f, 10.f};
 
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos.coordinates = vec2(1, 1);

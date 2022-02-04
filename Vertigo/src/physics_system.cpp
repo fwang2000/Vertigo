@@ -38,7 +38,7 @@ void PhysicsSystem::oscillate()
 		Oscillate& oscillate = oscillate_registry.components[i];
 		oscillate.phase += 2 * PI / oscillate.steps;
 		oscillate.phase = fmod(oscillate.phase, 2 * PI);
-		oscillate.amplitude = oscillate.max_amplitude * vec2(sin(oscillate.phase));
+		oscillate.displacement = oscillate.amplitude * vec2(sin(oscillate.phase));
 	}
 }
 

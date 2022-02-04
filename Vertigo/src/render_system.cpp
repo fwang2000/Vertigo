@@ -16,7 +16,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	Transform transform;
 	if (registry.oscillations.has(entity)){
 		Oscillate oscillate = registry.oscillations.get(entity);
-		transform.translate(oscillate.amplitude);
+		transform.translate(oscillate.displacement);
 	}
 	transform.translate(motion.position);
 	transform.scale(motion.scale);

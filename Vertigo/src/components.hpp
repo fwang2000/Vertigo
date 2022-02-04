@@ -92,8 +92,8 @@ struct MeshBox
 // TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
 
 struct Oscillate {
-	vec2 amplitude = { 0, 0 };
-	vec2 max_amplitude = { 0, 10 };
+	vec2 displacement = { 0, 0 };
+	vec2 amplitude = { 0, 10 };
 	double phase = 0;
 	int steps = 100;
 };
