@@ -90,6 +90,14 @@ struct MeshBox
 
 // All data relevant to the shape and motion of entities
 // TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
+
+struct Oscillate {
+	vec2 amplitude = { 0, 0 };
+	vec2 max_amplitude = { 0, 10 };
+	double phase = 0;
+	int steps = 100;
+};
+
 struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
