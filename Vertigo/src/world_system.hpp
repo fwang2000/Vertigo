@@ -46,8 +46,8 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	void move(vec2 velocity, vec2 distanceTo);
-	bool checkForTile();
+	void move(vec2 velocity, vec2 distanceTo, Direction direction);
+	bool checkForTile(Direction direction);
 	bool moving = false;
 	vec2 destination;
 

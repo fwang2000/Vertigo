@@ -37,7 +37,9 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 	motion.scale = vec2({ EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT });
 
 
-	registry.players.emplace(entity);
+	Player& explorer = registry.players.emplace(entity);
+	explorer.playerPos.coordinates = vec2(1, 1);
+
 	registry.renderRequests.insert(
 		entity,
 		{
@@ -49,21 +51,27 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 	return entity;
 }
 
-void createTile(RenderSystem* renderer, vec2 pos, TileState state) {
+void createTile(RenderSystem* renderer, TilePosition pos, TileState state) {
 	auto entity = Entity();
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Setting initial motion values
+	int distance = window_height_px / 3;
+
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
+	motion.position = vec2(
+		window_width_px / 2 + pos.coordinates.x * distance,
+		window_height_px / 2 + pos.coordinates.y * distance
+	);
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ TILE_BB_WIDTH, TILE_BB_HEIGHT });
 
 	registry.tiles.emplace(entity);
-    Tile * t1 =&registry.tiles.get(entity);
-    t1->tileState = state;
+    Tile& tile = registry.tiles.get(entity);
+	tile.tileState = state;
+	tile.tilePos = TilePosition{ vec2(pos.coordinates.x + 1, pos.coordinates.y + 1) };
 
     if(state != TileState::E){
         registry.renderRequests.insert(

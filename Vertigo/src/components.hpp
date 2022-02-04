@@ -27,7 +27,7 @@ struct Cube {
 	int dimension;
 };
 
-struct Position
+struct TilePosition
 {
 	vec2 coordinates = { 0, 0 };
 };
@@ -35,7 +35,7 @@ struct Position
 // Player component
 struct Player
 {
-
+	TilePosition playerPos;
 };
 
 struct Object
@@ -60,7 +60,7 @@ struct Fire
 //	int y;
 //};
 
-enum TileState
+enum class TileState
 {
 	S = 0,
 	F = 1,
@@ -71,7 +71,8 @@ enum TileState
 
 struct Tile
 {
-	int tileState = TileState::E;
+	TileState tileState = TileState::E;
+	TilePosition tilePos;
 };
 
 struct Box {

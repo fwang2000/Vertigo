@@ -29,7 +29,7 @@ WorldSystem::~WorldSystem() {
 // Debugging
 namespace {
 	void glfw_err_cb(int error, const char* desc) {
-		fprintf(stderr, "%d: %s", error, desc);
+		fprintf(stderr, "%f: %s", error, desc);
 	}
 }
 
@@ -183,7 +183,7 @@ void WorldSystem::handle_collisions() {
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		if (registry.players.has(entity) && registry.tiles.has(entity_other)){
-            handle_player_tile_collisions(&entity, &entity_other);
+            // handle_player_tile_collisions(&entity, &entity_other);
         }
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
@@ -194,17 +194,18 @@ void WorldSystem::handle_collisions() {
 	registry.collisions.clear();
 }
 void WorldSystem::handle_player_tile_collisions(Entity * player, Entity * tile) {
-    if (registry.tiles.get(*tile).tileState == E){
+   /* if (registry.tiles.get(*tile).tileState == TileState::E){
         if(currDirection==Direction::DOWN){
-            move(vec2(0, -250), vec2(0, -50));
+            move(vec2(0, -250), vec2(0, -window_height_px / 6));
         }else if(currDirection==Direction::UP){
-            move(vec2(0, 250), vec2(0, 50));
+            move(vec2(0, 250), vec2(0, window_height_px / 6));
         }else if(currDirection==Direction::LEFT){
-            move(vec2(-250, 0), vec2(50, 0));
+            move(vec2(-250, 0), vec2(window_height_px / 6, 0));
         }else{
-            move(vec2(-250, 0), vec2(-50, 0));
+            move(vec2(-250, 0), vec2(-window_height_px / 6, 0));
         }
     }
+	*/
 }
 // Should the game be over ?
 bool WorldSystem::is_over() const {
@@ -213,15 +214,7 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO: Control player such that one click will make the player
-	//		 to the next tile. 
-	// IDEA: boolean to check if movement is allowed. With each step,
-	//		 decrease the distance between the expected destination,
-	//		 and current position by some velocity. Once it has passed,
-	//		 untick the boolean and reset the explorer position to the
-	//		 exact tile position to account for any lag.
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
 	if (moving) {
 		return;
 	}
@@ -235,19 +228,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	case GLFW_KEY_W:
 		dir = Direction::UP;
-		move(vec2(0, -250), vec2(0, -100));
+		move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
 		break;
 	case GLFW_KEY_S:
 		dir = Direction::DOWN;
-		move(vec2(0, 250), vec2(0, 100));
+		move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
 		break;
 	case GLFW_KEY_A:
 		dir = Direction::LEFT;
-		move(vec2(-250, 0), vec2(-100, 0));
+		move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
 		break;
 	case GLFW_KEY_D:
 		dir = Direction::RIGHT;
-		move(vec2(250, 0), vec2(100, 0));
+		move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 		break;
 	default:
 		break;
@@ -271,12 +264,85 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::move(vec2 velocity, vec2 distanceTo) 
+void WorldSystem::move(vec2 velocity, vec2 distanceTo, Direction direction) 
 {
+	if (!checkForTile(direction)) {
+		return;
+	}
+
 	Motion* explorer_motion = &registry.motions.get(player_explorer);
 	explorer_motion->velocity = velocity;
 	destination = vec2(explorer_motion->position.x, explorer_motion->position.y) + distanceTo;
 	moving = true;
+
+	vec2 playerPosShift;
+
+	switch (direction) 
+	{
+	case Direction::DOWN:
+		playerPosShift = vec2(0, 1);
+		break;
+	case Direction::UP:
+		playerPosShift = vec2(0, -1);
+		break;
+	case Direction::LEFT:
+		playerPosShift = vec2(-1, 0);
+		break;
+	case Direction::RIGHT:
+		playerPosShift = vec2(1, 0);
+		break;
+	default:
+		break;
+	}
+
+	Player& player = registry.players.get(player_explorer);
+	player.playerPos.coordinates += playerPosShift;
+}
+
+bool WorldSystem::checkForTile(Direction direction) 
+{
+	Player& player = registry.players.get(player_explorer);
+	vec2 coords = player.playerPos.coordinates;
+
+	int index;
+
+	switch (direction)
+	{
+	case Direction::DOWN:
+		if (coords.y == 2) {
+			return false;
+		}
+		index = (coords.y + 1) + 3 * (coords.x);
+		break;
+	case Direction::UP:
+		if (coords.y == 0) {
+			return false;
+		}
+		index = (coords.y - 1) + 3 * (coords.x);
+		break;
+	case Direction::LEFT:
+		if (coords.x == 0) {
+			return false;
+		}
+		index = (coords.y) + 3 * (coords.x - 1);
+		break;
+	case Direction::RIGHT:
+		if (coords.x == 2) {
+			return false;
+		}
+		index = (coords.y) + 3 * (coords.x + 1);
+		break;
+	default:
+		break;
+	}
+	
+	Tile tile = registry.tiles.components.at(index);
+
+	if (tile.tileState == TileState::E) {
+		return false;
+	}
+	
+	return true;
 }
 
 void WorldSystem::SetSprite(Direction direction) {
@@ -317,20 +383,17 @@ void WorldSystem::SetSprite(Direction direction) {
 	currDirection = direction;
 }
 
-void WorldSystem::initTileCreation() {
-
-	int distance = 300;
-
+void WorldSystem::initTileCreation() 
+{
 	for (int i = -1; i < 2; i++) 
 	{
 		for (int j = -1; j < 2; j++) 
 		{
             if (i==1 && j==1){//hard code an empty tile
-                createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance), TileState::E);
+				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::E);
             }else{
-                createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance), TileState::V);
+                createTile(renderer, TilePosition{ vec2(i, j) }, TileState::V);
             }
-
 		}
 	}
 }
