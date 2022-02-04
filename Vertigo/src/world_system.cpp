@@ -170,7 +170,7 @@ void WorldSystem::restart_game() {
 	cube = createCube(renderer);
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
-	// initTileCreation();
+	initTileCreation();
 }
 
 // Compute collisions between entities
@@ -187,7 +187,6 @@ void WorldSystem::handle_collisions() {
         }
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
-
 		}
 	}
 
@@ -195,11 +194,16 @@ void WorldSystem::handle_collisions() {
 	registry.collisions.clear();
 }
 void WorldSystem::handle_player_tile_collisions(Entity * player, Entity * tile) {
-    Direction tempDirection = currDirection;
     if (registry.tiles.get(*tile).tileState == E){
-        //if player collides with the empty tile, stop moving, unless changing direction
-        Motion * motion = &registry.motions.get(*player);
-        motion->velocity =vec2(0,0);
+        if(currDirection==Direction::DOWN){
+            move(vec2(0, -250), vec2(0, -50));
+        }else if(currDirection==Direction::UP){
+            move(vec2(0, 250), vec2(0, 50));
+        }else if(currDirection==Direction::LEFT){
+            move(vec2(-250, 0), vec2(50, 0));
+        }else{
+            move(vec2(-250, 0), vec2(-50, 0));
+        }
     }
 }
 // Should the game be over ?
@@ -321,7 +325,12 @@ void WorldSystem::initTileCreation() {
 	{
 		for (int j = -1; j < 2; j++) 
 		{
-			createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance));
+            if (i==1 && j==1){//hard code an empty tile
+                createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance), TileState::E);
+            }else{
+                createTile(renderer, vec2(window_width_px / 2 + i * distance, window_height_px / 2 + j * distance), TileState::V);
+            }
+
 		}
 	}
 }

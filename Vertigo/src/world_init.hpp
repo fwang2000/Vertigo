@@ -15,4 +15,4 @@ Entity createCube(RenderSystem* renderer);
 // the explorer
 Entity createExplorer(RenderSystem* renderer, vec2 pos);
 // the tiles
-void createTile(RenderSystem* renderer, vec2 pos);
+void createTile(RenderSystem* renderer, vec2 pos, TileState state);
