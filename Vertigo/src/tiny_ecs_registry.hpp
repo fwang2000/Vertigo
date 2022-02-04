@@ -14,6 +14,7 @@ public:
 	// TODO: A1 add a LightUp component
 	ComponentContainer<DeathTimer> deathTimers;
 	ComponentContainer<Motion> motions;
+	ComponentContainer<Oscillate> oscillations;
 	ComponentContainer<Collision> collisions;
 	ComponentContainer<Player> players;
 	ComponentContainer<Mesh*> meshPtrs;
@@ -33,6 +34,7 @@ public:
 	{
 		registry_list.push_back(&deathTimers);
 		registry_list.push_back(&motions);
+		registry_list.push_back(&oscillations);
 		registry_list.push_back(&collisions);
 		registry_list.push_back(&players);
 		registry_list.push_back(&meshPtrs);

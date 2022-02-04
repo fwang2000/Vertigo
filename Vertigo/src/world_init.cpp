@@ -36,6 +36,9 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT });
 
+	// Add oscillation
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
+
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos.coordinates = vec2(1, 1);
 

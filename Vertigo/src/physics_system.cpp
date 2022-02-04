@@ -2,6 +2,10 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+// standard
+#include <math.h> 
+#define PI 3.14159265
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {
@@ -26,8 +30,23 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	return false;
 }
 
+void PhysicsSystem::oscillate()
+{
+	auto& oscillate_registry = registry.oscillations;
+	for (uint i = 0; i < oscillate_registry.size(); i++)
+	{
+		Oscillate& oscillate = oscillate_registry.components[i];
+		oscillate.phase += 2 * PI / oscillate.steps;
+		oscillate.phase = fmod(oscillate.phase, 2 * PI);
+		oscillate.displacement = oscillate.amplitude * vec2(sin(oscillate.phase));
+	}
+}
+
 void PhysicsSystem::step(float elapsed_ms)
 {
+	// Used for oscillation
+	PhysicsSystem::oscillate();
+
 	// Move bug based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
 	auto& motion_registry = registry.motions;
