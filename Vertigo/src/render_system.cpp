@@ -19,6 +19,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		transform.translate(oscillate.displacement);
 	}
 	transform.translate(motion.position);
+	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));

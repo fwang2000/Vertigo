@@ -47,21 +47,25 @@ private:
 
 	// Movement Functions
 	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
-	void fire_move(vec2 velocity, vec2 distanceTo);
+	void fire_move(vec2 velocity);
 	void Interact(Direction direction);
 	bool checkForTile(Direction direction);
-	bool moving = false;
-	bool interacting = false;
 	float count = 0;
 
 	// Fire Attributes
 	vec2 fire_spot;
 	bool obtainedFire;
+	vec2 fire_destination;
+	bool interacting = false;
 
 	// Player Attributes
 	void SetSprite(Direction direction);
 	void UpdatePlayerCoordinates(Direction direction);
 	vec2 player_destination;
+	bool moving = false;
+
+	// Object Attributes
+	bool activated = false;
 
 	// restart level
 	void restart_game();
@@ -77,9 +81,12 @@ private:
 	Entity player_explorer;
 	Entity cube;
 	Entity fire;
+	Entity currentObject;
 
 	Direction currDirection = Direction::DOWN;
 
+	// Helper Functions
+	Tile& searchForTile(Direction direction);
 	void initTileCreation();
 
 	// C++ random number generator
