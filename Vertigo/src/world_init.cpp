@@ -76,12 +76,12 @@ void createTile(RenderSystem* renderer, TilePosition pos, TileState state) {
 
     if(state != TileState::E){
         registry.renderRequests.insert(
-                entity,
-                {
-                        TEXTURE_ASSET_ID::TILE,
-                        EFFECT_ASSET_ID::TEXTURED,
-                        GEOMETRY_BUFFER_ID::SPRITE
-                }
+            entity,
+            {
+                TEXTURE_ASSET_ID::TILE,
+                EFFECT_ASSET_ID::TEXTURED,
+                GEOMETRY_BUFFER_ID::SPRITE
+            }
         );
     }
 }
@@ -102,6 +102,8 @@ Entity createFire(RenderSystem* renderer, TilePosition pos)
 	);
 	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
+
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
 
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = TilePosition{ vec2(pos.coordinates.x + 1, pos.coordinates.y + 1) };
