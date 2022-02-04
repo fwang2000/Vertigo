@@ -34,7 +34,8 @@ class RenderSystem {
 			textures_path("explorer_left.png"), 
 			textures_path("explorer_right.png"),
 			textures_path("tile.png"),
-			textures_path("fire.png") 
+			textures_path("fire.png"),
+			textures_path("object.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -12,6 +12,8 @@ const float TILE_BB_WIDTH = 0.6 * window_height_px / 3;
 const float TILE_BB_HEIGHT = 0.6 * window_height_px / 3;
 const float FIRE_BB_WIDTH = 0.3 * window_height_px / 3;
 const float FIRE_BB_HEIGHT = 0.3 * window_height_px / 3;
+const float OBJECT_BB_WIDTH = 0.4 * window_height_px / 3;
+const float OBJECT_BB_HEIGHT = 0.4 * window_height_px / 3;
 
 // the cube
 Entity createCube(RenderSystem* renderer);
@@ -21,3 +23,5 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos);
 void createTile(RenderSystem* renderer, TilePosition pos, TileState state);
 // the fire
 Entity createFire(RenderSystem* renderer, TilePosition pos);
+// the object
+void createObject(RenderSystem* renderer, TilePosition pos);

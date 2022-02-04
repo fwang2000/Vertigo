@@ -94,6 +94,7 @@ struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
 	vec2 scale = { 10, 10 };
+	float angle = 0;
 	Direction direction = Direction::DOWN;
 };
 
@@ -172,7 +173,8 @@ enum class TEXTURE_ASSET_ID {
 	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
 	TILE = EXPLORER_RIGHT + 1,
 	FIRE = TILE + 1,
-	TEXTURE_COUNT = FIRE + 1
+	OBJECT = FIRE + 1,
+	TEXTURE_COUNT = OBJECT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

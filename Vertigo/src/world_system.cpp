@@ -410,6 +410,11 @@ void WorldSystem::initTileCreation()
 				);
 				registry.colors.insert(fire, vec3{ 1, 0, 0 });
 			}
+			else if (i == -1 && j == 1) 
+			{
+				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::O);
+				createObject(renderer, TilePosition{ vec2(i, j) });
+			}
 			else
 			{
                 createTile(renderer, TilePosition{ vec2(i, j) }, TileState::V);
