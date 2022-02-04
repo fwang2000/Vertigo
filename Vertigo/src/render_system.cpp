@@ -8,10 +8,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat3& projection)
 {
 	Motion& motion = registry.motions.get(entity);
+
+
 	// Transformation code, see Rendering and Transformation in the template
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
+	if (registry.oscillations.has(entity)){
+		Oscillate oscillate = registry.oscillations.get(entity);
+		transform.translate(oscillate.amplitude);
+	}
 	transform.translate(motion.position);
 	transform.scale(motion.scale);
 
