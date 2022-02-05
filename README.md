@@ -26,7 +26,7 @@ world_system.cpp:
 
 render_system.cpp:
 * RenderSystem::createProjectionMatrix function - modified to allow the camera to follow the user
-* 
+
 physics_system.cpp:
 * PhysicsSystem::oscillate - Oscillate objects will have a offset of a certain amount which varies based on time
 
