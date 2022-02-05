@@ -79,6 +79,7 @@ public:
 	void draw();
 
 	mat3 createProjectionMatrix();
+	mat3 createProjectionMatrix(double offset_w, double offset_h);
 
 private:
 	// Internal drawing functions for each entity type
