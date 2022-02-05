@@ -12,7 +12,7 @@ world_init.cpp (called in world_syste.cpp to generate objects):
 world_system.cpp:
 * step - Update our game world
 * restart_game - Reset the world state to its initial state
-* on_key - WASP keys for player movement
+* on_key - WASD keys for player movement
 * player_move - call by on_key for handling movement of player
 * fire_move - call by player_move if player is with fire
 * UpdatePlayerCoordinates - update player coordinate after player move
