@@ -86,6 +86,36 @@ void createTile(RenderSystem* renderer, TilePosition pos, TileState state) {
     }
 }
 
+void createTileShadow(RenderSystem* renderer, TilePosition pos) {
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Setting initial motion values
+	int distance = window_height_px / 3;
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec2(
+		window_width_px / 2 + pos.coordinates.x * distance,
+		window_height_px / 2 + pos.coordinates.y * distance
+	);
+	motion.velocity = { 0.f, 0.f };
+	motion.scale = vec2({ TILE_BB_WIDTH * 1.1, TILE_BB_HEIGHT * 1.1 });
+
+	Parallax& parallax = registry.parallax.emplace(entity);
+	parallax.position = motion.position;
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TILE_SHADOW,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+}
+
 Entity createFire(RenderSystem* renderer, TilePosition pos)
 {
 	auto entity = Entity();

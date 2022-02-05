@@ -14,10 +14,17 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
-	if (registry.oscillations.has(entity)){
+	if (registry.oscillations.has(entity))
+	{
 		Oscillate oscillate = registry.oscillations.get(entity);
 		transform.translate(oscillate.displacement);
 	}
+	if (registry.parallax.has(entity))
+	{
+		Parallax parallax = registry.parallax.get(entity);
+		transform.translate(parallax.displacement);
+	}
+
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);
@@ -186,7 +193,13 @@ void RenderSystem::draw()
 							  // and alpha blending, one would have to sort
 							  // sprites back to front
 	gl_has_errors();
-	mat3 projection_2D = createProjectionMatrix();
+
+	// Follow player
+	
+	Entity player_entity = registry.players.entities[0];
+	Motion player_motion = registry.motions.get(player_entity);
+
+	mat3 projection_2D = createProjectionMatrix(player_motion.position.x - window_width_px / 2, player_motion.position.y - window_height_px / 2 );
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -205,15 +218,16 @@ void RenderSystem::draw()
 	gl_has_errors();
 }
 
-mat3 RenderSystem::createProjectionMatrix()
+mat3 RenderSystem::createProjectionMatrix(double offset_w, double offset_h)
 {
 	// Fake projection matrix, scales with respect to window coordinates
-	float left = 0.f;
-	float top = 0.f;
+
+	float left = 0.f + offset_w;
+	float top = 0.f + offset_h;
 
 	gl_has_errors();
-	float right = (float)window_width_px;
-	float bottom = (float)window_height_px;
+	float right = (float)window_width_px + offset_w;
+	float bottom = (float)window_height_px + offset_h;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);

@@ -99,6 +99,12 @@ struct Oscillate {
 	int steps = 100;
 };
 
+struct Parallax {
+	vec2 position = { 0, 0 };
+	vec2 displacement = { 0, 0 };
+	vec2 factor = { 0.05f, 0.05f };
+};
+
 struct Motion {
 	vec2 position = { 0, 0 };
 	vec2 velocity = { 0, 0 };
@@ -181,7 +187,8 @@ enum class TEXTURE_ASSET_ID {
 	EXPLORER_LEFT = EXPLORER_UP + 1,
 	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
 	TILE = EXPLORER_RIGHT + 1,
-	FIRE = TILE + 1,
+	TILE_SHADOW = TILE + 1,
+	FIRE = TILE_SHADOW + 1,
 	OBJECT = FIRE + 1,
 	TEXTURE_COUNT = OBJECT + 1
 };
