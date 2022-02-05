@@ -34,6 +34,7 @@ class RenderSystem {
 			textures_path("explorer_left.png"), 
 			textures_path("explorer_right.png"),
 			textures_path("tile.png"),
+			textures_path("tileshadow.png"),
 			textures_path("fire.png"),
 			textures_path("object.png")
 	};
@@ -78,7 +79,6 @@ public:
 	// Draw all entities
 	void draw();
 
-	mat3 createProjectionMatrix();
 	mat3 createProjectionMatrix(double offset_w, double offset_h);
 
 private:
