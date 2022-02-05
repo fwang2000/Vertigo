@@ -14,10 +14,17 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// specification for more info Incrementally updates transformation matrix,
 	// thus ORDER IS IMPORTANT
 	Transform transform;
-	if (registry.oscillations.has(entity)){
+	if (registry.oscillations.has(entity))
+	{
 		Oscillate oscillate = registry.oscillations.get(entity);
 		transform.translate(oscillate.displacement);
 	}
+	if (registry.parallax.has(entity))
+	{
+		Parallax parallax = registry.parallax.get(entity);
+		transform.translate(parallax.displacement);
+	}
+
 	transform.translate(motion.position);
 	transform.rotate(motion.angle);
 	transform.scale(motion.scale);

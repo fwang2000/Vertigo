@@ -146,6 +146,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			object_motion.scale -= 1.f;
 		}
 	}
+	UpdateParallax(player_motion.position);
 	/*
 	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
@@ -330,6 +331,15 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	}
 }
 
+void WorldSystem::UpdateParallax(vec2 playerPos)
+{
+	for (Entity entity : registry.parallax.entities)
+	{
+		Parallax& parallax = registry.parallax.get(entity);
+		parallax.displacement = (parallax.position - playerPos) * parallax.factor;
+	}
+}
+
 void WorldSystem::fire_move(vec2 velocity)
 {
 	Motion& motion = registry.motions.get(fire);
@@ -466,6 +476,7 @@ void WorldSystem::initTileCreation()
 	{
 		for (int j = -1; j < 2; j++) 
 		{
+            createTileShadow(renderer, TilePosition{ vec2(i, j) });
             if (i==1 && j==1)
 			{
 				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::E);
