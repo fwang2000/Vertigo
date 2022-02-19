@@ -126,7 +126,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			if (obtainedFire) {
 				fire_motion.velocity = vec2(0, 0);
 				fire_motion.position = player_destination + vec2(40, -40);
-				// printf("%f, %f\n", fire_motion.position.x, fire_motion.position.y);
 			}
 			moving = false;
 		}
@@ -390,8 +389,6 @@ void WorldSystem::Interact(Direction direction)
 
 	Tile& tile = searchForTile(direction);
 
-	printf("%d\n", tile.tileState);
-
 	vec2 velocityDirection = vec2(1, 1);
 
 	switch (direction) 
@@ -428,8 +425,6 @@ void WorldSystem::Interact(Direction direction)
 			interacting = true;
 		}
 	}
-
-	printf("%d\n", tile.tileState);
 }
 
 void WorldSystem::SetSprite(Direction direction) {
