@@ -8,32 +8,36 @@
 #include <iostream>
 #include <sstream>
 
-float death_timer_counter_ms = 3000;
-
 glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	glm::mat4 matrix = glm::mat4(1.0f);
 	// rotate then translate
 	switch (face) {
 		case 0:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(x, y, distance)) * matrix;
 			break;
 		case 1:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(-distance, x, y)) * matrix;
 			break;
 		case 2:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(distance, x, y)) * matrix;
 			break;
 		case 3:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(x, distance, y)) * matrix;
 			break;
 		case 4:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(x, -distance, y)) * matrix;
 			break;
 		case 5:
+			matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 			matrix = translate(glm::mat4(1.0f), vec3(x, y, -distance)) * matrix;
 			break;
 		default:

@@ -79,16 +79,6 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
-	cube.loadFromExcelFile(level_path("level2.csv"));
-	for (int i = 0; i < 6; i++) {
-		for (int j = 0; j < cube.size; j++) {
-			for (int k = 0; k < cube.size; k++) {
-				if (!(cube.faces[i][j][k].tileState == TileState::E))
-					createTile(cube.faces[i][j][k]);
-			}
-		}
-	}
-
 	// Set all states to default
 	restart_game();
 }
@@ -198,17 +188,9 @@ void WorldSystem::restart_game() {
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
-	cube.loadFromExcelFile(level_path("level2.csv"));
-	for (int i = 0; i < 6; i++) {
-		for (int j = 0; j < cube.size; j++) {
-			for (int k = 0; k < cube.size; k++) {
-				if (!(cube.faces[i][j][k].tileState == TileState::E))
-					createTile(cube.faces[i][j][k]);
-			}
-		}
-	}
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
+	// Create a new fire
 	fire = createFire(renderer, vec3(-1, -1, -1));
 	fire_spot = vec2(
 		window_width_px / 2 + -1 * window_height_px / 3,
@@ -217,6 +199,17 @@ void WorldSystem::restart_game() {
 	registry.colors.insert(fire, vec3{ 1, 0, 0 });
 
 	obtainedFire = false;
+
+	// Load a level
+	cube.loadFromExcelFile(level_path("levelOne.csv"));
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < cube.size; j++) {
+			for (int k = 0; k < cube.size; k++) {
+				if (!(cube.faces[i][j][k].tileState == TileState::E))
+					createTile(cube.faces[i][j][k]);
+			}
+		}
+	}
 }
 
 // Compute collisions between entities

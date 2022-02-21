@@ -68,6 +68,7 @@ struct Cube
 	bool loadFromExcelFile(std::string filename);
 	std::array<std::vector<std::vector<Tile>>, 6> faces;
 	int size = 0;
+	int getSize() { return size; }
 };
 
 
