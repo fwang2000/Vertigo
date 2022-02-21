@@ -1,18 +1,9 @@
 #pragma once
 #include "common.hpp"
 #include <vector>
+#include <array>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
-
-//enum CubeFace
-//{
-//	SIDE_0 = 0,
-//	SIDE_1 = 1,
-//	SIDE_2 = 2,
-//	SIDE_3 = 3,
-//	SIDE_4 = 4,
-//	SIDE_5 = 5,
-//};
 
 enum class Direction
 {
@@ -22,20 +13,10 @@ enum class Direction
 	DOWN = 3
 };
 
-struct Cube {
-
-	int dimension;
-};
-
-struct TilePosition
-{
-	vec2 coordinates = { 0, 0 };
-};
-
 // Player component
 struct Player
 {
-	TilePosition playerPos;
+	vec3 playerPos;
 };
 
 struct Object
@@ -51,41 +32,42 @@ struct Fire
 {
 	bool active = false;
 	bool inUse = false;
-	TilePosition firePos;
+	vec3 firePos;
 };
 
-//struct Tile
-//{
-//	int x;
-//	int y;
-//};
+enum class BOX_ANIMATION {
+	STILL = 0,
+	UP = 1,
+	DOWN = 2,
+	LEFT = 3,
+	RIGHT = 4
+};
 
+// Set each character to their placement in the alphabet for easy conversion from the CSV to TileState
 enum class TileState
 {
-	S = 0,
-	F = 1,
-	V = 2,
-	O = 3,
-	FIRE = 4,// possible types of object in future milestone
-	E = 99,
+	S = 18,
+	F = 5,
+	V = 21,
+	O = 14,
+	E = 4,
 };
 
 struct Tile
 {
+	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	glm::mat4 model;
+	int degrees = 0;
 	TileState tileState = TileState::E;
-	TilePosition tilePos;
 };
 
-struct Box {
-	std::vector <std::vector<Tile>> tiles;
-};
-
-// Mesh datastructure for cube
-struct MeshBox
+// represents the entire cube
+// front -> left -> right -> top -> bottom -> back
+struct Cube
 {
-	//added
-	bool loadFromExcelFile(std::string filename, std::vector <std::vector<Tile>>& out_tiles);
-	std::vector <std::vector<Tile>> tiles;
+	bool loadFromExcelFile(std::string filename);
+	std::array<std::vector<std::vector<Tile>>, 6> faces;
+	int size = 0;
 };
 
 
@@ -197,8 +179,8 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
 	TEXTURED = COLOURED + 1,
-	WIND = TEXTURED + 1,
-	EFFECT_COUNT = WIND + 1
+	TILE = TEXTURED + 1,
+	EFFECT_COUNT = TILE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
