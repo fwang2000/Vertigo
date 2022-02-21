@@ -7,12 +7,13 @@
 #include <sstream>
 
 #include "physics_system.hpp"
+#include <iostream>
 
 // Game configuration
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(1) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -146,28 +147,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 	UpdateParallax(player_motion.position);
-	/*
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	*/
 
 	return true;
 }
@@ -182,6 +161,14 @@ void WorldSystem::restart_game() {
 	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
 		registry.remove_all_components_of(registry.motions.entities.back());
+
+	while (registry.tiles.entities.size() > 0)
+		registry.remove_all_components_of(registry.tiles.entities.back());
+
+	while (registry.renderRequests.entities.size() > 0)
+		registry.remove_all_components_of(registry.renderRequests.entities.back());
+
+	printf("%d\n", registry.tiles.entities.size());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -200,8 +187,10 @@ void WorldSystem::restart_game() {
 
 	obtainedFire = false;
 
+	std::cout << "Level: " << level_path("level" + std::to_string(level) + ".csv") << std::endl;
+
 	// Load a level
-	cube.loadFromExcelFile(level_path("levelOne.csv"));
+	cube.loadFromExcelFile(level_path("level" + std::to_string(level) + ".csv"));
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
@@ -247,20 +236,7 @@ void WorldSystem::handle_collisions() {
 	// Remove all collisions from this simulation step
 	registry.collisions.clear();
 }
-void WorldSystem::handle_player_tile_collisions(Entity * player, Entity * tile) {
-   /* if (registry.tiles.get(*tile).tileState == TileState::E){
-        if(currDirection==Direction::DOWN){
-            move(vec2(0, -250), vec2(0, -window_height_px / 6));
-        }else if(currDirection==Direction::UP){
-            move(vec2(0, 250), vec2(0, window_height_px / 6));
-        }else if(currDirection==Direction::LEFT){
-            move(vec2(-250, 0), vec2(window_height_px / 6, 0));
-        }else{
-            move(vec2(-250, 0), vec2(-window_height_px / 6, 0));
-        }
-    }
-	*/
-}
+
 // Should the game be over ?
 bool WorldSystem::is_over() const {
 	return bool(glfwWindowShouldClose(window));
@@ -333,15 +309,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	/*
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
-
+		cube.reset();
+		level++;
 		restart_game();
 	}
-	*/
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
