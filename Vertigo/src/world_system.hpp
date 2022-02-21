@@ -80,7 +80,7 @@ private:
 	// Game state
 	RenderSystem* renderer;
 	Entity player_explorer;
-	Entity cube;
+	Cube cube;
 	Entity fire;
 	Entity currentObject;
 
@@ -88,7 +88,6 @@ private:
 
 	// Helper Functions
 	Tile& searchForTile(Direction direction);
-	void initTileCreation();
 
 	// C++ random number generator
 	std::default_random_engine rng;

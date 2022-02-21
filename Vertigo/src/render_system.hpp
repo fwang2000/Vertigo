@@ -44,13 +44,13 @@ class RenderSystem {
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("textured"),
-		shader_path("wind") 
+		shader_path("tile")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
 	std::array<Mesh, geometry_count> meshes;
-	std::array<MeshBox, geometry_count> meshboxs;
+	// std::array<MeshBox, geometry_count> meshboxs;
 
 public:
 	// Initialize the window
@@ -65,7 +65,7 @@ public:
 
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
-	MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
+	// MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
@@ -79,11 +79,12 @@ public:
 	// Draw all entities
 	void draw();
 
-	mat3 createProjectionMatrix(double offset_w, double offset_h);
+	mat4 createViewMatrix();
+	mat4 createProjectionMatrix(int width, int height);
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat3& projection);
+	void drawTexturedMesh(Entity entity, const mat4& projection, const mat4 &view);
 	void drawToScreen();
 
 	// Window handle
