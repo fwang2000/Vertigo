@@ -3,6 +3,7 @@
 #include <SDL.h>
 
 #include "tiny_ecs_registry.hpp"
+#include "world_system.hpp"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection, const mat4& view)
@@ -264,6 +265,8 @@ void RenderSystem::draw()
 							  // and alpha blending, one would have to sort
 							  // sprites back to front
 	gl_has_errors();
+
+	
 	mat4 projection_3D = createProjectionMatrix(w, h);
 	mat4 view = createViewMatrix();
 
@@ -288,7 +291,7 @@ void RenderSystem::draw()
 mat4 RenderSystem::createViewMatrix()
 {
     mat4 view = lookAt(vec3(6.0f, 3.0f, 6.0f),
-                            vec3(0.0f, -0.5f, 0.0f),
+                            vec3(0.0f, 0.0f, 0.0f),
                             vec3(0.0f, 1.0f, 0.0f));
     return view;
 }
@@ -296,10 +299,9 @@ mat4 RenderSystem::createViewMatrix()
 mat4 RenderSystem::createProjectionMatrix(int width, int height)
 {
     mat4 proj = mat4(1.0f);
-    proj = perspective(radians(50.0f), (float)width / height, 0.1f, 100.0f); 
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = 4; // this number should match the dimension of our box;
+    float const view_distance = 3.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
 }

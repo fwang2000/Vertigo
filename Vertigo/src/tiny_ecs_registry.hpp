@@ -26,6 +26,7 @@ public:
 	ComponentContainer<Tile> tiles;
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
+	ComponentContainer<Cube> cube;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -44,6 +45,7 @@ public:
 		registry_list.push_back(&tiles);
 		registry_list.push_back(&fire);
 		registry_list.push_back(&objects);
+		registry_list.push_back(&cube);
 	}
 
 	void clear_all_components() {
