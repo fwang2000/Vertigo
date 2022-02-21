@@ -16,6 +16,8 @@
 #include <glm/ext/vector_int2.hpp>  // ivec2
 #include <glm/vec3.hpp>             // vec3
 #include <glm/mat3x3.hpp>           // mat3
+#include <glm/vec4.hpp>				// vec4
+#include <glm/gtc/matrix_transform.hpp>
 using namespace glm;
 
 #include "tiny_ecs.hpp"
@@ -25,13 +27,14 @@ using namespace glm;
 // Get defintion of PROJECT_SOURCE_DIR from:
 #include "../ext/project_path.hpp"
 inline std::string data_path() { return std::string(PROJECT_SOURCE_DIR) + "data"; };
-inline std::string shader_path(const std::string& name) { return std::string(PROJECT_SOURCE_DIR) + "/shaders/" + name; };
+inline std::string shader_path(const std::string& name) { return std::string(PROJECT_SOURCE_DIR) + "/shaders/" + std::string(name); };
 inline std::string textures_path(const std::string& name) { return data_path() + "/textures/" + std::string(name); };
 inline std::string audio_path(const std::string& name) { return data_path() + "/audio/" + std::string(name); };
 inline std::string mesh_path(const std::string& name) { return data_path() + "/meshes/" + std::string(name); };
+inline std::string level_path(const std::string& name) {return data_path() + "/levels/" + std::string(name);};
 
-const int window_width_px = 1000;
-const int window_height_px = 800;
+const int window_width_px = 1200;
+const int window_height_px = 1200;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

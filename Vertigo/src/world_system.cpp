@@ -79,6 +79,16 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 
+	cube.loadFromExcelFile(level_path("level2.csv"));
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < cube.size; j++) {
+			for (int k = 0; k < cube.size; k++) {
+				if (!(cube.faces[i][j][k].tileState == TileState::E))
+					createTile(cube.faces[i][j][k]);
+			}
+		}
+	}
+
 	// Set all states to default
 	restart_game();
 }
@@ -186,14 +196,20 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	initTileCreation();
-
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
-	cube = createCube(renderer);
+	cube.loadFromExcelFile(level_path("level2.csv"));
+	for (int i = 0; i < 6; i++) {
+		for (int j = 0; j < cube.size; j++) {
+			for (int k = 0; k < cube.size; k++) {
+				if (!(cube.faces[i][j][k].tileState == TileState::E))
+					createTile(cube.faces[i][j][k]);
+			}
+		}
+	}
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
-	fire = createFire(renderer, TilePosition{ vec2(-1, -1) });
+	fire = createFire(renderer, vec3(-1, -1, -1));
 	fire_spot = vec2(
 		window_width_px / 2 + -1 * window_height_px / 3,
 		window_height_px / 2 + -1 * window_height_px / 3
@@ -296,6 +312,34 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	SetSprite(dir);
 
+	if (key == GLFW_KEY_UP) {
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::UP;
+		}
+	}
+
+	else if (key == GLFW_KEY_DOWN) {
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::DOWN;
+		}
+	}
+
+	else if (key == GLFW_KEY_LEFT) {
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::LEFT;
+		}
+	}
+
+	else if (key == GLFW_KEY_RIGHT) {
+		for (Tile& t : registry.tiles.components) {
+			if (t.status == BOX_ANIMATION::STILL)
+				t.status = BOX_ANIMATION::RIGHT;
+		}
+	}
+
 	/*
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -337,29 +381,29 @@ void WorldSystem::fire_move(vec2 velocity)
 }
 
 void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
-	
-	vec2 playerPosShift;
+	// TODO: rework this
+	// vec2 playerPosShift;
 
-	switch (direction)
-	{
-	case Direction::DOWN:
-		playerPosShift = vec2(0, 1);
-		break;
-	case Direction::UP:
-		playerPosShift = vec2(0, -1);
-		break;
-	case Direction::LEFT:
-		playerPosShift = vec2(-1, 0);
-		break;
-	case Direction::RIGHT:
-		playerPosShift = vec2(1, 0);
-		break;
-	default:
-		break;
-	}
+	// switch (direction)
+	// {
+	// case Direction::DOWN:
+	// 	playerPosShift = vec2(0, 1);
+	// 	break;
+	// case Direction::UP:
+	// 	playerPosShift = vec2(0, -1);
+	// 	break;
+	// case Direction::LEFT:
+	// 	playerPosShift = vec2(-1, 0);
+	// 	break;
+	// case Direction::RIGHT:
+	// 	playerPosShift = vec2(1, 0);
+	// 	break;
+	// default:
+	// 	break;
+	// }
 
-	Player& player = registry.players.get(player_explorer);
-	player.playerPos.coordinates += playerPosShift;
+	// Player& player = registry.players.get(player_explorer);
+	// player.playerPos.coordinates += playerPosShift;
 }
 
 bool WorldSystem::checkForTile(Direction direction) 
@@ -376,7 +420,7 @@ bool WorldSystem::checkForTile(Direction direction)
 void WorldSystem::Interact(Direction direction) 
 {
 	Player& player = registry.players.get(player_explorer);
-	vec2 coords = player.playerPos.coordinates;
+	vec3 coords = player.playerPos;
 
 	Tile& tile = searchForTile(direction);
 
@@ -404,19 +448,19 @@ void WorldSystem::Interact(Direction direction)
 
 	if (tile.tileState == TileState::O) {
 		
-		if (obtainedFire) 
-		{
-			Motion& motion = registry.motions.get(fire);
-			fire_move(
-				velocityDirection *
-				vec2(
-					motion.position.x - (window_width_px / 2 + (tile.tilePos.coordinates.x - 1) * window_height_px / 3),
-					motion.position.y - (window_height_px / 2 + (tile.tilePos.coordinates.y - 1) * window_height_px / 3)
-				)
-			);
-			tile.tileState = TileState::V;
-			interacting = true;
-		}
+		// if (obtainedFire) 
+		// {
+		// 	Motion& motion = registry.motions.get(fire);
+		// 	fire_move(
+		// 		velocityDirection *
+		// 		vec2(
+		// 			motion.position.x - (window_width_px / 2 + (tile.tilePos.coordinates.x - 1) * window_height_px / 3),
+		// 			motion.position.y - (window_height_px / 2 + (tile.tilePos.coordinates.y - 1) * window_height_px / 3)
+		// 		)
+		// 	);
+		// 	tile.tileState = TileState::V;
+		// 	interacting = true;
+		// }
 	}
 
 	printf("%d\n", tile.tileState);
@@ -460,73 +504,47 @@ void WorldSystem::SetSprite(Direction direction) {
 	currDirection = direction;
 }
 
-void WorldSystem::initTileCreation() 
-{
-	for (int i = -1; i < 2; i++) 
-	{
-		for (int j = -1; j < 2; j++) 
-		{
-            if (i==1 && j==1)
-			{
-				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::E);
-            }
-			else if (i == -1 && j == -1) 
-			{
-				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::FIRE);
-			}
-			else if (i == -1 && j == 1) 
-			{
-				createTile(renderer, TilePosition{ vec2(i, j) }, TileState::O);
-				createObject(renderer, TilePosition{ vec2(i, j) });
-			}
-			else
-			{
-                createTile(renderer, TilePosition{ vec2(i, j) }, TileState::V);
-            }
-		}
-	}
-}
 
 Tile& WorldSystem::searchForTile(Direction direction) {
 
-	Player& player = registry.players.get(player_explorer);
-	vec2 coords = player.playerPos.coordinates;
+	// Player& player = registry.players.get(player_explorer);
+	// vec3 coords = player.playerPos.coordinates;
 
-	int index = 0;
+	// int index = 0;
 
-	Tile tile{ TileState::E };
+	Tile tile;
 
-	switch (direction)
-	{
-	case Direction::DOWN:
-		if (coords.y == 2) {
-			return tile;
-		}
-		index = (coords.y + 1) + 3 * (coords.x);
-		break;
-	case Direction::UP:
-		if (coords.y == 0) {
-			return tile;
-		}
-		index = (coords.y - 1) + 3 * (coords.x);
-		break;
-	case Direction::LEFT:
-		if (coords.x == 0) {
-			return tile;
-		}
-		index = (coords.y) + 3 * (coords.x - 1);
-		break;
-	case Direction::RIGHT:
-		if (coords.x == 2) {
-			return tile;
-		}
-		index = (coords.y) + 3 * (coords.x + 1);
-		break;
-	default:
-		break;
-	}
+	// switch (direction)
+	// {
+	// case Direction::DOWN:
+	// 	if (coords.y == 2) {
+	// 		return tile;
+	// 	}
+	// 	index = (coords.y + 1) + 3 * (coords.x);
+	// 	break;
+	// case Direction::UP:
+	// 	if (coords.y == 0) {
+	// 		return tile;
+	// 	}
+	// 	index = (coords.y - 1) + 3 * (coords.x);
+	// 	break;
+	// case Direction::LEFT:
+	// 	if (coords.x == 0) {
+	// 		return tile;
+	// 	}
+	// 	index = (coords.y) + 3 * (coords.x - 1);
+	// 	break;
+	// case Direction::RIGHT:
+	// 	if (coords.x == 2) {
+	// 		return tile;
+	// 	}
+	// 	index = (coords.y) + 3 * (coords.x + 1);
+	// 	break;
+	// default:
+	// 	break;
+	// }
 	
-	Tile& realTile = registry.tiles.components.at(index);
+	// Tile& realTile = registry.tiles.components.at(index);
 
-	return realTile;
+	return tile;
 }

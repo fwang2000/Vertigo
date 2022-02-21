@@ -22,8 +22,6 @@ public:
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<vec3> colors;
 
-	ComponentContainer<Cube> cube;
-	ComponentContainer<Box> box;
 	ComponentContainer<Tile> tiles;
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
@@ -41,7 +39,6 @@ public:
 		registry_list.push_back(&renderRequests);
 		registry_list.push_back(&screenStates);
 		registry_list.push_back(&colors);
-		registry_list.push_back(&cube);
 		registry_list.push_back(&tiles);
 		registry_list.push_back(&fire);
 		registry_list.push_back(&objects);

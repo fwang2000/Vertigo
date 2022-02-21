@@ -20,8 +20,8 @@ Entity createCube(RenderSystem* renderer);
 // the explorer
 Entity createExplorer(RenderSystem* renderer, vec2 pos);
 // the tiles
-void createTile(RenderSystem* renderer, TilePosition pos, TileState state);
+Entity createTile(Tile tile);
 // the fire
-Entity createFire(RenderSystem* renderer, TilePosition pos);
+Entity createFire(RenderSystem* renderer, vec3 pos);
 // the object
-void createObject(RenderSystem* renderer, TilePosition pos);
+void createObject(RenderSystem* renderer, vec3 pos);
