@@ -8,20 +8,25 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection, const mat4& view)
 {
-	// Motion& motion = registry.motions.get(entity);
-
-
-	// Transformation code, see Rendering and Transformation in the template
-	// specification for more info Incrementally updates transformation matrix,
-	// thus ORDER IS IMPORTANT
 	Transform transform;
-	// if (registry.oscillations.has(entity)){
-	// 	Oscillate oscillate = registry.oscillations.get(entity);
-	// 	transform.translate(oscillate.displacement);
-	// }
-	// transform.translate(motion.position);
-	// transform.rotate(motion.angle);
-	// transform.scale(motion.scale);
+	if (registry.motions.has(entity))
+	{
+		Motion& motion = registry.motions.get(entity);
+
+
+		// Transformation code, see Rendering and Transformation in the template
+		// specification for more info Incrementally updates transformation matrix,
+		// thus ORDER IS IMPORTANT
+		
+		if (registry.oscillations.has(entity)) {
+			Oscillate oscillate = registry.oscillations.get(entity);
+			transform.translate(oscillate.displacement);
+		}
+		transform.translate(motion.position);
+		transform.rotate(motion.angle);
+		transform.scale(motion.scale);
+
+	}
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);

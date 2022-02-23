@@ -4,6 +4,9 @@
 #include <array>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+#include <chrono>
+
+using Clock = std::chrono::high_resolution_clock;
 
 enum class Direction
 {
@@ -33,6 +36,7 @@ struct Fire
 	bool active = false;
 	bool inUse = false;
 	vec3 firePos;
+	std::chrono::steady_clock::time_point startshoot = Clock::now();
 };
 
 enum class BOX_ANIMATION {

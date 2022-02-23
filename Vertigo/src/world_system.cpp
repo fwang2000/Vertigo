@@ -9,6 +9,9 @@
 #include "physics_system.hpp"
 #include <iostream>
 
+#include <chrono>
+using Clock = std::chrono::high_resolution_clock;
+
 // Game configuration
 
 // Create the world
@@ -270,9 +273,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		dir = Direction::RIGHT;
 		player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 		break;
-	case GLFW_KEY_ENTER:
-		Interact(currDirection);
-		break;
+	//case GLFW_KEY_ENTER:
+	//	Interact(currDirection);
+	//	break;
 	default:
 		break;
 	}
@@ -305,6 +308,23 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			if (t.status == BOX_ANIMATION::STILL)
 				t.status = BOX_ANIMATION::RIGHT;
 		}
+	}
+
+	// Fire release
+	
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		auto start = Clock::now();
+		Fire& f = registry.fire.components[0];
+		f.startshoot = start;
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER) {
+		auto end = Clock::now();
+		Fire& f = registry.fire.components[0];
+		auto start = f.startshoot;
+		float duration =
+			(float)(std::chrono::duration_cast<std::chrono::microseconds>(start - end)).count();
+		Interact(currDirection, duration);
 	}
 
 	// Resetting game
@@ -392,12 +412,41 @@ bool WorldSystem::checkForTile(Direction direction)
 	return true;
 }
 
-void WorldSystem::Interact(Direction direction) 
+void WorldSystem::Interact(Direction direction, float duration) 
 {
 	Player& player = registry.players.get(player_explorer);
 	vec3 coords = player.playerPos;
 
-	Tile& tile = searchForTile(direction);
+	float distance = duration;
+	if (duration > 3) {
+		distance = 3;
+	}
+
+	Motion& motion = registry.motions.get(fire);
+
+	switch (direction)
+	{
+	case Direction::DOWN:
+		motion.velocity.y = distance;
+		break;
+	case Direction::UP:
+		motion.velocity.y = distance;
+		break;
+	case Direction::LEFT:
+		motion.velocity.x = distance;
+		break;
+	case Direction::RIGHT:
+		motion.velocity.x = distance;
+		break;
+	default:
+		break;
+	}
+
+	///////
+	// TODO: collision with object
+	///////
+
+	/*Tile& tile = searchForTile(direction);
 
 	vec2 velocityDirection = vec2(1, 1);
 
@@ -417,10 +466,10 @@ void WorldSystem::Interact(Direction direction)
 		break;
 	default:
 		break;
-	}
+	}*/
 
-	if (tile.tileState == TileState::O) {
-		
+	// if (tile.tileState == TileState::O) {
+
 		// if (obtainedFire) 
 		// {
 		// 	Motion& motion = registry.motions.get(fire);
@@ -434,7 +483,7 @@ void WorldSystem::Interact(Direction direction)
 		// 	tile.tileState = TileState::V;
 		// 	interacting = true;
 		// }
-	}
+	// }
 }
 
 void WorldSystem::SetSprite(Direction direction) {

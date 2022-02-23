@@ -89,14 +89,14 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = vec3(pos.x + 1, pos.y + 1, pos.z + 1) ;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{
-	// 		TEXTURE_ASSET_ID::FIRE,
-	// 		EFFECT_ASSET_ID::TEXTURED,
-	// 		GEOMETRY_BUFFER_ID::SPRITE
-	// 	}
-	// );
+	 registry.renderRequests.insert(
+	 	entity,
+	 	{
+	 		TEXTURE_ASSET_ID::FIRE,
+	 		EFFECT_ASSET_ID::TEXTURED,
+	 		GEOMETRY_BUFFER_ID::SPRITE
+	 	}
+	 );
 	return entity;
 }
 
