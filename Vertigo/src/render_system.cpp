@@ -8,20 +8,6 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection, const mat4& view)
 {
-	// Motion& motion = registry.motions.get(entity);
-
-
-	// Transformation code, see Rendering and Transformation in the template
-	// specification for more info Incrementally updates transformation matrix,
-	// thus ORDER IS IMPORTANT
-	Transform transform;
-	// if (registry.oscillations.has(entity)){
-	// 	Oscillate oscillate = registry.oscillations.get(entity);
-	// 	transform.translate(oscillate.displacement);
-	// }
-	// transform.translate(motion.position);
-	// transform.rotate(motion.angle);
-	// transform.scale(motion.scale);
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -48,6 +34,20 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// Input data location as in the vertex buffer
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
 	{
+
+		Motion& motion = registry.motions.get(entity);
+
+		// Transformation code, see Rendering and Transformation in the template
+		// specification for more info Incrementally updates transformation matrix,
+		// thus ORDER IS IMPORTANT
+		Transform transform;
+		if (registry.oscillations.has(entity)){
+			Oscillate oscillate = registry.oscillations.get(entity);
+			transform.translate(oscillate.displacement);
+		}
+		transform.translate(motion.position);
+		transform.scale(motion.scale);
+
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();

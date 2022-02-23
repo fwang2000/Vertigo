@@ -146,7 +146,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			object_motion.scale -= 1.f;
 		}
 	}
-	UpdateParallax(player_motion.position);
+	// 		object_motion.angle = 10.f;
+	// 		object_motion.scale -= 1.f;
+	// 	}
+	// }
 
 	return true;
 }

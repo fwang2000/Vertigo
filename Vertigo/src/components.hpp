@@ -91,11 +91,6 @@ struct Oscillate {
 	int steps = 100;
 };
 
-struct Parallax {
-	vec2 position = { 0, 0 };
-	vec2 displacement = { 0, 0 };
-	vec2 factor = { 0.05f, 0.05f };
-};
 
 struct Motion {
 	vec2 position = { 0, 0 };

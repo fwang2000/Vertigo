@@ -48,7 +48,6 @@ private:
 	// Movement Functions
 	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
 	void fire_move(vec2 velocity);
-	void UpdateParallax(vec2 playerPos);
 	void Interact(Direction direction);
 	bool checkForTile(Direction direction);
 	float count = 0;
