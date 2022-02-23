@@ -44,13 +44,21 @@ enum class BOX_ANIMATION {
 };
 
 // Set each character to their placement in the alphabet for easy conversion from the CSV to TileState
+// Letters are 0-indexed: i.e. A = 0
 enum class TileState
 {
 	S = 18,
 	F = 5,
 	V = 21,
 	O = 14,
+	B = 2,
+	I = 8,
+	M = 12,
+	N = 13,
+	W = 22,
+	U = 20,
 	E = 4,
+	Z = 25
 };
 
 struct Tile
@@ -68,6 +76,7 @@ struct Cube
 	bool loadFromExcelFile(std::string filename);
 	std::array<std::vector<std::vector<Tile>>, 6> faces;
 	int size = 0;
+	int getSize() { return this->size; }
 	void reset();
 };
 
@@ -170,7 +179,11 @@ enum class TEXTURE_ASSET_ID {
 	EXPLORER_LEFT = EXPLORER_UP + 1,
 	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
 	TILE = EXPLORER_RIGHT + 1,
-	TILE_SHADOW = TILE + 1,
+	INVISIBLE_TILE = TILE + 1,
+	SWITCH_TILE = INVISIBLE_TILE + 1,
+	UP_TILE = SWITCH_TILE + 1,
+	END_TILE = UP_TILE + 1,
+	TILE_SHADOW = END_TILE + 1,
 	FIRE = TILE_SHADOW + 1,
 	OBJECT = FIRE + 1,
 	TEXTURE_COUNT = OBJECT + 1

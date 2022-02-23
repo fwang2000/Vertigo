@@ -34,6 +34,10 @@ class RenderSystem {
 			textures_path("explorer_left.png"), 
 			textures_path("explorer_right.png"),
 			textures_path("tile.png"),
+			textures_path("invisible_tile.png"),
+			textures_path("switch_tile.png"),
+			textures_path("up_tile.png"),
+			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("fire.png"),
 			textures_path("object.png")
