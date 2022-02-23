@@ -46,6 +46,7 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
+	// TODO: Update to 3D
 	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
 	void fire_move(vec2 velocity);
 	void Interact(Direction direction);

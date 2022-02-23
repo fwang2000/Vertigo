@@ -91,13 +91,21 @@ struct Oscillate {
 	int steps = 100;
 };
 
+struct Motion
+{
+	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
+	vec3 velocity = {0, 0, 0}; // Used if extrapolating
+	vec3 destination = {0, 0, 0}; // Used if interpolating
+	float remaining_time = 0; // Used if interpolating
 
-struct Motion {
-	vec2 position = { 0, 0 };
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
-	float angle = 0;
-	Direction direction = Direction::DOWN;
+	// For rendering 3d coordinates to 2d screen
+	vec3 origin = {0, 0, 0};
+	vec2 x_vector = {cos(radians(30.0f)), sin(radians(30.0f))};
+	vec2 y_vector = {0, 1};
+	vec2 z_vector = {cos(radians(60.0f)), sin(radians(60.0f))};
+	vec3 position = {0, 0, 0};
+	
+	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information

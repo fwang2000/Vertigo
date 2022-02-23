@@ -115,37 +115,33 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	Motion& player_motion = motions_registry.get(player_explorer);
 	Motion& fire_motion = motions_registry.get(fire);
 
-	if (moving) {
-		if ((player_destination.y >= player_motion.position.y && currDirection == Direction::UP) ||
-			(player_destination.y <= player_motion.position.y && currDirection == Direction::DOWN) ||
-			(player_destination.x <= player_motion.position.x && currDirection == Direction::RIGHT) ||
-			(player_destination.x >= player_motion.position.x && currDirection == Direction::LEFT))
-		{
-			player_motion.velocity = vec2(0, 0);
-			player_motion.position = player_destination;
+	// if (moving) {
+	// 	if ((player_destination.y >= player_motion.position.y && currDirection == Direction::UP) ||
+	// 		(player_destination.y <= player_motion.position.y && currDirection == Direction::DOWN) ||
+	// 		(player_destination.x <= player_motion.position.x && currDirection == Direction::RIGHT) ||
+	// 		(player_destination.x >= player_motion.position.x && currDirection == Direction::LEFT))
+	// 	{
+	// 		player_motion.velocity = vec2(0, 0);
+	// 		player_motion.position = player_destination;
 			
-			if (obtainedFire) {
-				fire_motion.velocity = vec2(0, 0);
-				fire_motion.position = player_destination + vec2(40, -40);
-			}
-			moving = false;
-		}
-	}
+	// 		if (obtainedFire) {
+	// 			fire_motion.velocity = vec2(0, 0);
+	// 			fire_motion.position = player_destination + vec2(40, -40);
+	// 		}
+	// 		moving = false;
+	// 	}
+	// }
 	
-	if (activated) {
+	// if (activated) {
 
-		Motion& object_motion = motions_registry.get(currentObject);
+	// 	Motion& object_motion = motions_registry.get(currentObject);
 		
-		if (object_motion.scale.x <= 0.f || object_motion.scale.y <= 0.f) {
+	// 	if (object_motion.scale.x <= 0.f || object_motion.scale.y <= 0.f) {
 
-			activated = false;
-		}
-		else {
+	// 		activated = false;
+	// 	}
+	// 	else {
 
-			object_motion.angle = 10.f;
-			object_motion.scale -= 1.f;
-		}
-	}
 	// 		object_motion.angle = 10.f;
 	// 		object_motion.scale -= 1.f;
 	// 	}
@@ -331,31 +327,22 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 		return;
 	}
 
-	Motion& motion = registry.motions.get(player_explorer);
-	motion.velocity = velocity;
-	player_destination = motion.position + distanceTo;
-	moving = true;
-	UpdatePlayerCoordinates(direction);
+	// Motion& motion = registry.motions.get(player_explorer);
+	// motion.velocity = velocity;
+	// player_destination = motion.position + distanceTo;
+	// moving = true;
+	// UpdatePlayerCoordinates(direction);
 
-	if (obtainedFire) 
-	{
-		fire_move(velocity);
-	}
-}
-
-void WorldSystem::UpdateParallax(vec2 playerPos)
-{
-	for (Entity entity : registry.parallax.entities)
-	{
-		Parallax& parallax = registry.parallax.get(entity);
-		parallax.displacement = (parallax.position - playerPos) * parallax.factor;
-	}
+	// if (obtainedFire) 
+	// {
+	// 	fire_move(velocity);
+	// }
 }
 
 void WorldSystem::fire_move(vec2 velocity)
 {
-	Motion& motion = registry.motions.get(fire);
-	motion.velocity = velocity;
+	// Motion& motion = registry.motions.get(fire);
+	// motion.velocity = velocity;
 }
 
 void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
@@ -402,25 +389,25 @@ void WorldSystem::Interact(Direction direction)
 
 	Tile& tile = searchForTile(direction);
 
-	vec2 velocityDirection = vec2(1, 1);
+	// vec2 velocityDirection = vec2(1, 1);
 
-	switch (direction) 
-	{
-	case Direction::DOWN:
-		velocityDirection = vec2(-1, -1);
-		break;
-	case Direction::UP:
-		velocityDirection = vec2(1, 1);
-		break;
-	case Direction::LEFT:
-		velocityDirection = vec2(-1, -1);
-		break;
-	case Direction::RIGHT:
-		velocityDirection = vec2(1, 1);
-		break;
-	default:
-		break;
-	}
+	// switch (direction) 
+	// {
+	// case Direction::DOWN:
+	// 	velocityDirection = vec2(-1, -1);
+	// 	break;
+	// case Direction::UP:
+	// 	velocityDirection = vec2(1, 1);
+	// 	break;
+	// case Direction::LEFT:
+	// 	velocityDirection = vec2(-1, -1);
+	// 	break;
+	// case Direction::RIGHT:
+	// 	velocityDirection = vec2(1, 1);
+	// 	break;
+	// default:
+	// 	break;
+	// }
 
 	if (tile.tileState == TileState::O) {
 		
