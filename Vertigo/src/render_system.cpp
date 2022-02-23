@@ -41,11 +41,11 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		// specification for more info Incrementally updates transformation matrix,
 		// thus ORDER IS IMPORTANT
 		Transform transform;
-		if (registry.oscillations.has(entity)){
-			Oscillate oscillate = registry.oscillations.get(entity);
-			transform.translate(oscillate.displacement);
-		}
-		transform.translate(motion.position);
+		
+		transform.translate( motion.position[0] * motion.x_vector
+						   + motion.position[1] * motion.y_vector
+						   + motion.position[2] * motion.z_vector
+						   + motion.origin);
 		transform.scale(motion.scale);
 
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");

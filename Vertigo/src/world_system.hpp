@@ -54,9 +54,7 @@ private:
 	float count = 0;
 
 	// Fire Attributes
-	vec2 fire_spot;
 	bool obtainedFire;
-	vec2 fire_destination;
 	bool interacting = false;
 
 	// Player Attributes

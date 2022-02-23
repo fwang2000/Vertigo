@@ -1,7 +1,7 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
-Entity createExplorer(RenderSystem* renderer, vec2 pos) {
+Entity createExplorer(RenderSystem* renderer, vec3 pos) {
 	auto entity = Entity();
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
@@ -9,24 +9,23 @@ Entity createExplorer(RenderSystem* renderer, vec2 pos) {
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = true;
+	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
 	motion.position = pos;
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT });
-
-	// Add oscillation
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
+	motion.velocity = { 0.f, 0.f , 0.f };
+	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = vec3(1, 1, 1);
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{
-	// 		TEXTURE_ASSET_ID::EXPLORER_DOWN,
-	// 		EFFECT_ASSET_ID::TEXTURED,
-	// 		GEOMETRY_BUFFER_ID::SPRITE
-	// 	}
-	// );
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::EXPLORER_DOWN,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
 	return entity;
 }
 
@@ -77,11 +76,9 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = vec2(
-		window_width_px / 2 + pos.x * distance,
-		window_height_px / 2 + pos.y * distance
-	);
-	motion.velocity = { 0.f, 0.f };
+	motion.position = pos;
+	motion.velocity = { 0.f, 0.f, 0.f};
+	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
 	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
 
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
@@ -89,14 +86,14 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = vec3(pos.x + 1, pos.y + 1, pos.z + 1) ;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{
-	// 		TEXTURE_ASSET_ID::FIRE,
-	// 		EFFECT_ASSET_ID::TEXTURED,
-	// 		GEOMETRY_BUFFER_ID::SPRITE
-	// 	}
-	// );
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::FIRE,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
 	return entity;
 }
 

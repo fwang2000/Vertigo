@@ -171,15 +171,11 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create a new explorer
-	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
+	player_explorer = createExplorer(renderer, { 0, 0, 0 });
 	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
 	// Create a new fire
 	fire = createFire(renderer, vec3(-1, -1, -1));
-	fire_spot = vec2(
-		window_width_px / 2 + -1 * window_height_px / 3,
-		window_height_px / 2 + -1 * window_height_px / 3
-	);
 	registry.colors.insert(fire, vec3{ 1, 0, 0 });
 
 	obtainedFire = false;
@@ -207,27 +203,27 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.fire.has(entity) && registry.objects.has(entity_other))
-		{
-			Motion& motion = registry.motions.get(entity);
-			motion.velocity = vec2(0);
-			motion.position = player_destination + vec2(40, -40);
-			interacting = false;
+		// if (registry.fire.has(entity) && registry.objects.has(entity_other))
+		// {
+		// 	Motion& motion = registry.motions.get(entity);
+		// 	motion.velocity = vec2(0);
+		// 	motion.position = player_destination + vec2(40, -40);
+		// 	interacting = false;
 
-			currentObject = entity_other;
-			activated = true;
-        }
+		// 	currentObject = entity_other;
+		// 	activated = true;
+        // }
 
-		if (registry.players.has(entity) && registry.fire.has(entity_other)) 
-		{
-			//Player& player = registry.players.get(entity);
-			if (!obtainedFire) 
-			{
-				obtainedFire = true;
-				Motion& motion = registry.motions.get(entity_other);
-				motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
-			}
-		}
+		// if (registry.players.has(entity) && registry.fire.has(entity_other)) 
+		// {
+		// 	//Player& player = registry.players.get(entity);
+		// 	if (!obtainedFire) 
+		// 	{
+		// 		obtainedFire = true;
+		// 		Motion& motion = registry.motions.get(entity_other);
+		// 		motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
+		// 	}
+		// }
 	}
 
 	// Remove all collisions from this simulation step

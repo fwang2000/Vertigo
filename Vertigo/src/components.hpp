@@ -99,7 +99,7 @@ struct Motion
 	float remaining_time = 0; // Used if interpolating
 
 	// For rendering 3d coordinates to 2d screen
-	vec3 origin = {0, 0, 0};
+	vec2 origin = {0, 0};
 	vec2 x_vector = {cos(radians(30.0f)), sin(radians(30.0f))};
 	vec2 y_vector = {0, 1};
 	vec2 z_vector = {cos(radians(60.0f)), sin(radians(60.0f))};
