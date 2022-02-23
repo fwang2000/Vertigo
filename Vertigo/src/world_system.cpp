@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(1) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -167,8 +167,6 @@ void WorldSystem::restart_game() {
 
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
-
-	printf("%d\n", registry.tiles.entities.size());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();

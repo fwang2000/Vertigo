@@ -53,29 +53,34 @@ glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 bool Cube::loadFromExcelFile(std::string filename) {
 	std::ifstream file(filename);
 
-	std::cout << filename << std::endl;
-
-	for (auto face : this->faces) {
-		std::cout << face.size() << std::endl;
-	}
-
-	if(!file) {
-        printf("Failed to open the file\n");
-        return false;
-    }
-
 	std::string sizeStr;
 	std::getline(file, sizeStr);
 	size = stoi(sizeStr);
 	float distance = size / 2.f;
 
+	float divisor = 1.f;
+
+	switch (size) {
+	case 3:
+		divisor = 3.f;
+		break;
+	case 4:
+		divisor = 2.f;
+		break;
+	case 5:
+		divisor = 2.5f;
+		break;
+	default:
+		break;
+	}
+
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		float y = size / 3.f; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		float y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 		if (size % 2 == 0) y -= 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
-			float x = (-size / 3.f); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+			float x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);
@@ -102,9 +107,8 @@ bool Cube::loadFromExcelFile(std::string filename) {
 }
 
 void Cube::reset() {
-	for (auto face : this->faces) {
-		face.clear();
-		printf("%d\n", face.size());
+	for (int i = 0; i < 6; i++) {
+		this->faces[i].clear();
 	}
 }
 

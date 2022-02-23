@@ -34,11 +34,33 @@ Entity createTile(Tile tile)
 {
 	Entity entity = Entity();
 
+	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
+
+	switch (tile.tileState) {
+	case TileState::V:
+		id = TEXTURE_ASSET_ID::TILE;
+		break;
+	case TileState::I:
+		id = TEXTURE_ASSET_ID::INVISIBLE_TILE;
+		break;
+	case TileState::W:
+		id = TEXTURE_ASSET_ID::SWITCH_TILE;
+		break;
+	case TileState::U:
+		id = TEXTURE_ASSET_ID::UP_TILE;
+		break;
+	case TileState::Z:
+		id = TEXTURE_ASSET_ID::END_TILE;
+		break;
+	default:
+		id = TEXTURE_ASSET_ID::TILE;
+	}
+
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	registry.tiles.insert(entity, tile);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::TILE,
+		{ id,
 		 EFFECT_ASSET_ID::TILE,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
