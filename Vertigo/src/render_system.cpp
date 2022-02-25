@@ -8,20 +8,22 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection, const mat4& view)
 {
-	// Motion& motion = registry.motions.get(entity);
-
-
-	// Transformation code, see Rendering and Transformation in the template
-	// specification for more info Incrementally updates transformation matrix,
-	// thus ORDER IS IMPORTANT
 	Transform transform;
-	// if (registry.oscillations.has(entity)){
-	// 	Oscillate oscillate = registry.oscillations.get(entity);
-	// 	transform.translate(oscillate.displacement);
-	// }
-	// transform.translate(motion.position);
-	// transform.rotate(motion.angle);
-	// transform.scale(motion.scale);
+
+	if (registry.motions.has(entity)) {
+		Motion& motion = registry.motions.get(entity);
+
+		// Transformation code, see Rendering and Transformation in the template
+		// specification for more info Incrementally updates transformation matrix,
+		// thus ORDER IS IMPORTANT
+		if (registry.oscillations.has(entity)) {
+			Oscillate oscillate = registry.oscillations.get(entity);
+			transform.translate(oscillate.displacement);
+		}
+		transform.translate(motion.position);
+		transform.rotate(motion.angle);
+		transform.scale(motion.scale);
+	}
 
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -132,8 +134,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		// handle rotation
 		Tile& boxRotate = registry.tiles.get(entity);
+
 		switch (boxRotate.status) {
 			case BOX_ANIMATION::UP:
 				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
@@ -176,6 +178,86 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
 		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+		gl_has_errors();
+		// Drawing of num_indices/3 triangles specified in the index buffer
+		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+		gl_has_errors();
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "aPos");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		// use 2d
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		Text& boxRotate = registry.text.get(entity);
+
+		switch (boxRotate.status) {
+		case BOX_ANIMATION::UP:
+			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
+			boxRotate.degrees++;
+			break;
+		case BOX_ANIMATION::DOWN:
+			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
+			boxRotate.degrees++;
+			break;
+		case BOX_ANIMATION::LEFT:
+			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
+			boxRotate.degrees++;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
+			boxRotate.degrees++;
+			break;
+		}
+		if (boxRotate.degrees == 90)
+		{
+			boxRotate.degrees = 0;
+			boxRotate.status = BOX_ANIMATION::STILL;
+		}
+		model = boxRotate.model;
+
+		// Get number of indices from index buffer, which has elements uint16_t
+		GLint size = 0;
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+		gl_has_errors();
+
+		GLsizei num_indices = size / sizeof(uint16_t);
+		// GLsizei num_triangles = num_indices / 3;
+
+		GLint currProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+		// Setting uniform values to the currently bound program
+		GLuint model_loc = glGetUniformLocation(currProgram, "model");
+		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint view_loc = glGetUniformLocation(currProgram, "view");
+		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection);
 		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -259,8 +341,8 @@ void RenderSystem::draw()
 	glClearColor(0, 0, 0, 1.0);
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	// glEnable(GL_BLEND);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_DEPTH_TEST); // native OpenGL does not work with a depth buffer
 							  // and alpha blending, one would have to sort
 							  // sprites back to front

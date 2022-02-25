@@ -70,6 +70,7 @@ private:
 
 	// restart level
 	void restart_game();
+	void load_level();
 
 	// OpenGL window handle
 	GLFWwindow* window;

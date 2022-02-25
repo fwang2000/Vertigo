@@ -165,11 +165,11 @@ void WorldSystem::restart_game() {
 	while (registry.tiles.entities.size() > 0)
 		registry.remove_all_components_of(registry.tiles.entities.back());
 
+	while (registry.text.entities.size() > 0)
+		registry.remove_all_components_of(registry.text.entities.back());
+
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
-
-	// Debugging for memory/component leaks
-	registry.list_all_components();
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
@@ -185,10 +185,17 @@ void WorldSystem::restart_game() {
 
 	obtainedFire = false;
 
-	std::cout << "Level: " << level_path("level" + std::to_string(level) + ".csv") << std::endl;
+	load_level();
+
+	// Debugging for memory/component leaks
+	registry.list_all_components();
+}
+
+void WorldSystem::load_level() {
 
 	// Load a level
-	cube.loadFromExcelFile(level_path("level" + std::to_string(level) + ".csv"));
+	cube.loadFromExcelFile(tile_path("level" + std::to_string(level) + ".csv"));
+
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
@@ -196,6 +203,12 @@ void WorldSystem::restart_game() {
 					createTile(cube.faces[i][j][k]);
 			}
 		}
+	}
+	
+	cube.loadTextFromExcelFile(text_path("text" + std::to_string(level) + ".csv"));
+
+	for (int i = 0; i < cube.text.size(); i++) {
+		createText(cube.text[i]);
 	}
 }
 
@@ -280,30 +293,49 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	SetSprite(dir);
 
 	if (key == GLFW_KEY_UP) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::UP;
+		for (Tile& tile : registry.tiles.components) {
+			if (tile.status == BOX_ANIMATION::STILL)
+				tile.status = BOX_ANIMATION::UP;
+		}
+		for (Text& text : registry.text.components) {
+			if (text.status == BOX_ANIMATION::STILL)
+				text.status = BOX_ANIMATION::UP;
 		}
 	}
 
 	else if (key == GLFW_KEY_DOWN) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::DOWN;
+		for (Tile& tile : registry.tiles.components) {
+			if (tile.status == BOX_ANIMATION::STILL)
+				tile.status = BOX_ANIMATION::DOWN;
+		}
+
+		for (Text& text : registry.text.components) {
+			if (text.status == BOX_ANIMATION::STILL)
+				text.status = BOX_ANIMATION::DOWN;
 		}
 	}
 
 	else if (key == GLFW_KEY_LEFT) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::LEFT;
+		for (Tile& tile : registry.tiles.components) {
+			if (tile.status == BOX_ANIMATION::STILL)
+				tile.status = BOX_ANIMATION::LEFT;
+		}
+
+		for (Text& text : registry.text.components) {
+			if (text.status == BOX_ANIMATION::STILL)
+				text.status = BOX_ANIMATION::LEFT;
 		}
 	}
 
 	else if (key == GLFW_KEY_RIGHT) {
-		for (Tile& t : registry.tiles.components) {
-			if (t.status == BOX_ANIMATION::STILL)
-				t.status = BOX_ANIMATION::RIGHT;
+		for (Tile& tile : registry.tiles.components) {
+			if (tile.status == BOX_ANIMATION::STILL)
+				tile.status = BOX_ANIMATION::RIGHT;
+		}
+
+		for (Text& text : registry.text.components) {
+			if (text.status == BOX_ANIMATION::STILL)
+				text.status = BOX_ANIMATION::RIGHT;
 		}
 	}
 
