@@ -47,7 +47,11 @@ class RenderSystem {
 			textures_path("text/One.png"),
 			textures_path("text/Two.png"),
 			textures_path("text/Three.png"),
-			textures_path("text/Four.png")
+			textures_path("text/Four.png"),
+			textures_path("text/Bush.png"),
+			textures_path("text/Burn.png"),
+			textures_path("text/Invisible.png"),
+			textures_path("text/Switch.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

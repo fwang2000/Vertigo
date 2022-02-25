@@ -231,7 +231,11 @@ enum class TEXTURE_ASSET_ID {
 	TWO = ONE + 1,
 	THREE = TWO + 1,
 	FOUR = THREE + 1,
-	TEXTURE_COUNT = FOUR + 1
+	BUSH = FOUR + 1,
+	BURN = BUSH + 1,
+	INVISIBLE = BURN + 1,
+	SWITCH = INVISIBLE + 1,
+	TEXTURE_COUNT = SWITCH + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
