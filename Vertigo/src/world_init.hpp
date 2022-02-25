@@ -21,6 +21,8 @@ Entity createCube(RenderSystem* renderer);
 Entity createExplorer(RenderSystem* renderer, vec2 pos);
 // the tiles
 Entity createTile(Tile tile);
+// the text
+Entity createText(Text text);
 // the fire
 Entity createFire(RenderSystem* renderer, vec3 pos);
 // the object

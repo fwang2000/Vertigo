@@ -67,6 +67,22 @@ Entity createTile(Tile tile)
 	return entity;
 }
 
+Entity createText(Text text) {
+
+	Entity entity = Entity();
+
+	TEXTURE_ASSET_ID id = (TEXTURE_ASSET_ID)text.texture_id;
+
+	registry.text.insert(entity, text);
+	registry.renderRequests.insert(
+		entity,
+		{ id,
+		 EFFECT_ASSET_ID::TEXT,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity createFire(RenderSystem* renderer, vec3 pos)
 {
 	auto entity = Entity();

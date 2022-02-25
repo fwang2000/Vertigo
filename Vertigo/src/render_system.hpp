@@ -40,7 +40,14 @@ class RenderSystem {
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("fire.png"),
-			textures_path("object.png")
+			textures_path("object.png"),
+			textures_path("text/Vertigo.png"),
+			textures_path("text/Start.png"),
+			textures_path("text/Level.png"),
+			textures_path("text/One.png"),
+			textures_path("text/Two.png"),
+			textures_path("text/Three.png"),
+			textures_path("text/Four.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -48,7 +55,8 @@ class RenderSystem {
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
 		shader_path("textured"),
-		shader_path("tile")
+		shader_path("tile"),
+		shader_path("text")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -85,6 +93,8 @@ public:
 
 	mat4 createViewMatrix();
 	mat4 createProjectionMatrix(int width, int height);
+
+	mat4 rotateBox(Rotatable& rotatable);
 
 private:
 	// Internal drawing functions for each entity type

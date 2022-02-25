@@ -48,6 +48,46 @@ glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	return matrix;
 }
 
+glm::mat4 textStartingMatrix(int face, float x, float y, float distance, float scale_x, float scale_y) {
+	glm::mat4 matrix = glm::mat4(1.0f);
+	// rotate then translate
+	switch (face) {
+	case 0:
+		matrix = scale(glm::mat4(1.0f), vec3(scale_x, scale_y, 0.85)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, y, distance)) * matrix;
+		break;
+	case 1:
+		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(-distance, -x, y)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+		break;
+	case 2:
+		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(distance, x, y)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+		break;
+	case 3:
+		matrix = scale(glm::mat4(1.0f), vec3(scale_x, scale_y, 0.85)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, distance, y)) * matrix;
+		break;
+	case 4:
+		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, -distance, y)) * matrix;
+		break;
+	case 5:
+		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(-x, y, -distance)) * matrix;
+		break;
+	default:
+		break;
+	}
+	return matrix;
+}
+
 // load tiles from excel file, also set the model matrix of each tile (rotate -> translate)
 // order of faces: front, left, right, top, bottom, back
 bool Cube::loadFromExcelFile(std::string filename) {
@@ -91,6 +131,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 				Tile tile;
 				tile.model = tileStartingMatrix(i, x, y, distance);
 				tile.tileState = static_cast<TileState>(value[0] - 'A');
+
 				row.push_back(tile);
 				x += 1.f;
 			}
@@ -106,10 +147,46 @@ bool Cube::loadFromExcelFile(std::string filename) {
 	return true;
 }
 
+bool Cube::loadTextFromExcelFile(std::string filename) {
+	std::ifstream file(filename);
+
+	std::string sizeStr;
+	std::getline(file, sizeStr);
+	size = stoi(sizeStr);
+	float distance = size / 2.f;
+
+	std::string line;
+	while (std::getline(file, line)) {
+
+		std::string value;
+		std::stringstream ss(line);
+		std::vector<std::string> textValues;
+		textValues.reserve(6);
+
+		while (std::getline(ss, value, ','))
+		{
+			textValues.push_back(value);
+		}
+
+		int i = std::stoi(textValues[0]);
+		float x = std::stof(textValues[1]);
+		float y = std::stof(textValues[2]);
+		float scale_x = std::stof(textValues[3]);
+		float scale_y = std::stof(textValues[4]);
+
+		Text t;
+		t.model = textStartingMatrix(i, x, y, distance, scale_x, scale_y);
+		t.texture_id = std::stoi(textValues[5]);
+		this->text.push_back(t);
+	}
+	return true;
+}
+
 void Cube::reset() {
 	for (int i = 0; i < 6; i++) {
 		this->faces[i].clear();
 	}
+	this->text.clear();
 }
 
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7

@@ -61,7 +61,13 @@ enum class TileState
 	Z = 25
 };
 
-struct Tile
+struct Rotatable {
+	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	glm::mat4 model;
+	int degrees = 0;
+};
+
+struct Tile : Rotatable
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
 	glm::mat4 model;
@@ -69,12 +75,44 @@ struct Tile
 	TileState tileState = TileState::E;
 };
 
+struct UpTile : public Tile {
+
+	Direction dir = Direction::UP;
+};
+
+struct SwitchTile : Tile {
+
+	Tile targetTile; 
+};
+
+struct InvisibleTile : Tile {
+
+};
+
+struct FinishTile : Tile {
+
+};
+
+struct StartTile : Tile {
+
+};
+
+struct Text : Rotatable {
+
+	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	glm::mat4 model;
+	int degrees = 0;
+	int texture_id;
+};
+
 // represents the entire cube
 // front -> left -> right -> top -> bottom -> back
 struct Cube
 {
 	bool loadFromExcelFile(std::string filename);
+	bool loadTextFromExcelFile(std::string filename);
 	std::array<std::vector<std::vector<Tile>>, 6> faces;
+	std::vector<Text> text;
 	int size = 0;
 	int getSize() { return this->size; }
 	void reset();
@@ -186,7 +224,14 @@ enum class TEXTURE_ASSET_ID {
 	TILE_SHADOW = END_TILE + 1,
 	FIRE = TILE_SHADOW + 1,
 	OBJECT = FIRE + 1,
-	TEXTURE_COUNT = OBJECT + 1
+	VERTIGO = OBJECT + 1,
+	START = VERTIGO + 1,
+	LEVEL = START + 1,
+	ONE = LEVEL + 1,
+	TWO = ONE + 1,
+	THREE = TWO + 1,
+	FOUR = THREE + 1,
+	TEXTURE_COUNT = FOUR + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -194,7 +239,8 @@ enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
 	TEXTURED = COLOURED + 1,
 	TILE = TEXTURED + 1,
-	EFFECT_COUNT = TILE + 1
+	TEXT = TILE + 1,
+	EFFECT_COUNT = TEXT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
