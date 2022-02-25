@@ -32,4 +32,4 @@ physics_system.cpp:
 
 grace day remarks:
 Is it possible to carry over our granted graceday to future milestones?
-One of our groupmates drop the course so we were granted for 3 extra grace days and move submission deadline to Monday from piazza (in discussion with Alla)
+One of our groupmates drop the course so we were granted for 3 extra grace days from discussion with Alla.
