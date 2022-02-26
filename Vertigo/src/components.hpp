@@ -163,7 +163,7 @@ struct ScreenState
 
 
 // A timer that will be associated to dying chicken
-struct DeathTimer
+struct FadeTimer
 {
 	float counter_ms = 3000;
 };
@@ -249,7 +249,8 @@ enum class EFFECT_ASSET_ID {
 	TILE = TEXTURED + 1,
 	TEXT = TILE + 1,
 	PLAYER = TEXT + 1,
-	EFFECT_COUNT = PLAYER + 1
+	FADE = PLAYER + 1,
+	EFFECT_COUNT = FADE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

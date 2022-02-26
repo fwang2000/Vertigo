@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(1) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -148,6 +148,26 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 	UpdateParallax(player_motion.position);
 
+	float min_counter_ms = 3000.f;
+	for (Entity entity : registry.fadeTimers.entities) {
+		// progress timer
+		FadeTimer& counter = registry.fadeTimers.get(entity);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+		if (counter.counter_ms < min_counter_ms) {
+			min_counter_ms = counter.counter_ms;
+		}
+
+		// restart the game once the death timer expired
+		if (counter.counter_ms < 0) {
+			registry.fadeTimers.remove(entity);
+			screen.darken_screen_factor = 0;
+			// restart_game();
+			return true;
+		}
+	}
+	// reduce window brightness if any of the present chickens is dying
+	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
 	return true;
 }
 
@@ -171,9 +191,6 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
-	// Debugging for memory/component leaks
-	registry.list_all_components();
-
 	// Create a new fire
 	fire = createFire(renderer, vec3(-1, -1, -1));
 	fire_spot = vec2(
@@ -185,6 +202,10 @@ void WorldSystem::restart_game() {
 	obtainedFire = false;
 
 	load_level();
+
+	if (!registry.fadeTimers.has(player_explorer)) {
+		registry.fadeTimers.emplace(player_explorer);
+	}
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
@@ -266,6 +287,10 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
+	if (level == 0) {
+
+	}
+
 	if (moving || interacting) {
 		return;
 	}
@@ -301,16 +326,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	// SetSprite(dir); // TODO: causes sprite to dissapear
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		cube.reset();
-		level++;
-		restart_game();
-	}
+	SetSprite(dir); // TODO: causes sprite to dissapear
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
@@ -325,7 +341,7 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
-	if (tile->tileState == TileState::E || tile->tileState == TileState::O) {
+	if (tile->tileState == TileState::E || tile->tileState == TileState::O || tile->tileState == TileState::I) {
 		return;
 	}
 	Player& player = registry.players.get(player_explorer);
@@ -341,10 +357,18 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::DOWN;
 				}
+				for (Text& t : registry.text.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::DOWN;
+				}
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
 				break;
 			case Direction::RIGHT:
 				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::LEFT;
+				}
+				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::LEFT;
 				}
@@ -355,10 +379,18 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::RIGHT;
 				}
+				for (Text& t : registry.text.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::RIGHT;
+				}
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::DOWN:
 				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::UP;
+				}
+				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::UP;
 				}
@@ -383,6 +415,10 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
+
+	if (tile->tileState == TileState::Z) {
+		next_level();
+	}
 
 	// UpdatePlayerCoordinates(direction);
 	// Motion& motion = registry.motions.get(player_explorer);
@@ -499,34 +535,25 @@ void WorldSystem::SetSprite(Direction direction) {
 		return;
 	}
 
+	RenderRequest& request = registry.renderRequests.get(player_explorer);
+
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
 	switch (direction) {
 	case Direction::UP:
-		id = TEXTURE_ASSET_ID::EXPLORER_UP;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_LEFT;
 		break;
 	case Direction::DOWN:
-		id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
 		break;
 	case Direction::LEFT:
-		id = TEXTURE_ASSET_ID::EXPLORER_LEFT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_UP;
 		break;
 	case Direction::RIGHT:
-		id = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_DOWN;
 		break;
 	default:
 		break;
 	}
-
-	registry.renderRequests.remove(player_explorer);
-
-	registry.renderRequests.insert(
-		player_explorer,
-		{
-			id,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE
-		}
-	);
 
 	currDirection = direction;
 }
@@ -569,4 +596,14 @@ Coordinates WorldSystem::searchForTile(Direction direction) {
 	}
 
 	return coords;
+}
+
+void WorldSystem::next_level() {
+	
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		cube.reset();
+		level++;
+		faceDirection = Direction::UP;
+		restart_game();
 }

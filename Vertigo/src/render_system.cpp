@@ -329,6 +329,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 // wind
 void RenderSystem::drawToScreen()
 {
+	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FADE]);
+	gl_has_errors();
+	
 	// Clearing backbuffer
 	int w, h;
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
@@ -341,7 +344,7 @@ void RenderSystem::drawToScreen()
 	gl_has_errors();
 	// Enabling alpha channel for textures
 	glDisable(GL_BLEND);
-	// glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glDisable(GL_DEPTH_TEST);
 
 	// Draw the screen texture on the quad geometry
@@ -351,20 +354,22 @@ void RenderSystem::drawToScreen()
 		index_buffers[(GLuint)GEOMETRY_BUFFER_ID::SCREEN_TRIANGLE]); // Note, GL_ELEMENT_ARRAY_BUFFER associates
 																	 // indices to the bound GL_ARRAY_BUFFER
 	gl_has_errors();
-	// const GLuint wind_program = effects[(GLuint)EFFECT_ASSET_ID::WIND];
-	// // Set clock
-	// GLuint time_uloc = glGetUniformLocation(wind_program, "time");
-	// GLuint dead_timer_uloc = glGetUniformLocation(wind_program, "darken_screen_factor");
-	// glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
-	// ScreenState& screen = registry.screenStates.get(screen_state_entity);
-	// glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
-	// gl_has_errors();
-	// // Set the vertex position and vertex texture coordinates (both stored in the
-	// // same VBO)
-	// GLint in_position_loc = glGetAttribLocation(wind_program, "in_position");
-	// glEnableVertexAttribArray(in_position_loc);
-	// glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
-	// gl_has_errors();
+
+	const GLuint fade_program = effects[(GLuint)EFFECT_ASSET_ID::FADE];
+	// Set clock
+	GLuint time_uloc = glGetUniformLocation(fade_program, "time");
+	GLuint dead_timer_uloc = glGetUniformLocation(fade_program, "darken_screen_factor");
+	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
+	ScreenState& screen = registry.screenStates.get(screen_state_entity);
+	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
+	printf("%f", screen.darken_screen_factor);
+	gl_has_errors();
+	// Set the vertex position and vertex texture coordinates (both stored in the
+	// same VBO)
+	GLint in_position_loc = glGetAttribLocation(fade_program, "in_position");
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE, sizeof(vec3), (void*)0);
+	gl_has_errors();
 
 	// Bind our texture in Texture Unit 0
 	glActiveTexture(GL_TEXTURE0);
@@ -419,7 +424,7 @@ void RenderSystem::draw()
 	}
 
 	// Truely render to the screen
-	//drawToScreen();
+	// drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);

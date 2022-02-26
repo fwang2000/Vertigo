@@ -12,7 +12,7 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
-	ComponentContainer<DeathTimer> deathTimers;
+	ComponentContainer<FadeTimer> fadeTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Oscillate> oscillations;
 	ComponentContainer<Parallax> parallax;
@@ -33,7 +33,7 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		registry_list.push_back(&deathTimers);
+		registry_list.push_back(&fadeTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&oscillations);
 		registry_list.push_back(&parallax);
