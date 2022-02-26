@@ -3,20 +3,21 @@
 #include <vector>
 #include <array>
 #include <unordered_map>
+#include <utility>
 #include "../ext/stb_image/stb_image.h"
 
-enum class Direction
+struct Coordinates
 {
-	LEFT = 0,
-	RIGHT = 1,
-	UP = 2,
-	DOWN = 3
+	int f; // face
+	int r; // row
+	int c; // col
 };
 
 // Player component
 struct Player
 {
-	vec3 playerPos;
+	Coordinates playerPos;
+	glm::mat4 model = glm::mat4(1.f);
 };
 
 struct Object
@@ -73,6 +74,7 @@ struct Tile : Rotatable
 	glm::mat4 model;
 	int degrees = 0;
 	TileState tileState = TileState::E;
+	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 };
 
 struct UpTile : public Tile {
@@ -111,10 +113,12 @@ struct Cube
 {
 	bool loadFromExcelFile(std::string filename);
 	bool loadTextFromExcelFile(std::string filename);
+	void createAdjList();
 	std::array<std::vector<std::vector<Tile>>, 6> faces;
 	std::vector<Text> text;
 	int size = 0;
 	int getSize() { return this->size; }
+	Tile* getTile(Coordinates coord);
 	void reset();
 };
 
@@ -244,7 +248,8 @@ enum class EFFECT_ASSET_ID {
 	TEXTURED = COLOURED + 1,
 	TILE = TEXTURED + 1,
 	TEXT = TILE + 1,
-	EFFECT_COUNT = TEXT + 1
+	PLAYER = TEXT + 1,
+	EFFECT_COUNT = PLAYER + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

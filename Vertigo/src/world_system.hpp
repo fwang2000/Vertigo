@@ -50,7 +50,7 @@ private:
 	void fire_move(vec2 velocity);
 	void UpdateParallax(vec2 playerPos);
 	void Interact(Direction direction);
-	bool checkForTile(Direction direction);
+	// bool checkForTile(Direction direction);
 	float count = 0;
 
 	// Fire Attributes
@@ -64,6 +64,7 @@ private:
 	void UpdatePlayerCoordinates(Direction direction);
 	vec2 player_destination;
 	bool moving = false;
+	Direction faceDirection = Direction::UP; // always starts as up
 
 	// Object Attributes
 	bool activated = false;
@@ -88,7 +89,7 @@ private:
 	Direction currDirection = Direction::DOWN;
 
 	// Helper Functions
-	Tile& searchForTile(Direction direction);
+	Coordinates searchForTile(Direction direction);
 
 	// C++ random number generator
 	std::default_random_engine rng;

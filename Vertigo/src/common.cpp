@@ -88,3 +88,9 @@ bool gl_has_errors()
 
 	return true;
 }
+
+Direction mod(Direction dir, int b)
+{
+	int a = static_cast<int>(dir) + b;
+	return static_cast<Direction>((4 + (a % 4)) % 4);
+}

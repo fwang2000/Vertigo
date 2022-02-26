@@ -171,9 +171,8 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
-	// Create a new explorer
-	player_explorer = createExplorer(renderer, { window_width_px / 2, window_height_px / 2 });
-	registry.colors.insert(player_explorer, { 1, 1, 1 });
+	// Debugging for memory/component leaks
+	registry.list_all_components();
 
 	// Create a new fire
 	fire = createFire(renderer, vec3(-1, -1, -1));
@@ -193,23 +192,34 @@ void WorldSystem::restart_game() {
 
 void WorldSystem::load_level() {
 
+	Coordinates startingpos = {0, 0, 0};
+	glm::mat4 translateMatrix = glm::mat4(1.f);
 	// Load a level
 	cube.loadFromExcelFile(tile_path("level" + std::to_string(level) + ".csv"));
-
+	cube.createAdjList();
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
 				if (!(cube.faces[i][j][k].tileState == TileState::E))
 					createTile(cube.faces[i][j][k]);
+				if (cube.faces[i][j][k].tileState == TileState::S) {
+					startingpos.f = i;
+					startingpos.r = j;
+					startingpos.c = k;
+					translateMatrix = cube.faces[i][j][k].model;
+				}
 			}
 		}
 	}
 	
 	cube.loadTextFromExcelFile(text_path("text" + std::to_string(level) + ".csv"));
-
 	for (int i = 0; i < cube.text.size(); i++) {
 		createText(cube.text[i]);
 	}
+
+	// Create a new explorer
+	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
+	registry.colors.insert(player_explorer, {1, 1, 1});
 }
 
 // Compute collisions between entities
@@ -262,82 +272,36 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Direction dir = currDirection;
 
-	switch (key)
-	{
-		if (action != GLFW_PRESS) {
+	Entity& tileEntity = registry.tiles.entities[0];
+	Tile& tile = registry.tiles.get(tileEntity);
+	if (action == GLFW_RELEASE && tile.status == BOX_ANIMATION::STILL) {
+		switch (key)
+		{
+		case GLFW_KEY_W:
+			dir = Direction::UP;
+			player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
+			break;
+		case GLFW_KEY_S:
+			dir = Direction::DOWN;
+			player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
+			break;
+		case GLFW_KEY_A:
+			dir = Direction::LEFT;
+			player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
+			break;
+		case GLFW_KEY_D:
+			dir = Direction::RIGHT;
+			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
+			break;
+		case GLFW_KEY_ENTER:
+			Interact(currDirection);
+			break;
+		default:
 			break;
 		}
-	case GLFW_KEY_W:
-		dir = Direction::UP;
-		player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
-		break;
-	case GLFW_KEY_S:
-		dir = Direction::DOWN;
-		player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
-		break;
-	case GLFW_KEY_A:
-		dir = Direction::LEFT;
-		player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
-		break;
-	case GLFW_KEY_D:
-		dir = Direction::RIGHT;
-		player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
-		break;
-	case GLFW_KEY_ENTER:
-		Interact(currDirection);
-		break;
-	default:
-		break;
 	}
 
-	SetSprite(dir);
-
-	if (key == GLFW_KEY_UP) {
-		for (Tile& tile : registry.tiles.components) {
-			if (tile.status == BOX_ANIMATION::STILL)
-				tile.status = BOX_ANIMATION::UP;
-		}
-		for (Text& text : registry.text.components) {
-			if (text.status == BOX_ANIMATION::STILL)
-				text.status = BOX_ANIMATION::UP;
-		}
-	}
-
-	else if (key == GLFW_KEY_DOWN) {
-		for (Tile& tile : registry.tiles.components) {
-			if (tile.status == BOX_ANIMATION::STILL)
-				tile.status = BOX_ANIMATION::DOWN;
-		}
-
-		for (Text& text : registry.text.components) {
-			if (text.status == BOX_ANIMATION::STILL)
-				text.status = BOX_ANIMATION::DOWN;
-		}
-	}
-
-	else if (key == GLFW_KEY_LEFT) {
-		for (Tile& tile : registry.tiles.components) {
-			if (tile.status == BOX_ANIMATION::STILL)
-				tile.status = BOX_ANIMATION::LEFT;
-		}
-
-		for (Text& text : registry.text.components) {
-			if (text.status == BOX_ANIMATION::STILL)
-				text.status = BOX_ANIMATION::LEFT;
-		}
-	}
-
-	else if (key == GLFW_KEY_RIGHT) {
-		for (Tile& tile : registry.tiles.components) {
-			if (tile.status == BOX_ANIMATION::STILL)
-				tile.status = BOX_ANIMATION::RIGHT;
-		}
-
-		for (Text& text : registry.text.components) {
-			if (text.status == BOX_ANIMATION::STILL)
-				text.status = BOX_ANIMATION::RIGHT;
-		}
-	}
+	// SetSprite(dir); // TODO: causes sprite to dissapear
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -356,20 +320,80 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction direction) 
 {
-	if (!checkForTile(direction)) {
+	int dir = static_cast<int>(faceDirection) * -1;
+	Direction trueDirection = mod(direction, dir);
+
+	Coordinates newCoords = searchForTile(trueDirection);
+	Tile* tile = cube.getTile(newCoords);
+	if (tile->tileState == TileState::E || tile->tileState == TileState::O) {
 		return;
 	}
+	Player& player = registry.players.get(player_explorer);
 
-	Motion& motion = registry.motions.get(player_explorer);
-	motion.velocity = velocity;
-	player_destination = motion.position + distanceTo;
-	moving = true;
-	UpdatePlayerCoordinates(direction);
-
-	if (obtainedFire) 
-	{
-		fire_move(velocity);
+	if (player.playerPos.f != newCoords.f) {
+		// play cube rotation animation based on DIRECTION, not trueDirection
+		float multiplier = cube.size-1.f;
+		Tile* curTile = cube.getTile(player.playerPos);
+		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		switch (direction) {
+			case Direction::UP:
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::DOWN;
+				}
+				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
+				break;
+			case Direction::RIGHT:
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::LEFT;
+				}
+				player.model = translate(glm::mat4(1.f), vec3((multiplier * -1.f), 0.f, 0.f)) * player.model;
+				break;
+			case Direction::LEFT:
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::RIGHT;
+				}
+				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
+				break;
+			case Direction::DOWN:
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::UP;
+				}
+				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * 1.f), 0.f)) * player.model;
+				break;
+		}
+	} else {
+		switch (direction) {
+			case Direction::UP:
+				player.model = translate(glm::mat4(1.f), vec3(0.f, 1.f, 0.f)) * player.model;
+				break;
+			case Direction::RIGHT:
+				player.model = translate(glm::mat4(1.f), vec3(1.f, 0.f, 0.f)) * player.model;
+				break;
+			case Direction::LEFT:
+				player.model = translate(glm::mat4(1.f), vec3(-1.f, 0.f, 0.f)) * player.model;
+				break;
+			case Direction::DOWN:
+				player.model = translate(glm::mat4(1.f), vec3(0.f, -1.f, 0.f)) * player.model;
+				break;
+		}
 	}
+
+	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
+
+	// UpdatePlayerCoordinates(direction);
+	// Motion& motion = registry.motions.get(player_explorer);
+	// motion.velocity = velocity;
+	// player_destination = motion.position + distanceTo;
+	// moving = true;
+
+	// if (obtainedFire) 
+	// {
+	// 	fire_move(velocity);
+	// }
 }
 
 void WorldSystem::UpdateParallax(vec2 playerPos)
@@ -413,23 +437,23 @@ void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
 	// player.playerPos.coordinates += playerPosShift;
 }
 
-bool WorldSystem::checkForTile(Direction direction) 
-{
-	Tile& tile = searchForTile(direction);
+// bool WorldSystem::checkForTile(Direction direction) 
+// {
+// 	Tile* tile = searchForTile(direction);
 
-	if (tile.tileState == TileState::E || tile.tileState == TileState::O) {
-		return false;
-	}
+// 	if (tile->tileState == TileState::E || tile->tileState == TileState::O) {
+// 		return false;
+// 	}
 	
-	return true;
-}
+// 	return true;
+// }
 
 void WorldSystem::Interact(Direction direction) 
 {
 	Player& player = registry.players.get(player_explorer);
-	vec3 coords = player.playerPos;
+	Coordinates coords = player.playerPos;
 
-	Tile& tile = searchForTile(direction);
+	Tile* tile = cube.getTile(searchForTile(direction));
 
 	vec2 velocityDirection = vec2(1, 1);
 
@@ -451,7 +475,7 @@ void WorldSystem::Interact(Direction direction)
 		break;
 	}
 
-	if (tile.tileState == TileState::O) {
+	if (tile->tileState == TileState::O) {
 		
 		// if (obtainedFire) 
 		// {
@@ -507,46 +531,42 @@ void WorldSystem::SetSprite(Direction direction) {
 	currDirection = direction;
 }
 
-Tile& WorldSystem::searchForTile(Direction direction) {
+Coordinates WorldSystem::searchForTile(Direction direction) {
 
-	// Player& player = registry.players.get(player_explorer);
-	// vec3 coords = player.playerPos.coordinates;
+	Player& player = registry.players.get(player_explorer);
+	Coordinates coords = player.playerPos;
 
-	// int index = 0;
+	switch (direction)
+	{
+	case Direction::UP:
+		if (coords.r == 0) {
+			return cube.getTile(coords)->adjList[0].first;
+		} else {
+			coords.r--;
+		}
+		break;
+	case Direction::RIGHT:
+		if (coords.c == cube.size - 1) {
+			return cube.getTile(coords)->adjList[1].first;
+		} else {
+			coords.c++;
+		}
+		break;
+	case Direction::DOWN:
+		if (coords.r == cube.size - 1) {
+			return cube.getTile(coords)->adjList[2].first;
+		} else {
+			coords.r++;
+		}
+		break;
+	case Direction::LEFT:
+		if (coords.c == 0) {
+			return cube.getTile(coords)->adjList[3].first;
+		} else {
+			coords.c--;
+		}
+		break;
+	}
 
-	Tile tile;
-
-	// switch (direction)
-	// {
-	// case Direction::DOWN:
-	// 	if (coords.y == 2) {
-	// 		return tile;
-	// 	}
-	// 	index = (coords.y + 1) + 3 * (coords.x);
-	// 	break;
-	// case Direction::UP:
-	// 	if (coords.y == 0) {
-	// 		return tile;
-	// 	}
-	// 	index = (coords.y - 1) + 3 * (coords.x);
-	// 	break;
-	// case Direction::LEFT:
-	// 	if (coords.x == 0) {
-	// 		return tile;
-	// 	}
-	// 	index = (coords.y) + 3 * (coords.x - 1);
-	// 	break;
-	// case Direction::RIGHT:
-	// 	if (coords.x == 2) {
-	// 		return tile;
-	// 	}
-	// 	index = (coords.y) + 3 * (coords.x + 1);
-	// 	break;
-	// default:
-	// 	break;
-	// }
-	
-	// Tile& realTile = registry.tiles.components.at(index);
-
-	return tile;
+	return coords;
 }

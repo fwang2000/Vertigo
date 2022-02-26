@@ -60,7 +60,8 @@ class RenderSystem {
 		shader_path("coloured"),
 		shader_path("textured"),
 		shader_path("tile"),
-		shader_path("text")
+		shader_path("text"),
+		shader_path("player")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
