@@ -64,3 +64,13 @@ struct Transform {
 };
 
 bool gl_has_errors();
+
+enum class Direction
+{
+	UP = 0,
+	RIGHT = 1,
+	DOWN = 2,
+	LEFT = 3
+};
+
+Direction mod(Direction a, int b);
