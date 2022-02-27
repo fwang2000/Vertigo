@@ -67,7 +67,9 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 		}
 		else{
+			motion.velocity = motion.velocity + motion.acceleration * step_seconds;
 			motion.position = motion.position + motion.velocity * step_seconds;
+
 		}
 	}
 

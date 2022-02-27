@@ -13,6 +13,7 @@ public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
 	ComponentContainer<ShootTimer> shootTimers;
+	ComponentContainer<HoldTimer> holdTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Oscillate> oscillations;
 	ComponentContainer<Collision> collisions;
@@ -32,6 +33,7 @@ public:
 	ECSRegistry()
 	{
 		registry_list.push_back(&shootTimers);
+		registry_list.push_back(&holdTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&oscillations);
 		registry_list.push_back(&collisions);

@@ -49,7 +49,7 @@ private:
 	// TODO: Update to 3D
 	void player_move(vec3 movement, Direction direction);
 	void fire_move(vec2 velocity);
-	void Interact(Direction direction);
+	void Interact(Direction direction, float power);
 	bool checkForTile(Direction direction);
 	float count = 0;
 

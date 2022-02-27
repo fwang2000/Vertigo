@@ -94,7 +94,12 @@ struct Oscillate {
 struct Motion
 {
 	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
+
+	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
+	vec3 acceleration = {0, 0, 0}; // Used if extrapolating
+
+	// Interpolation
 	vec3 destination = {0, 0, 0}; // Used if interpolating
 	float remaining_time = 0; // Used if interpolating
 
@@ -127,6 +132,14 @@ struct ScreenState
 struct ShootTimer
 {
 	float counter_ms = 4000;
+};
+
+struct HoldTimer
+{
+	float counter_ms = 0;
+	float max_ms = 3000;
+	bool reverse_when_max = true;
+	bool increasing = true;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
