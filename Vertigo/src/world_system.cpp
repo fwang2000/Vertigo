@@ -234,11 +234,12 @@ void WorldSystem::load_level() {
 		}
 	}
 
-	/*
 	cube.loadTextFromExcelFile(text_path("text" + std::to_string(level) + ".csv"));
 	for (int i = 0; i < cube.text.size(); i++) {
 		createText(cube.text[i]);
-	}*/
+	}
+
+	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
@@ -419,8 +420,6 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 
 	getTileFromRegistry(player.playerPos);
 
-	printf("%d, %d, %d\n", player.playerPos.f, player.playerPos.r, player.playerPos.c);
-
 	if (tile->tileState == TileState::Z) {
 		next_level();
 	}
@@ -496,9 +495,6 @@ void WorldSystem::Interact(Tile* tile)
 	}
 
 	SwitchTile* s_tile = (SwitchTile*)tile;
-	s_tile->action();
-	int index = 9 * 5 + 3 * 1 + 1;
-	s_tile->targetTile = registry.tiles.components.at(index);
 
 	if (s_tile->targetTile->tileState == TileState::I) {
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
@@ -506,7 +502,8 @@ void WorldSystem::Interact(Tile* tile)
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
 	}
 
-	s_tile->targetTile->action();
+	s_tile->action();
+	printf("%d\n", s_tile->targetTile->tileState);
 }
 
 void WorldSystem::SetSprite(Direction direction) {

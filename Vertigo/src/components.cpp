@@ -301,6 +301,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 				return false;
 			}
 			this->faces[i].push_back(row);
+			std::vector<Tile*>().swap(row);
 			y -= 1.f;
 			if (++rows == size) break;
 		}
@@ -310,6 +311,10 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 bool Cube::loadTextFromExcelFile(std::string filename) {
 	std::ifstream file(filename);
+
+	if (file.peek() == std::ifstream::traits_type::eof()) {
+		return true;
+	}
 
 	std::string sizeStr;
 	std::getline(file, sizeStr);
@@ -339,7 +344,54 @@ bool Cube::loadTextFromExcelFile(std::string filename) {
 		t.model = textStartingMatrix(i, x, y, distance, scale_x, scale_y);
 		t.texture_id = std::stoi(textValues[5]);
 		this->text.push_back(t);
+
+		std::vector<std::string>().swap(textValues);
 	}
+	return true;
+}
+
+bool Cube::loadModificationsFromExcelFile(std::string filename) {
+
+	std::ifstream file(filename);
+
+	if (file.peek() == std::ifstream::traits_type::eof()) {
+		return true;
+	}
+
+	std::string line;
+	while (std::getline(file, line)) {
+
+		std::string value;
+		std::stringstream ss(line);
+		std::vector<std::string> modifications;
+		modifications.reserve(10);
+
+		while (std::getline(ss, value, ','))
+		{
+			modifications.push_back(value);
+		}
+
+		if (modifications.at(0) == "W") {
+
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			SwitchTile* switch_tile = (SwitchTile*)getTile(Coordinates{ f, r, c });
+
+			if (modifications.at(4) == "I") {
+
+				int t_f = std::stoi(modifications.at(5));
+				int t_r = std::stoi(modifications.at(6));
+				int t_c = std::stoi(modifications.at(7));
+
+				switch_tile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+			}
+		}
+
+		std::vector<std::string>().swap(modifications);
+	}
+
 	return true;
 }
 
@@ -465,13 +517,14 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
+	printf("Switch\n");
+
 	if (toggled) {
 		return;
 	}
 
-	printf("Switch\n");
-
 	if (targetTile->tileState == TileState::I) {
+		targetTile->tileState = TileState::V;
 		targetTile->action();
 	}
 	else if (targetTile->tileState == TileState::M) {

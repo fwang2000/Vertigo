@@ -83,7 +83,7 @@ struct SwitchTile : public Tile {
 
 	Tile* targetTile;
 	vec2 movement = vec2(0);
-	bool toggled = true;
+	bool toggled = false;
 	virtual void action();
 };
 
@@ -124,6 +124,7 @@ struct Cube
 {
 	bool loadFromExcelFile(std::string filename);
 	bool loadTextFromExcelFile(std::string filename);
+	bool loadModificationsFromExcelFile(std::string filename);
 	void createAdjList();
 	std::array<std::vector<std::vector<Tile*>>, 6> faces;
 	std::vector<Text> text;
