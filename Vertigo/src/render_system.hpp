@@ -100,8 +100,6 @@ public:
 	mat4 createViewMatrix();
 	mat4 createProjectionMatrix(int width, int height);
 
-	mat4 rotateBox(Rotatable& rotatable);
-
 private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat4& projection, const mat4 &view);

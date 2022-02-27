@@ -91,113 +91,113 @@ glm::mat4 textStartingMatrix(int face, float x, float y, float distance, float s
 void Cube::createAdjList() {
 	// doing the edges (gonna take 12 for loops lol)
 	for (int i = 0; i < size; i++) {
-		Tile& left = faces[0][i][size-1];
-		Tile& right = faces[2][i][0];
+		Tile* left = faces[0][i][size-1];
+		Tile* right = faces[2][i][0];
 		Coordinates leftCoord = {0, i, size-1};
 		Coordinates rightCoord = {2, i, 0};
-		left.adjList[1] = std::make_pair(rightCoord, 0);
-		right.adjList[3] = std::make_pair(leftCoord, 0);
+		left->adjList[1] = std::make_pair(rightCoord, 0);
+		right->adjList[3] = std::make_pair(leftCoord, 0);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& left = faces[2][i][size-1];
-		Tile& right = faces[5][i][0];
+		Tile* left = faces[2][i][size-1];
+		Tile* right = faces[5][i][0];
 		Coordinates leftCoord = {2, i, size-1};
 		Coordinates rightCoord = {5, i, 0};
-		left.adjList[1] = std::make_pair(rightCoord, 0);
-		right.adjList[3] = std::make_pair(leftCoord, 0);
+		left->adjList[1] = std::make_pair(rightCoord, 0);
+		right->adjList[3] = std::make_pair(leftCoord, 0);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& left = faces[5][i][size-1];
-		Tile& right = faces[1][i][0];
+		Tile* left = faces[5][i][size-1];
+		Tile* right = faces[1][i][0];
 		Coordinates leftCoord = {5, i, size-1};
 		Coordinates rightCoord = {1, i, 0};
-		left.adjList[1] = std::make_pair(rightCoord, 0);
-		right.adjList[3] = std::make_pair(leftCoord, 0);
+		left->adjList[1] = std::make_pair(rightCoord, 0);
+		right->adjList[3] = std::make_pair(leftCoord, 0);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& left = faces[1][i][size-1];
-		Tile& right = faces[0][i][0];
+		Tile* left = faces[1][i][size-1];
+		Tile* right = faces[0][i][0];
 		Coordinates leftCoord = {1, i, size-1};
 		Coordinates rightCoord = {0, i, 0};
-		left.adjList[1] = std::make_pair(rightCoord, 0);
-		right.adjList[3] = std::make_pair(leftCoord, 0);
+		left->adjList[1] = std::make_pair(rightCoord, 0);
+		right->adjList[3] = std::make_pair(leftCoord, 0);
 	}
 
 	// up/down adges
 	for (int i = 0; i < size; i++) {
-		Tile& down = faces[0][0][i];
-		Tile& up = faces[3][size-1][i];
+		Tile* down = faces[0][0][i];
+		Tile* up = faces[3][size-1][i];
 		Coordinates downCoord = {0, 0, i};
 		Coordinates upCoord = {3, size-1, i};
-		down.adjList[0] = std::make_pair(upCoord, 0);
-		up.adjList[2] = std::make_pair(downCoord, 0);
+		down->adjList[0] = std::make_pair(upCoord, 0);
+		up->adjList[2] = std::make_pair(downCoord, 0);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& down = faces[4][0][i];
-		Tile& up = faces[0][size-1][i];
+		Tile* down = faces[4][0][i];
+		Tile* up = faces[0][size-1][i];
 		Coordinates downCoord = {4, 0, i};
 		Coordinates upCoord = {0, size-1, i};
-		down.adjList[0] = std::make_pair(upCoord, 0);
-		up.adjList[2] = std::make_pair(downCoord, 0);
+		down->adjList[0] = std::make_pair(upCoord, 0);
+		up->adjList[2] = std::make_pair(downCoord, 0);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& up = faces[3][0][i];
-		Tile& up2 = faces[5][0][size - (i+1)];
+		Tile* up = faces[3][0][i];
+		Tile* up2 = faces[5][0][size - (i+1)];
 		Coordinates upCoord = {3, 0, i};
 		Coordinates up2Coord = {5, 0, size - (i+1)};
-		up.adjList[0] = std::make_pair(up2Coord, 2);
-		up2.adjList[0] = std::make_pair(upCoord, 2);
+		up->adjList[0] = std::make_pair(up2Coord, 2);
+		up2->adjList[0] = std::make_pair(upCoord, 2);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& down = faces[4][size-1][i];
-		Tile& down2 = faces[5][size-1][size - (i+1)];
+		Tile* down = faces[4][size-1][i];
+		Tile* down2 = faces[5][size-1][size - (i+1)];
 		Coordinates downCoord = {4, size-1, i};
 		Coordinates down2Coord = {5, size-1, size - (i+1)};
-		down.adjList[2] = std::make_pair(down2Coord, 2);
-		down2.adjList[2] = std::make_pair(downCoord, 2);
+		down->adjList[2] = std::make_pair(down2Coord, 2);
+		down2->adjList[2] = std::make_pair(downCoord, 2);
 	}
 
 	// last 4 edges
 	for (int i = 0; i < size; i++) {
-		Tile& up = faces[3][size-(i+1)][size-1];
-		Tile& right = faces[2][0][i];
+		Tile* up = faces[3][size-(i+1)][size-1];
+		Tile* right = faces[2][0][i];
 		Coordinates upCoord = {3, size-(i+1), size-1};
 		Coordinates rightCoord = {2, 0, i};
-		up.adjList[1] = std::make_pair(rightCoord, -1);
-		right.adjList[0] = std::make_pair(upCoord, 1);
+		up->adjList[1] = std::make_pair(rightCoord, -1);
+		right->adjList[0] = std::make_pair(upCoord, 1);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& up = faces[3][i][0];
-		Tile& left = faces[1][0][i];
+		Tile* up = faces[3][i][0];
+		Tile* left = faces[1][0][i];
 		Coordinates upCoord = {3, i, 0};
 		Coordinates leftCoord = {1, 0, i};
-		up.adjList[3] = std::make_pair(leftCoord, 1);
-		left.adjList[0] = std::make_pair(upCoord, -1);
+		up->adjList[3] = std::make_pair(leftCoord, 1);
+		left->adjList[0] = std::make_pair(upCoord, -1);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& down = faces[4][i][0];
-		Tile& left = faces[1][size-1][size-(i+1)];
+		Tile* down = faces[4][i][0];
+		Tile* left = faces[1][size-1][size-(i+1)];
 		Coordinates downCoord = {4, i, 0};
 		Coordinates leftCoord = {1, size-1, size-(i+1)};
-		down.adjList[3] = std::make_pair(leftCoord, -1);
-		left.adjList[2] = std::make_pair(downCoord, 1);
+		down->adjList[3] = std::make_pair(leftCoord, -1);
+		left->adjList[2] = std::make_pair(downCoord, 1);
 	}
 
 	for (int i = 0; i < size; i++) {
-		Tile& down = faces[4][i][size-1];
-		Tile& right = faces[2][size-1][i];
+		Tile* down = faces[4][i][size-1];
+		Tile* right = faces[2][size-1][i];
 		Coordinates downCoord = {4, i, size-1};
 		Coordinates rightCoord = {2, size-1, i};
-		down.adjList[1] = std::make_pair(rightCoord, 1);
-		right.adjList[2] = std::make_pair(downCoord, -1);
+		down->adjList[1] = std::make_pair(rightCoord, 1);
+		right->adjList[2] = std::make_pair(downCoord, -1);
 	}
 }
 
@@ -237,15 +237,61 @@ bool Cube::loadFromExcelFile(std::string filename) {
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);
-			std::vector<Tile> row;
+			std::vector<Tile*> row;
 			row.reserve(size);
 			while (std::getline(ss, value, ','))
 			{
-				Tile tile;
-				tile.model = tileStartingMatrix(i, x, y, distance);
-				tile.tileState = static_cast<TileState>(value[0] - 'A');
+				switch (static_cast<TileState>(value[0] - 'A')) {
+				case TileState::W:
+				{
+					printf("w");
+					SwitchTile* s_tile = new SwitchTile();
+					s_tile->model = tileStartingMatrix(i, x, y, distance);
+					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
+					std::cout << typeid(*s_tile).name() << std::endl;
+					row.push_back(s_tile);
+					std::cout << "Pushed: " << typeid(*row.back()).name() << std::endl;
+					break;
+				}
+				case TileState::U:
+				{
+					UpTile* u_tile = new UpTile();
+					u_tile->model = tileStartingMatrix(i, x, y, distance);
+					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-				row.push_back(tile);
+					row.push_back(u_tile);
+					break;
+				}
+				case TileState::I:
+				{
+					printf("i");
+					InvisibleTile* i_tile = new InvisibleTile();
+					i_tile->model = tileStartingMatrix(i, x, y, distance);
+					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(i_tile);
+					break;
+				}
+				case TileState::M:
+				{
+					MoveableTile* m_tile = new MoveableTile();
+					m_tile->model = tileStartingMatrix(i, x, y, distance);
+					m_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(m_tile);
+					break;
+				}
+				default:
+				{
+					Tile* tile = new Tile();
+					tile->model = tileStartingMatrix(i, x, y, distance);
+					tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(tile);
+					break;
+				}
+				}
+
 				x += 1.f;
 			}
 			if (row.size() != size) {
@@ -296,14 +342,12 @@ bool Cube::loadTextFromExcelFile(std::string filename) {
 }
 
 void Cube::reset() {
-	for (int i = 0; i < 6; i++) {
-		this->faces[i].clear();
-	}
-	this->text.clear();
+	std::array<std::vector<std::vector<Tile*>>, 6>().swap(this->faces);
+	std::vector<Text>().swap(this->text);
 }
 
 Tile* Cube::getTile(Coordinates coord) {
-	return &this->faces[coord.f][coord.r][coord.c];
+	return this->faces[coord.f][coord.r][coord.c];
 }
 
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7
@@ -414,3 +458,11 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 	return true;
 }
+
+#pragma region TILE_FUNCTIONS
+
+void SwitchTile::action() {
+
+}
+
+#pragma endregion

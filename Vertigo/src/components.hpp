@@ -62,44 +62,52 @@ enum class TileState
 	Z = 25
 };
 
-struct Rotatable {
-	BOX_ANIMATION status = BOX_ANIMATION::STILL;
-	glm::mat4 model;
-	int degrees = 0;
-};
-
-struct Tile : Rotatable
+struct Tile
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
 	glm::mat4 model;
 	int degrees = 0;
+	int id = 0;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
+	virtual void action() { return; };
 };
 
 struct UpTile : public Tile {
 
 	Direction dir = Direction::UP;
+	virtual void action() override;
 };
 
-struct SwitchTile : Tile {
+struct SwitchTile : public Tile {
 
-	Tile targetTile; 
+	Tile* targetTile;
+	vec2 movement = vec2(0);
+	bool toggled = true;
+	void toggle() { if (!toggled) { toggled = true; } }
+	virtual void action() override;
 };
 
-struct InvisibleTile : Tile {
+struct InvisibleTile : public Tile {
+	bool toggled = false;
+	void toggle() { if (!toggled) { toggled = true; } }
+	virtual void action() override;
+};
+
+struct MoveableTile : public Tile {
+	virtual void action() { printf("3"); };
+	void move(float x, float y);
+};
+
+struct FinishTile : public Tile {
 
 };
 
-struct FinishTile : Tile {
+struct StartTile : public Tile {
 
 };
 
-struct StartTile : Tile {
-
-};
-
-struct Text : Rotatable {
+struct Text {
 
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
 	glm::mat4 model;
@@ -114,7 +122,7 @@ struct Cube
 	bool loadFromExcelFile(std::string filename);
 	bool loadTextFromExcelFile(std::string filename);
 	void createAdjList();
-	std::array<std::vector<std::vector<Tile>>, 6> faces;
+	std::array<std::vector<std::vector<Tile*>>, 6> faces;
 	std::vector<Text> text;
 	int size = 0;
 	int getSize() { return this->size; }
