@@ -219,7 +219,7 @@ void WorldSystem::handle_collisions() {
 		// 	//Player& player = registry.players.get(entity);
 		// 	if (!obtainedFire) 
 		// 	{
-		// 		obtainedFire = true;
+		// 		obtaineda = true;
 		// 		Motion& motion = registry.motions.get(entity_other);
 		// 		motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
 		// 	}
@@ -251,19 +251,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	case GLFW_KEY_W:
 		dir = Direction::UP;
-		player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
+		player_move(vec3({0, -1, 0}), dir);
 		break;
 	case GLFW_KEY_S:
 		dir = Direction::DOWN;
-		player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
+		player_move(vec3({0, 1, 0}), dir);
 		break;
 	case GLFW_KEY_A:
 		dir = Direction::LEFT;
-		player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
+		player_move(vec3({-1, 0, 0}), dir);
 		break;
 	case GLFW_KEY_D:
 		dir = Direction::RIGHT;
-		player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
+		player_move(vec3({1, 0, 0}), dir);
 		break;
 	case GLFW_KEY_ENTER:
 		Interact(currDirection);
@@ -271,7 +271,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	default:
 		break;
 	}
-
+	
 	SetSprite(dir);
 
 	if (key == GLFW_KEY_UP) {
@@ -317,54 +317,25 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction direction) 
+void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
-	if (!checkForTile(direction)) {
+	// if (!checkForTile(direction)) {
+	// 	return;
+	// }
+
+	Motion& motion = registry.motions.get(player_explorer);
+	// Check player has reached destination
+	if (motion.position != motion.destination){
 		return;
 	}
-
-	// Motion& motion = registry.motions.get(player_explorer);
-	// motion.velocity = velocity;
-	// player_destination = motion.position + distanceTo;
-	// moving = true;
-	// UpdatePlayerCoordinates(direction);
-
-	// if (obtainedFire) 
-	// {
-	// 	fire_move(velocity);
-	// }
+	motion.destination = motion.position + vec3({TILE_BB_WIDTH/3.5, TILE_BB_HEIGHT/3.5, 0}) * movement;
+	motion.remaining_time = 500;
 }
 
 void WorldSystem::fire_move(vec2 velocity)
 {
 	// Motion& motion = registry.motions.get(fire);
 	// motion.velocity = velocity;
-}
-
-void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
-	// TODO: rework this
-	// vec2 playerPosShift;
-
-	// switch (direction)
-	// {
-	// case Direction::DOWN:
-	// 	playerPosShift = vec2(0, 1);
-	// 	break;
-	// case Direction::UP:
-	// 	playerPosShift = vec2(0, -1);
-	// 	break;
-	// case Direction::LEFT:
-	// 	playerPosShift = vec2(-1, 0);
-	// 	break;
-	// case Direction::RIGHT:
-	// 	playerPosShift = vec2(1, 0);
-	// 	break;
-	// default:
-	// 	break;
-	// }
-
-	// Player& player = registry.players.get(player_explorer);
-	// player.playerPos.coordinates += playerPosShift;
 }
 
 bool WorldSystem::checkForTile(Direction direction) 

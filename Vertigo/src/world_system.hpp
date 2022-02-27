@@ -47,7 +47,7 @@ private:
 
 	// Movement Functions
 	// TODO: Update to 3D
-	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
+	void player_move(vec3 movement, Direction direction);
 	void fire_move(vec2 velocity);
 	void Interact(Direction direction);
 	bool checkForTile(Direction direction);

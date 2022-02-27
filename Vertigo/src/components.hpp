@@ -100,9 +100,9 @@ struct Motion
 
 	// For rendering 3d coordinates to 2d screen
 	vec2 origin = {0, 0};
-	vec2 x_vector = {cos(radians(30.0f)), sin(radians(30.0f))};
+	vec2 x_vector = {sin(radians(60.0f)), cos(radians(60.0f))};
 	vec2 y_vector = {0, 1};
-	vec2 z_vector = {cos(radians(60.0f)), sin(radians(60.0f))};
+	vec2 z_vector = {sin(radians(30.0f)), cos(radians(30.0f))};
 	vec3 position = {0, 0, 0};
 	
 	vec2 scale = {10, 10};

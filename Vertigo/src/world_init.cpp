@@ -12,6 +12,7 @@ Entity createExplorer(RenderSystem* renderer, vec3 pos) {
 	motion.interpolate = true;
 	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
 	motion.position = pos;
+	motion.destination = pos;
 	motion.velocity = { 0.f, 0.f , 0.f };
 	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
