@@ -20,7 +20,7 @@ Entity createCube(RenderSystem* renderer);
 // the explorer
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the tiles
-Entity createTile(Tile tile);
+Entity createTile(Tile* tile);
 // the text
 Entity createText(Text text);
 // the fire

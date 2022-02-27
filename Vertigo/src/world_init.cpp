@@ -30,13 +30,13 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	return entity;
 }
 
-Entity createTile(Tile tile)
+Entity createTile(Tile* tile)
 {
 	Entity entity = Entity();
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
 
-	switch (tile.tileState) {
+	switch (tile->tileState) {
 	case TileState::V:
 		id = TEXTURE_ASSET_ID::TILE;
 		break;
@@ -57,7 +57,7 @@ Entity createTile(Tile tile)
 	}
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	registry.tiles.insert(entity, tile);
+	registry.tiles.insert(entity, *tile);
 	registry.renderRequests.insert(
 		entity,
 		{ id,

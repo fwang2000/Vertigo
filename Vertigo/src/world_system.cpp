@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(1) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -221,13 +221,13 @@ void WorldSystem::load_level() {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
-				if (!(cube.faces[i][j][k].tileState == TileState::E))
+				if (!(cube.faces[i][j][k]->tileState == TileState::E))
 					createTile(cube.faces[i][j][k]);
-				if (cube.faces[i][j][k].tileState == TileState::S) {
+				if (cube.faces[i][j][k]->tileState == TileState::S) {
 					startingpos.f = i;
 					startingpos.r = j;
 					startingpos.c = k;
-					translateMatrix = cube.faces[i][j][k].model;
+					translateMatrix = cube.faces[i][j][k]->model;
 				}
 			}
 		}
@@ -287,10 +287,6 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (level == 0) {
-
-	}
-
 	if (moving || interacting) {
 		return;
 	}
@@ -318,8 +314,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			dir = Direction::RIGHT;
 			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 			break;
-		case GLFW_KEY_ENTER:
+		case GLFW_KEY_I:
 			Interact(currDirection);
+			break;
+		case GLFW_KEY_B:
+			// BURN
 			break;
 		default:
 			break;

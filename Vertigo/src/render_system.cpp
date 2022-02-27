@@ -325,8 +325,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	}
 }
 
-// draw the intermediate texture to the screen, with some distortion to simulate
-// wind
 void RenderSystem::drawToScreen()
 {
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FADE]);
