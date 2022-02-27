@@ -70,13 +70,13 @@ struct Tile
 	Coordinates coords;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
-	virtual void action() { return; };
+	virtual void action() { printf("Tile\n"); };
 };
 
 struct UpTile : public Tile {
 
 	Direction dir = Direction::UP;
-	virtual void action() override;
+	virtual void action();
 };
 
 struct SwitchTile : public Tile {
@@ -84,18 +84,18 @@ struct SwitchTile : public Tile {
 	Tile* targetTile;
 	vec2 movement = vec2(0);
 	bool toggled = true;
-	virtual void action() override;
+	virtual void action();
 };
 
 struct InvisibleTile : public Tile {
 	bool toggled = false;
-	virtual void action() override;
+	virtual void action();
 };
 
 struct MoveableTile : public Tile {
 	vec2 movement = vec2(0);
 	void move(float x, float y);
-	virtual void action() override;
+	virtual void action();
 };
 
 struct BurnableTile : public Tile {

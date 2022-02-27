@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -221,8 +221,9 @@ void WorldSystem::load_level() {
 	for (int i = 0; i < 6; i++) {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
-				if (!(cube.faces[i][j][k]->tileState == TileState::E))
-					createTile(cube.faces[i][j][k]);
+
+				createTile(cube.faces[i][j][k]);
+
 				if (cube.faces[i][j][k]->tileState == TileState::S) {
 					startingpos.f = i;
 					startingpos.r = j;
@@ -232,11 +233,12 @@ void WorldSystem::load_level() {
 			}
 		}
 	}
-	
+
+	/*
 	cube.loadTextFromExcelFile(text_path("text" + std::to_string(level) + ".csv"));
 	for (int i = 0; i < cube.text.size(); i++) {
 		createText(cube.text[i]);
-	}
+	}*/
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
@@ -293,10 +295,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Direction dir = currDirection;
 
-	Entity& tileEntity = registry.tiles.entities[0];
-	Tile* tile = &registry.tiles.get(tileEntity);
-
-	printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
+	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
 	if (action == GLFW_RELEASE && tile->status == BOX_ANIMATION::STILL) {
 		switch (key)
@@ -355,20 +354,20 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
 		switch (direction) {
 			case Direction::UP:
-				for (Tile& t : registry.tiles.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::DOWN;
+				for (Tile* t : registry.tiles.components) {
+					if (t->status == BOX_ANIMATION::STILL)
+						t->status = BOX_ANIMATION::DOWN;
 				}
-				for (Text& t : registry.text.components) {
+				for (Text t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::DOWN;
 				}
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
 				break;
 			case Direction::RIGHT:
-				for (Tile& t : registry.tiles.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::LEFT;
+				for (Tile* t : registry.tiles.components) {
+					if (t->status == BOX_ANIMATION::STILL)
+						t->status = BOX_ANIMATION::LEFT;
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -377,9 +376,9 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * -1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::LEFT:
-				for (Tile& t : registry.tiles.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::RIGHT;
+				for (Tile* t : registry.tiles.components) {
+					if (t->status == BOX_ANIMATION::STILL)
+						t->status = BOX_ANIMATION::RIGHT;
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -388,9 +387,9 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::DOWN:
-				for (Tile& t : registry.tiles.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::UP;
+				for (Tile* t : registry.tiles.components) {
+					if (t->status == BOX_ANIMATION::STILL)
+						t->status = BOX_ANIMATION::UP;
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -417,6 +416,10 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
+
+	getTileFromRegistry(player.playerPos);
+
+	printf("%d, %d, %d\n", player.playerPos.f, player.playerPos.r, player.playerPos.c);
 
 	if (tile->tileState == TileState::Z) {
 		next_level();
@@ -494,10 +497,16 @@ void WorldSystem::Interact(Tile* tile)
 
 	SwitchTile* s_tile = (SwitchTile*)tile;
 	s_tile->action();
+	int index = 9 * 5 + 3 * 1 + 1;
+	s_tile->targetTile = registry.tiles.components.at(index);
 
 	if (s_tile->targetTile->tileState == TileState::I) {
-		
+		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
+		RenderRequest& request = registry.renderRequests.get(tile);
+		request.used_texture = TEXTURE_ASSET_ID::TILE;
 	}
+
+	s_tile->targetTile->action();
 }
 
 void WorldSystem::SetSprite(Direction direction) {
@@ -567,6 +576,13 @@ Coordinates WorldSystem::searchForTile(Direction direction) {
 	}
 
 	return coords;
+}
+
+Entity WorldSystem::getTileFromRegistry(Coordinates coordinates) {
+
+	int index = 9 * coordinates.f + 3 * coordinates.r + coordinates.c;
+
+	return registry.tiles.entities.at(index);
 }
 
 void WorldSystem::next_level() {
