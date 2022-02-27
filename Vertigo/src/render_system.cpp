@@ -6,7 +6,7 @@
 #include "world_system.hpp"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-	const mat4& projection, const mat4& view)
+	const mat4& projection3D, const mat3& projection2D, const mat4& view)
 {
 
 	assert(registry.renderRequests.has(entity));
@@ -47,6 +47,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 						   + motion.position[2] * motion.z_vector
 						   + motion.origin);
 		transform.scale(motion.scale);
+		transform.rotate(acos(dot(motion.z_vector, vec2({0, 1}))));
 
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -95,7 +96,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
 		glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection2D);
 		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -175,7 +176,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
 		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -267,7 +268,8 @@ void RenderSystem::draw()
 	gl_has_errors();
 
 	
-	mat4 projection_3D = createProjectionMatrix(w, h);
+	mat4 projection_3D = create3DProjectionMatrix(w, h);
+	mat3 projection_2D = create2DProjectionMatrix();
 	mat4 view = createViewMatrix();
 
 	// Draw all textured meshes that have a position and size component
@@ -277,7 +279,7 @@ void RenderSystem::draw()
 		// 	continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_3D, view);
+		drawTexturedMesh(entity, projection_3D, projection_2D, view);
 	}
 
 	// Truely render to the screen
@@ -296,7 +298,7 @@ mat4 RenderSystem::createViewMatrix()
     return view;
 }
 
-mat4 RenderSystem::createProjectionMatrix(int width, int height)
+mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
 {
     mat4 proj = mat4(1.0f);
 
@@ -304,4 +306,21 @@ mat4 RenderSystem::createProjectionMatrix(int width, int height)
     float const view_distance = 3.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
+}
+
+mat3 RenderSystem::create2DProjectionMatrix()
+{
+	// Fake projection matrix, scales with respect to window coordinates
+	float left = 0.f;
+	float top = 0.f;
+
+	gl_has_errors();
+	float right = (float) window_width_px;
+	float bottom = (float) window_height_px;
+
+	float sx = 2.f / (right - left);
+	float sy = 2.f / (top - bottom);
+	float tx = -(right + left) / (right - left);
+	float ty = -(top + bottom) / (top - bottom);
+	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }
