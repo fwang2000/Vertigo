@@ -114,6 +114,10 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Motion& player_motion = motions_registry.get(player_explorer);
 	Motion& fire_motion = motions_registry.get(fire);
+	
+	if (!registry.shootTimers.has(fire)){
+		fire_motion.position = player_motion.position + vec2(40, -40);
+	}
 
 	// if (moving) {
 	// 	if ((player_destination.y >= player_motion.position.y && currDirection == Direction::UP) ||

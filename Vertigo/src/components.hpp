@@ -123,10 +123,10 @@ struct ScreenState
 };
 
 
-// A timer that will be associated to dying chicken
-struct DeathTimer
+// A timer that will be associated to shot fire
+struct ShootTimer
 {
-	float counter_ms = 3000;
+	float counter_ms = 4000;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
