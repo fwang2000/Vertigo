@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -294,8 +294,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Direction dir = currDirection;
 
 	Entity& tileEntity = registry.tiles.entities[0];
-	Tile& tile = registry.tiles.get(tileEntity);
-	if (action == GLFW_RELEASE && tile.status == BOX_ANIMATION::STILL) {
+	Tile* tile = &registry.tiles.get(tileEntity);
+
+	printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
+
+	if (action == GLFW_RELEASE && tile->status == BOX_ANIMATION::STILL) {
 		switch (key)
 		{
 		case GLFW_KEY_W:
@@ -315,7 +318,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 			break;
 		case GLFW_KEY_I:
-			Interact(currDirection);
+			Interact(tile);
 			break;
 		case GLFW_KEY_B:
 			// BURN
@@ -483,48 +486,17 @@ void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
 // 	return true;
 // }
 
-void WorldSystem::Interact(Direction direction) 
+void WorldSystem::Interact(Tile* tile) 
 {
-	Player& player = registry.players.get(player_explorer);
-	Coordinates coords = player.playerPos;
-
-	Tile* tile = cube.getTile(searchForTile(direction));
-
-	vec2 velocityDirection = vec2(1, 1);
-
-	switch (direction) 
-	{
-	case Direction::DOWN:
-		velocityDirection = vec2(-1, -1);
-		break;
-	case Direction::UP:
-		velocityDirection = vec2(1, 1);
-		break;
-	case Direction::LEFT:
-		velocityDirection = vec2(-1, -1);
-		break;
-	case Direction::RIGHT:
-		velocityDirection = vec2(1, 1);
-		break;
-	default:
-		break;
+	if (tile->tileState != TileState::W) {
+		return;
 	}
 
-	if (tile->tileState == TileState::O) {
+	SwitchTile* s_tile = (SwitchTile*)tile;
+	s_tile->action();
+
+	if (s_tile->targetTile->tileState == TileState::I) {
 		
-		// if (obtainedFire) 
-		// {
-		// 	Motion& motion = registry.motions.get(fire);
-		// 	fire_move(
-		// 		velocityDirection *
-		// 		vec2(
-		// 			motion.position.x - (window_width_px / 2 + (tile.tilePos.coordinates.x - 1) * window_height_px / 3),
-		// 			motion.position.y - (window_height_px / 2 + (tile.tilePos.coordinates.y - 1) * window_height_px / 3)
-		// 		)
-		// 	);
-		// 	tile.tileState = TileState::V;
-		// 	interacting = true;
-		// }
 	}
 }
 

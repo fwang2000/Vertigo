@@ -229,11 +229,11 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		float y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		int y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 		if (size % 2 == 0) y -= 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
-			float x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+			int x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);
@@ -244,13 +244,12 @@ bool Cube::loadFromExcelFile(std::string filename) {
 				switch (static_cast<TileState>(value[0] - 'A')) {
 				case TileState::W:
 				{
-					printf("w");
 					SwitchTile* s_tile = new SwitchTile();
 					s_tile->model = tileStartingMatrix(i, x, y, distance);
 					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
-					std::cout << typeid(*s_tile).name() << std::endl;
+
 					row.push_back(s_tile);
-					std::cout << "Pushed: " << typeid(*row.back()).name() << std::endl;
+					// s_tile->coords = { i, x, y };
 					break;
 				}
 				case TileState::U:
@@ -260,16 +259,17 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(u_tile);
+					// u_tile->coords = { i, x, y };
 					break;
 				}
 				case TileState::I:
 				{
-					printf("i");
 					InvisibleTile* i_tile = new InvisibleTile();
 					i_tile->model = tileStartingMatrix(i, x, y, distance);
 					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(i_tile);
+					// i_tile->coords = { i, x, y };
 					break;
 				}
 				case TileState::M:
@@ -279,6 +279,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					m_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(m_tile);
+					// m_tile->coords = { i, x, y };
 					break;
 				}
 				default:
@@ -288,6 +289,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(tile);
+					// tile->coords = { i, x, y };
 					break;
 				}
 				}
@@ -463,6 +465,35 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
+	if (toggled) {
+		return;
+	}
+
+	if (targetTile->tileState == TileState::I) {
+		targetTile->action();
+	}
+	else if (targetTile->tileState == TileState::M) {
+		MoveableTile* m_tile = ((MoveableTile*)targetTile);
+		m_tile->movement = this->movement;
+		m_tile->action();
+	}
+
+	toggled = true;
+}
+
+void UpTile::action() {
+
+}
+
+void InvisibleTile::action() {
+	if (!toggled) {
+		toggled = true;
+		this->tileState = TileState::V;
+	}
+}
+
+void MoveableTile::action() {
+	return;
 }
 
 #pragma endregion
