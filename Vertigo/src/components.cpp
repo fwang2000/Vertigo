@@ -249,7 +249,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(s_tile);
-					// s_tile->coords = { i, x, y };
+					s_tile->coords = { i, x + 1, y + 1 };
 					break;
 				}
 				case TileState::U:
@@ -259,7 +259,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(u_tile);
-					// u_tile->coords = { i, x, y };
+					u_tile->coords = { i, x + 1, y + 1 };
 					break;
 				}
 				case TileState::I:
@@ -269,7 +269,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(i_tile);
-					// i_tile->coords = { i, x, y };
+					i_tile->coords = { i, x + 1, y + 1 };
 					break;
 				}
 				case TileState::M:
@@ -279,7 +279,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					m_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(m_tile);
-					// m_tile->coords = { i, x, y };
+					m_tile->coords = { i, x + 1, y + 1 };
 					break;
 				}
 				default:
@@ -289,7 +289,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(tile);
-					// tile->coords = { i, x, y };
+					tile->coords = { i, x + 1, y + 1 };
 					break;
 				}
 				}
@@ -469,6 +469,8 @@ void SwitchTile::action() {
 		return;
 	}
 
+	printf("Switch\n");
+
 	if (targetTile->tileState == TileState::I) {
 		targetTile->action();
 	}
@@ -486,6 +488,9 @@ void UpTile::action() {
 }
 
 void InvisibleTile::action() {
+
+	printf("Invisible\n");
+
 	if (!toggled) {
 		toggled = true;
 		this->tileState = TileState::V;

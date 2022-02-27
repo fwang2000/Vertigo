@@ -23,7 +23,7 @@ public:
 	ComponentContainer<ScreenState> screenStates;
 	ComponentContainer<vec3> colors;
 
-	ComponentContainer<Tile> tiles;
+	ComponentContainer<Tile*> tiles;
 	ComponentContainer<Text> text;
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
