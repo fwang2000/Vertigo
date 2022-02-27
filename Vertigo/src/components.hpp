@@ -67,7 +67,7 @@ struct Tile
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
 	glm::mat4 model;
 	int degrees = 0;
-	int id = 0;
+	Coordinates coords;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	virtual void action() { return; };
@@ -84,19 +84,22 @@ struct SwitchTile : public Tile {
 	Tile* targetTile;
 	vec2 movement = vec2(0);
 	bool toggled = true;
-	void toggle() { if (!toggled) { toggled = true; } }
 	virtual void action() override;
 };
 
 struct InvisibleTile : public Tile {
 	bool toggled = false;
-	void toggle() { if (!toggled) { toggled = true; } }
 	virtual void action() override;
 };
 
 struct MoveableTile : public Tile {
-	virtual void action() { printf("3"); };
+	vec2 movement = vec2(0);
 	void move(float x, float y);
+	virtual void action() override;
+};
+
+struct BurnableTile : public Tile {
+	// virtual void action() override;
 };
 
 struct FinishTile : public Tile {
