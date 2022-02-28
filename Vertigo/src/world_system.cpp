@@ -115,58 +115,55 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	Motion& player_motion = motions_registry.get(player_explorer);
 	Motion& fire_motion = motions_registry.get(fire);
 
-	if (moving) {
-		if ((player_destination.y >= player_motion.position.y && currDirection == Direction::UP) ||
-			(player_destination.y <= player_motion.position.y && currDirection == Direction::DOWN) ||
-			(player_destination.x <= player_motion.position.x && currDirection == Direction::RIGHT) ||
-			(player_destination.x >= player_motion.position.x && currDirection == Direction::LEFT))
-		{
-			player_motion.velocity = vec2(0, 0);
-			player_motion.position = player_destination;
-			
-			if (obtainedFire) {
-				fire_motion.velocity = vec2(0, 0);
-				fire_motion.position = player_destination + vec2(40, -40);
-			}
-			moving = false;
+	if (!registry.shootTimers.has(fire)){
+		fire_motion.position = player_motion.position + vec3(40, -40, 0);
+		fire_motion.acceleration = vec3(0, 0, 0);
+	}
+	
+	// Update timers
+	for (Entity entity : registry.shootTimers.entities) {
+		// progress timer
+		ShootTimer& counter = registry.shootTimers.get(entity);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+		// restart the game once the death timer expired
+		if (counter.counter_ms < 0) {
+			registry.shootTimers.remove(entity);
+		}
+		else if (registry.motions.has(entity) && registry.motions.get(entity).position[2] < 0){
+			registry.shootTimers.remove(entity);
 		}
 	}
 	
-	if (activated) {
-
-		Motion& object_motion = motions_registry.get(currentObject);
-		
-		if (object_motion.scale.x <= 0.f || object_motion.scale.y <= 0.f) {
-
-			activated = false;
-		}
-		else {
-
-			object_motion.angle = 10.f;
-			object_motion.scale -= 1.f;
-		}
-	}
-	UpdateParallax(player_motion.position);
-
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.fadeTimers.entities) {
+	for (Entity entity : registry.holdTimers.entities) {
 		// progress timer
-		FadeTimer& counter = registry.fadeTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
+		HoldTimer& counter = registry.holdTimers.get(entity);
+
+		if (counter.increasing){
+			counter.counter_ms += elapsed_ms_since_last_update;
+			// restart the game once the death timer expired
+			if (counter.counter_ms > counter.max_ms) {
+				if (counter.reverse_when_max){
+					counter.counter_ms = 2 * counter.max_ms - counter.counter_ms;
+				}
+				else{
+					counter.counter_ms = counter.max_ms;
+				}
+			}
 		}
 
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.fadeTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			// restart_game();
-			return true;
+		else{
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0) {
+				if (counter.reverse_when_max){
+					counter.counter_ms = -counter.counter_ms;
+				}
+				else{
+					counter.counter_ms = 0;
+				}
+			}
 		}
 	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	return true;
 }
@@ -203,10 +200,6 @@ void WorldSystem::restart_game() {
 
 	load_level();
 
-	if (!registry.fadeTimers.has(player_explorer)) {
-		registry.fadeTimers.emplace(player_explorer);
-	}
-
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 }
@@ -239,7 +232,7 @@ void WorldSystem::load_level() {
 	}
 
 	// Create a new explorer
-	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
+	player_explorer = createExplorer(renderer, startingpos, cube.size);
 	registry.colors.insert(player_explorer, {1, 1, 1});
 }
 
@@ -252,27 +245,27 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.fire.has(entity) && registry.objects.has(entity_other))
-		{
-			Motion& motion = registry.motions.get(entity);
-			motion.velocity = vec2(0);
-			motion.position = player_destination + vec2(40, -40);
-			interacting = false;
+		// if (registry.fire.has(entity) && registry.objects.has(entity_other))
+		// {
+		// 	Motion& motion = registry.motions.get(entity);
+		// 	motion.velocity = vec2(0);
+		// 	motion.position = player_destination + vec2(40, -40);
+		// 	interacting = false;
 
-			currentObject = entity_other;
-			activated = true;
-        }
+		// 	currentObject = entity_other;
+		// 	activated = true;
+        // }
 
-		if (registry.players.has(entity) && registry.fire.has(entity_other)) 
-		{
-			//Player& player = registry.players.get(entity);
-			if (!obtainedFire) 
-			{
-				obtainedFire = true;
-				Motion& motion = registry.motions.get(entity_other);
-				motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
-			}
-		}
+		// if (registry.players.has(entity) && registry.fire.has(entity_other)) 
+		// {
+		// 	//Player& player = registry.players.get(entity);
+		// 	if (!obtainedFire) 
+		// 	{
+		// 		obtainedFire = true;
+		// 		Motion& motion = registry.motions.get(entity_other);
+		// 		motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
+		// 	}
+		// }
 	}
 
 	// Remove all collisions from this simulation step
@@ -303,19 +296,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
-			player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
+			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
-			player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
+			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
-			player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
+			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
-			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
+			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
 			Interact(tile);
@@ -328,7 +321,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	SetSprite(dir); // TODO: causes sprite to dissapear
+	// Fire release
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		if (!registry.shootTimers.has(fire)){
+			// If fire has yet to be shot, add to holdTimer
+			HoldTimer& holdTimer = registry.holdTimers.emplace(fire);
+		}
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire)) {
+		HoldTimer& holdTimer = registry.holdTimers.get(fire);
+		float power = holdTimer.counter_ms/holdTimer.max_ms;
+		registry.holdTimers.remove(fire);
+		UsePower(currDirection, power);
+	}
+
+	SetSprite(dir);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
@@ -336,7 +344,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction direction) 
+void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
@@ -418,6 +426,10 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
 
+	Motion& motion = registry.motions.get(player_explorer);
+	motion.destination = motion.position + vec3({TILE_BB_WIDTH/3.5, TILE_BB_HEIGHT/3.5, 0}) * movement;
+	motion.remaining_time = 500;
+
 	if (tile->tileState == TileState::Z) {
 		next_level();
 	}
@@ -434,19 +446,10 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	// }
 }
 
-void WorldSystem::UpdateParallax(vec2 playerPos)
-{
-	for (Entity entity : registry.parallax.entities)
-	{
-		Parallax& parallax = registry.parallax.get(entity);
-		parallax.displacement = (parallax.position - playerPos) * parallax.factor;
-	}
-}
-
 void WorldSystem::fire_move(vec2 velocity)
 {
-	Motion& motion = registry.motions.get(fire);
-	motion.velocity = velocity;
+	// Motion& motion = registry.motions.get(fire);
+	// motion.velocity = velocity;
 }
 
 void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
@@ -497,6 +500,39 @@ void WorldSystem::Interact(Tile* tile)
 
 	if (s_tile->targetTile->tileState == TileState::I) {
 		
+	}
+}
+
+void WorldSystem::UsePower(Direction direction, float power) 
+{
+	Player& player = registry.players.get(player_explorer);
+
+	// If fire is already shot, do not reshoot
+	if (registry.shootTimers.has(fire)){
+		return;
+	}
+
+	registry.shootTimers.emplace(fire);
+
+	Motion& motion = registry.motions.get(fire);
+	motion.acceleration = vec3(0, 0, -TILE_BB_WIDTH/3);
+
+	switch (direction) 
+	{
+	case Direction::DOWN:
+		motion.velocity = vec3(0, TILE_BB_HEIGHT, TILE_BB_WIDTH) * power;
+		break;
+	case Direction::UP:
+		motion.velocity = vec3(0, -TILE_BB_HEIGHT, TILE_BB_WIDTH) * power;
+		break;
+	case Direction::LEFT:
+		motion.velocity = vec3(-TILE_BB_WIDTH, 0, TILE_BB_HEIGHT) * power;
+		break;
+	case Direction::RIGHT:
+		motion.velocity = vec3(TILE_BB_WIDTH, 0, TILE_BB_HEIGHT);
+		break;
+	default:
+		motion.velocity = vec3(0, 0, 0);
 	}
 }
 

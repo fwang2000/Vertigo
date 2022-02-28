@@ -229,11 +229,11 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		int y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		float y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 		if (size % 2 == 0) y -= 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
-			int x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+			float x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);

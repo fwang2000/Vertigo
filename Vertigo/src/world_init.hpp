@@ -18,7 +18,8 @@ const float OBJECT_BB_HEIGHT = 0.4 * window_height_px / 3;
 // the cube
 Entity createCube(RenderSystem* renderer);
 // the explorer
-Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+Entity createExplorer(RenderSystem* renderer, Coordinates pos, int size);
 // the tiles
 Entity createTile(Tile* tile);
 // the text
