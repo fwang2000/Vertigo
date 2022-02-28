@@ -57,7 +57,9 @@ enum class TileState
 	M = 12,
 	N = 13,
 	W = 22,
+	C = 2,
 	U = 20,
+	D = 3,
 	E = 4,
 	Z = 25
 };
@@ -74,9 +76,13 @@ struct Tile
 };
 
 struct UpTile : public Tile {
-
 	Direction dir = Direction::UP;
 	virtual void action();
+};
+
+struct UpTileSuccess : public Tile {
+
+	virtual void action() { printf("Up Tile success\n"); };
 };
 
 struct SwitchTile : public Tile {
@@ -85,6 +91,10 @@ struct SwitchTile : public Tile {
 	vec2 movement = vec2(0);
 	bool toggled = false;
 	virtual void action();
+};
+
+struct SwitchTileSuccess : public Tile {
+	virtual void action() { printf("Switch tile success\n"); };
 };
 
 struct InvisibleTile : public Tile {
@@ -235,8 +245,10 @@ enum class TEXTURE_ASSET_ID {
 	TILE = EXPLORER_RIGHT + 1,
 	INVISIBLE_TILE = TILE + 1,
 	SWITCH_TILE = INVISIBLE_TILE + 1,
-	UP_TILE = SWITCH_TILE + 1,
-	END_TILE = UP_TILE + 1,
+	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
+	UP_TILE = SWITCH_TILE_SUCCESS + 1,
+	UP_TILE_SUCCESS = UP_TILE + 1,
+	END_TILE = UP_TILE_SUCCESS + 1,
 	TILE_SHADOW = END_TILE + 1,
 	FIRE = TILE_SHADOW + 1,
 	OBJECT = FIRE + 1,

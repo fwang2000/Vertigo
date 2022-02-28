@@ -533,10 +533,14 @@ void SwitchTile::action() {
 		m_tile->action();
 	}
 
+	this->tileState = TileState::C;
 	toggled = true;
 }
 
 void UpTile::action() {
+	// if up tile facing up {
+	// 	this->tileState = TileState::D;
+	// }
 
 }
 

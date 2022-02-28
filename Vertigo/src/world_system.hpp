@@ -91,6 +91,7 @@ private:
 
 	// Helper Functions
 	Coordinates searchForTile(Direction direction);
+	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 
 	// C++ random number generator

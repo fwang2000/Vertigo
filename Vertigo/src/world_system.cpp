@@ -494,12 +494,16 @@ void WorldSystem::Interact(Tile* tile)
 		return;
 	}
 
+	Coordinates switchCoords = tile->coords;
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
 	if (s_tile->targetTile->tileState == TileState::I) {
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
+		Entity successTile = getCurrentTileEntity();
+		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 
 	s_tile->action();
@@ -573,6 +577,12 @@ Coordinates WorldSystem::searchForTile(Direction direction) {
 	}
 
 	return coords;
+}
+
+// Get entity of the current tile player is on using getTileFromRegistry(player coordinates) 
+Entity WorldSystem::getCurrentTileEntity() {
+	Player& player = registry.players.get(player_explorer);
+	return getTileFromRegistry(player.playerPos);
 }
 
 Entity WorldSystem::getTileFromRegistry(Coordinates coordinates) {
