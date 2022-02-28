@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(3) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -328,6 +328,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
+	if (action == GLFW_PRESS && key == GLFW_KEY_R) {
+		cube.reset();
+		restart_game();
+	}
+
 	SetSprite(dir); // TODO: causes sprite to dissapear
 }
 
@@ -343,23 +348,52 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
-	if (tile->tileState == TileState::E || tile->tileState == TileState::O || tile->tileState == TileState::I) {
+	printf("curr coords: %d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
+	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I) {// || !tile->atNormalPosition) {
 		return;
+	} 
+	else if (tile->tileState == TileState::O) 
+	{
+		if (!((OccupyTile*)tile)->occupied) {
+			return;
+		}
 	}
+
 	Player& player = registry.players.get(player_explorer);
 
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
 		float multiplier = cube.size-1.f;
 		Tile* curTile = cube.getTile(player.playerPos);
+
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		
 		switch (direction) {
 			case Direction::UP:
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL)
+					if (t->status == BOX_ANIMATION::STILL) {
+
 						t->status = BOX_ANIMATION::DOWN;
+
+						switch (t->direction) {
+						case FACE_DIRECTION::FRONT:
+							t->direction = FACE_DIRECTION::BOTTOM;
+							break;
+						case FACE_DIRECTION::TOP:
+							t->direction = FACE_DIRECTION::FRONT;
+							break;
+						case FACE_DIRECTION::BACK:
+							t->direction = FACE_DIRECTION::TOP;
+							break;
+						case FACE_DIRECTION::BOTTOM:
+							t->direction = FACE_DIRECTION::BACK;
+							break;
+						default:
+							break;
+						}
+					}
 				}
-				for (Text t : registry.text.components) {
+				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::DOWN;
 				}
@@ -367,8 +401,26 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				break;
 			case Direction::RIGHT:
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL)
+					if (t->status == BOX_ANIMATION::STILL) {
 						t->status = BOX_ANIMATION::LEFT;
+
+						switch (t->direction) {
+						case FACE_DIRECTION::FRONT:
+							t->direction = FACE_DIRECTION::LEFT;
+							break;
+						case FACE_DIRECTION::LEFT:
+							t->direction = FACE_DIRECTION::BACK;
+							break;
+						case FACE_DIRECTION::BACK:
+							t->direction = FACE_DIRECTION::RIGHT;
+							break;
+						case FACE_DIRECTION::RIGHT:
+							t->direction = FACE_DIRECTION::FRONT;
+							break;
+						default:
+							break;
+						}
+					}
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -378,8 +430,26 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				break;
 			case Direction::LEFT:
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL)
+					if (t->status == BOX_ANIMATION::STILL) {
 						t->status = BOX_ANIMATION::RIGHT;
+
+						switch (t->direction) {
+						case FACE_DIRECTION::FRONT:
+							t->direction = FACE_DIRECTION::RIGHT;
+							break;
+						case FACE_DIRECTION::LEFT:
+							t->direction = FACE_DIRECTION::FRONT;
+							break;
+						case FACE_DIRECTION::BACK:
+							t->direction = FACE_DIRECTION::LEFT;
+							break;
+						case FACE_DIRECTION::RIGHT:
+							t->direction = FACE_DIRECTION::BACK;
+							break;
+						default:
+							break;
+						}
+					}
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -389,8 +459,26 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				break;
 			case Direction::DOWN:
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL)
+					if (t->status == BOX_ANIMATION::STILL) {
 						t->status = BOX_ANIMATION::UP;
+
+						switch (t->direction) {
+						case FACE_DIRECTION::FRONT:
+							t->direction = FACE_DIRECTION::TOP;
+							break;
+						case FACE_DIRECTION::TOP:
+							t->direction = FACE_DIRECTION::BACK;
+							break;
+						case FACE_DIRECTION::BACK:
+							t->direction = FACE_DIRECTION::BOTTOM;
+							break;
+						case FACE_DIRECTION::BOTTOM:
+							t->direction = FACE_DIRECTION::FRONT;
+							break;
+						default:
+							break;
+						}
+					}
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -399,6 +487,7 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * 1.f), 0.f)) * player.model;
 				break;
 		}
+
 	} else {
 		switch (direction) {
 			case Direction::UP:
@@ -417,8 +506,6 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-
-	getTileFromRegistry(player.playerPos);
 
 	if (tile->tileState == TileState::Z) {
 		next_level();
@@ -496,14 +583,67 @@ void WorldSystem::Interact(Tile* tile)
 
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
+	if (s_tile->toggled) {
+
+		return;
+	}
+
 	if (s_tile->targetTile->tileState == TileState::I) {
+
+		Coordinates curr_coords = {
+			s_tile->targetTile->currentPos.f,
+			s_tile->targetTile->currentPos.r,
+			s_tile->targetTile->currentPos.c
+		};
+
+		Coordinates next_coords = {
+			s_tile->targetTile->currentPos.f,
+			s_tile->targetTile->currentPos.r - s_tile->coord_movement.y,
+			s_tile->targetTile->currentPos.c + s_tile->coord_movement.x
+		};
+		printf("curr coords: %d, %d, %d\n", curr_coords.f, curr_coords.r, curr_coords.c);
+		printf("next coords: %d, %d, %d\n", next_coords.f, next_coords.r, next_coords.c);
+
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
 	}
+	else {
+
+		Coordinates curr_coords = {
+			s_tile->targetTile->currentPos.f,
+			s_tile->targetTile->currentPos.r,
+			s_tile->targetTile->currentPos.c
+		};
+
+		Coordinates next_coords = {
+			s_tile->targetTile->currentPos.f,
+			s_tile->targetTile->currentPos.r - s_tile->coord_movement.y,
+			s_tile->targetTile->currentPos.c + s_tile->coord_movement.x
+		};
+		printf("curr coords: %d, %d, %d\n", curr_coords.f, curr_coords.r, curr_coords.c);
+		printf("next coords: %d, %d, %d\n", next_coords.f, next_coords.r, next_coords.c);
+
+		Tile* currTile = cube.getTile(curr_coords);
+		Tile* nextTile = cube.getTile(next_coords);
+
+		if (nextTile->tileState == TileState::O) {
+			printf("O_TILE");
+			OccupyTile* o_tile = (OccupyTile*)nextTile;
+			o_tile->status = BOX_ANIMATION::STILL;
+			o_tile->occupied = true;
+			currTile->atNormalPosition = false;
+		}
+		else 
+		{
+			OccupyTile* returnTile = (OccupyTile*)cube.getTile(curr_coords);
+			returnTile->status = BOX_ANIMATION::STILL;
+			returnTile->occupied = false;
+			nextTile->atNormalPosition = true;
+		}
+	}
 
 	s_tile->action();
-	printf("%d\n", s_tile->targetTile->tileState);
 }
 
 void WorldSystem::SetSprite(Direction direction) {

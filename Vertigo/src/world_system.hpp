@@ -13,6 +13,14 @@
 
 #include "render_system.hpp"
 
+enum class GameState {
+
+	IDLE = 0,
+	MOVING = 1,
+	INTERACTING = 2,
+	BURNING = 3
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -86,6 +94,7 @@ private:
 	Cube cube;
 	Entity fire;
 	Entity currentObject;
+	GameState gameState = GameState::IDLE;
 
 	Direction currDirection = Direction::DOWN;
 

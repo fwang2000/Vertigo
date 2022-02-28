@@ -62,7 +62,7 @@ Entity createTile(Tile* tile)
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
 	registry.tiles.insert(entity, tile);
 
-	if (tile->tileState == TileState::E) {
+	if (tile->tileState == TileState::E || tile->tileState == TileState::O) {
 		return entity;
 	}
 
