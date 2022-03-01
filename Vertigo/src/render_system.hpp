@@ -29,6 +29,17 @@ class RenderSystem {
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
+			textures_path("text/Vertigo.png"),
+			textures_path("text/Start.png"),
+			textures_path("text/Level.png"),
+			textures_path("text/One.png"),
+			textures_path("text/Two.png"),
+			textures_path("text/Three.png"),
+			textures_path("text/Four.png"),
+			textures_path("text/Bush.png"),
+			textures_path("text/Burn.png"),
+			textures_path("text/Invisible.png"),
+			textures_path("text/Switch.png"),
 			textures_path("explorer_down.png"),
 			textures_path("explorer_up.png"),
 			textures_path("explorer_left.png"), 
@@ -43,17 +54,6 @@ class RenderSystem {
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
 			textures_path("object.png"),
-			textures_path("text/Vertigo.png"),
-			textures_path("text/Start.png"),
-			textures_path("text/Level.png"),
-			textures_path("text/One.png"),
-			textures_path("text/Two.png"),
-			textures_path("text/Three.png"),
-			textures_path("text/Four.png"),
-			textures_path("text/Bush.png"),
-			textures_path("text/Burn.png"),
-			textures_path("text/Invisible.png"),
-			textures_path("text/Switch.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
