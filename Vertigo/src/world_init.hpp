@@ -26,5 +26,7 @@ Entity createTile(Tile* tile);
 Entity createText(Text text);
 // the fire
 Entity createFire(RenderSystem* renderer, vec3 pos);
+// the fire's power gauge
+Entity createFireGauge(RenderSystem* renderer);
 // the object
 void createObject(RenderSystem* renderer, vec3 pos);

@@ -85,6 +85,8 @@ private:
 	Entity player_explorer;
 	Cube cube;
 	Entity fire;
+	Entity fire_gauge;
+	Entity fire_shadow;
 	Entity currentObject;
 
 	Direction currDirection = Direction::DOWN;

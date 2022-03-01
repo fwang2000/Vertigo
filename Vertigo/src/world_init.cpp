@@ -97,12 +97,7 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = pos;
-	motion.velocity = { 0.f, 0.f, 0.f};
-	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
 	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
-
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
 
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = vec3(pos.x + 1, pos.y + 1, pos.z + 1) ;
@@ -111,6 +106,29 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 		entity,
 		{
 			TEXTURE_ASSET_ID::FIRE,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+	return entity;
+}
+
+Entity createFireGauge(RenderSystem* renderer)
+{
+	auto entity = Entity();
+
+	registry.holdTimers.emplace(entity);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.scale = vec2({ 50, 0});
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::FIRE_GAUGE,
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE
 		}
