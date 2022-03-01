@@ -45,7 +45,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 						   + motion.position[2] * motion.z_vector
 						   + motion.origin);
 		transform.scale(motion.scale);
-		transform.rotate(acos(dot(motion.z_vector, vec2({0, 1}))));
+		transform.rotate(-acos(dot(motion.x_vector, vec2({0, 1}))));
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();

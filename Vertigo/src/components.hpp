@@ -162,7 +162,7 @@ struct Motion
 	// It's hard coded based on the current viewing angle of the cube
 	vec2 x_vector = {sin(radians(72.0f)), cos(radians(72.0f))};
 	vec2 y_vector = {0, 1};
-	vec2 z_vector = {sin(radians(30.0f)), cos(radians(30.0f))};
+	vec2 z_vector = {-sin(radians(30.0f)), -cos(radians(30.0f))};
 	vec3 position = {0, 0, 0};
 
 	vec2 scale = {10, 10};
