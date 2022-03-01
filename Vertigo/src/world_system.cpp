@@ -94,19 +94,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 	*/
 
+	// TODO Update checking of out of screen
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
+	// for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+	// 	Motion& motion = motions_registry.components[i];
+	// 	if (motion.position.x + abs(motion.scale.x) < 0.f) {
+	// 		if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
+	// 			registry.remove_all_components_of(motions_registry.entities[i]);
+	// 	}
+	// }
 
 	// Processing the explorer state
 	assert(registry.screenStates.components.size() <= 1);
@@ -355,14 +356,20 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		return;
 	}
 	Player& player = registry.players.get(player_explorer);
+	Motion& motion = registry.motions.get(player_explorer);
 
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
 		float multiplier = cube.size-1.f;
 		Tile* curTile = cube.getTile(player.playerPos);
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		motion.remaining_time = 1000;
+
 		switch (direction) {
 			case Direction::UP:
+				
+				motion.destination[1] += (cube.size - 1) * TILE_BB_HEIGHT;
+
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::DOWN;
@@ -374,6 +381,9 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
 				break;
 			case Direction::RIGHT:
+				
+				motion.destination[0] -= (cube.size - 1) * TILE_BB_WIDTH;
+
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::LEFT;
@@ -385,6 +395,9 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * -1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::LEFT:
+				
+				motion.destination[0] += (cube.size - 1) * TILE_BB_WIDTH;
+
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::RIGHT;
@@ -396,6 +409,9 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::DOWN:
+				
+				motion.destination[1] -= (cube.size - 1) * TILE_BB_HEIGHT;
+
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
 						t.status = BOX_ANIMATION::UP;
@@ -407,7 +423,11 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * 1.f), 0.f)) * player.model;
 				break;
 		}
-	} else {
+	} 
+	else {
+		motion.remaining_time = 500;
+		motion.destination = motion.position + vec3({TILE_BB_WIDTH, TILE_BB_HEIGHT, 0}) * movement;
+
 		switch (direction) {
 			case Direction::UP:
 				player.model = translate(glm::mat4(1.f), vec3(0.f, 1.f, 0.f)) * player.model;
@@ -425,10 +445,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-
-	Motion& motion = registry.motions.get(player_explorer);
-	motion.destination = motion.position + vec3({TILE_BB_WIDTH/3.5, TILE_BB_HEIGHT/3.5, 0}) * movement;
-	motion.remaining_time = 500;
 
 	if (tile->tileState == TileState::Z) {
 		next_level();

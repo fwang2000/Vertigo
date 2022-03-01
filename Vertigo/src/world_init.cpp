@@ -6,22 +6,13 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, int size) {
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-
-	// convert pos to world coords
-	float x = (-size / 2.f);
-	x += pos.c * 0.5f;
-	x *= TILE_BB_WIDTH;
-	float y = size / 2.f;
-	y -= pos.r * 0.5f;
-	y *= TILE_BB_HEIGHT;
-	float z = size / 2.f;
 	
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
 	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
-	motion.position = vec3(0.f);
-	motion.destination = vec3(0.f);
+	motion.position = vec3(-(size - 0.5)* TILE_BB_WIDTH + pos.c * TILE_BB_WIDTH, -(size/2 - 0.5) * TILE_BB_HEIGHT + pos.r * TILE_BB_HEIGHT, 0);
+	motion.destination = motion.position;
 	motion.velocity = { 0.f , 0.f , 0.f };
 	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
