@@ -229,11 +229,11 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		float y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		int y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 		if (size % 2 == 0) y -= 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
-			float x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+			int x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);
@@ -517,20 +517,14 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
-<<<<<<< HEAD
 	printf("Switch\n");
 
-=======
->>>>>>> origin/3d_motion_merge
 	if (toggled) {
 		return;
 	}
 
 	if (targetTile->tileState == TileState::I) {
-<<<<<<< HEAD
 		targetTile->tileState = TileState::V;
-=======
->>>>>>> origin/3d_motion_merge
 		targetTile->action();
 	}
 	else if (targetTile->tileState == TileState::M) {
@@ -543,22 +537,16 @@ void SwitchTile::action() {
 }
 
 void UpTile::action() {
-<<<<<<< HEAD
 	// if up tile facing up {
 	// 	this->tileState = TileState::D;
 	// }
-=======
->>>>>>> origin/3d_motion_merge
 
 }
 
 void InvisibleTile::action() {
-<<<<<<< HEAD
 
 	printf("Invisible\n");
 
-=======
->>>>>>> origin/3d_motion_merge
 	if (!toggled) {
 		toggled = true;
 		this->tileState = TileState::V;
@@ -569,7 +557,6 @@ void MoveableTile::action() {
 	return;
 }
 
-<<<<<<< HEAD
 void BurnableTile::action() {
 	printf("Burning\n");
 
@@ -579,6 +566,4 @@ void BurnableTile::action() {
 	}
 }
 
-=======
->>>>>>> origin/3d_motion_merge
 #pragma endregion

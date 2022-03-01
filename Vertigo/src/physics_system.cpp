@@ -52,25 +52,12 @@ void PhysicsSystem::step(float elapsed_ms)
 	auto& motion_registry = registry.motions;
 	for (uint i = 0; i < motion_registry.size(); i++)
 	{
+		// !!! TODO A1: update motion.position based on step_seconds and motion.velocity
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
 		float step_seconds = elapsed_ms / 1000.f;
-
-		if (motion.interpolate){
-			if (elapsed_ms > motion.remaining_time){
-				motion.position = motion.destination;
-				motion.remaining_time = 0;
-			}
-			else{
-				motion.position = motion.position + (motion.destination - motion.position) * (elapsed_ms / motion.remaining_time);
-				motion.remaining_time -= elapsed_ms;
-			}
-		}
-		else{
-			motion.velocity = motion.velocity + motion.acceleration * step_seconds;
-			motion.position = motion.position + motion.velocity * step_seconds;
-
-		}
+		motion.position = motion.position + motion.velocity * step_seconds;
+		(void)elapsed_ms; // placeholder to silence unused warning until implemented
 	}
 
 	// Check for collisions between all moving entities
