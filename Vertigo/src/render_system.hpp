@@ -31,7 +31,7 @@ class RenderSystem {
 	const std::array<std::string, texture_count> texture_paths = {
 			textures_path("explorer_down.png"),
 			textures_path("explorer_up.png"),
-			textures_path("explorer_left.png"), 
+			textures_path("explorer_left.png"),
 			textures_path("explorer_right.png"),
 			textures_path("tile.png"),
 			textures_path("invisible_tile.png"),
@@ -51,7 +51,8 @@ class RenderSystem {
 			textures_path("text/Bush.png"),
 			textures_path("text/Burn.png"),
 			textures_path("text/Invisible.png"),
-			textures_path("text/Switch.png")
+			textures_path("text/Switch.png"),
+			textures_path("empty_tile.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

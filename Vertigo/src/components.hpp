@@ -60,10 +60,8 @@ enum class TileState
 	S = 18,		// Start
 	F = 5,		// Fire
 	V = 21,		// Valid
-	O = 14,		// Occupy
 	B = 2,		// Burnable
 	I = 8,		// Invisible
-	M = 12,		// Moveable
 	N = 13,		// Non-interactible
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
@@ -81,10 +79,9 @@ struct Tile
 	Coordinates currentPos;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
-	virtual void action() { printf("Tile\n"); };
+	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
-	bool atNormalPosition = true;
 };
 
 struct UpTile : public Tile {
@@ -96,8 +93,7 @@ struct UpTile : public Tile {
 struct SwitchTile : public Tile {
 
 	Tile* targetTile;
-	vec2 translation = vec2(0);
-	vec2 coord_movement = vec2(0);
+	Coordinates targetCoords;
 	bool toggled = false;
 	virtual void action();
 };
@@ -105,18 +101,6 @@ struct SwitchTile : public Tile {
 struct InvisibleTile : public Tile {
 	bool toggled = false;
 	virtual void action();
-};
-
-struct MoveableTile : public Tile {
-	vec2 movement = vec2(0);
-	bool atBase = true;
-	virtual void action();
-};
-
-struct OccupyTile : public Tile {
-
-	Tile* targetTile;
-	bool occupied = false;
 };
 
 struct BurnableTile : public Tile {
@@ -272,7 +256,8 @@ enum class TEXTURE_ASSET_ID {
 	BURN = BUSH + 1,
 	INVISIBLE = BURN + 1,
 	SWITCH = INVISIBLE + 1,
-	TEXTURE_COUNT = SWITCH + 1
+	EMPTY = SWITCH + 1,
+	TEXTURE_COUNT = EMPTY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
