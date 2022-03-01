@@ -186,7 +186,7 @@ struct ScreenState
 // A timer that will be associated to shot fire
 struct ShootTimer
 {
-	float counter_ms = 4000;
+	float counter_ms = 10000;
 };
 
 struct HoldTimer
@@ -256,7 +256,9 @@ enum class TEXTURE_ASSET_ID {
 	END_TILE = UP_TILE + 1,
 	TILE_SHADOW = END_TILE + 1,
 	FIRE = TILE_SHADOW + 1,
-	OBJECT = FIRE + 1,
+	FIRE_SHADOW = FIRE + 1,
+	FIRE_GAUGE = FIRE_SHADOW + 1,
+	OBJECT = FIRE_GAUGE + 1,
 	VERTIGO = OBJECT + 1,
 	START = VERTIGO + 1,
 	LEVEL = START + 1,

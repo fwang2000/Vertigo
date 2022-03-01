@@ -40,6 +40,8 @@ class RenderSystem {
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("fire.png"),
+			textures_path("fire_shadow.png"),
+			textures_path("fire_gauge.png"),
 			textures_path("object.png"),
 			textures_path("text/Vertigo.png"),
 			textures_path("text/Start.png"),
