@@ -152,18 +152,28 @@ struct Oscillate {
 	int steps = 100;
 };
 
-struct Parallax {
-	vec2 position = { 0, 0 };
-	vec2 displacement = { 0, 0 };
-	vec2 factor = { 0.05f, 0.05f };
-};
+struct Motion
+{
+	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
 
-struct Motion {
-	vec2 position = { 0, 0 };
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
-	float angle = 0;
-	Direction direction = Direction::DOWN;
+	// Extrapolation
+	vec3 velocity = {0, 0, 0}; // Used if extrapolating
+	vec3 acceleration = {0, 0, 0}; // Used if extrapolating
+
+	// Interpolation
+	vec3 destination = {0, 0, 0}; // Used if interpolating
+	float remaining_time = 0; // Used if interpolating
+
+	// For rendering 3d coordinates to 2d screen
+	vec2 origin = {0, 0};
+	// Please don't change this unless you're changing the viewing angle
+	// It's hard coded based on the current viewing angle of the cube
+	vec2 x_vector = {sin(radians(72.0f)), cos(radians(72.0f))};
+	vec2 y_vector = {0, 1};
+	vec2 z_vector = {sin(radians(30.0f)), cos(radians(30.0f))};
+	vec3 position = {0, 0, 0};
+
+	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information
@@ -181,10 +191,18 @@ struct ScreenState
 };
 
 
-// A timer that will be associated to dying chicken
-struct FadeTimer
+// A timer that will be associated to shot fire
+struct ShootTimer
 {
-	float counter_ms = 3000;
+	float counter_ms = 4000;
+};
+
+struct HoldTimer
+{
+	float counter_ms = 0;
+	float max_ms = 3000;
+	bool reverse_when_max = true;
+	bool increasing = true;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)

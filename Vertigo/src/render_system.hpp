@@ -108,11 +108,12 @@ public:
 	void draw();
 
 	mat4 createViewMatrix();
-	mat4 createProjectionMatrix(int width, int height);
+	mat4 create3DProjectionMatrix(int width, int height);
+	mat3 create2DProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat4& projection, const mat4 &view);
+	void drawTexturedMesh(Entity entity, const mat4& projection3D, const mat3& projection2D, const mat4 &view);
 	void drawToScreen();
 
 	// Window handle

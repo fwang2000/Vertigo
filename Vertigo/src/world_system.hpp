@@ -46,11 +46,14 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
+	void player_move(vec3 movement, Direction direction);
 	void fire_move(vec2 velocity);
-	void UpdateParallax(vec2 playerPos);
 	void Interact(Tile* tile);
+<<<<<<< HEAD
 	void Burn(Tile* tile);
+=======
+	void UsePower(Direction direction, float power);
+>>>>>>> origin/3d_motion_merge
 	// bool checkForTile(Direction direction);
 	float count = 0;
 

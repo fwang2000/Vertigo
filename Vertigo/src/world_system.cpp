@@ -94,19 +94,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 	*/
 
+	// TODO Update checking of out of screen
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion& motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
+	// for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+	// 	Motion& motion = motions_registry.components[i];
+	// 	if (motion.position.x + abs(motion.scale.x) < 0.f) {
+	// 		if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
+	// 			registry.remove_all_components_of(motions_registry.entities[i]);
+	// 	}
+	// }
 
 	// Processing the explorer state
 	assert(registry.screenStates.components.size() <= 1);
@@ -115,58 +116,55 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	Motion& player_motion = motions_registry.get(player_explorer);
 	Motion& fire_motion = motions_registry.get(fire);
 
-	if (moving) {
-		if ((player_destination.y >= player_motion.position.y && currDirection == Direction::UP) ||
-			(player_destination.y <= player_motion.position.y && currDirection == Direction::DOWN) ||
-			(player_destination.x <= player_motion.position.x && currDirection == Direction::RIGHT) ||
-			(player_destination.x >= player_motion.position.x && currDirection == Direction::LEFT))
-		{
-			player_motion.velocity = vec2(0, 0);
-			player_motion.position = player_destination;
-			
-			if (obtainedFire) {
-				fire_motion.velocity = vec2(0, 0);
-				fire_motion.position = player_destination + vec2(40, -40);
-			}
-			moving = false;
+	if (!registry.shootTimers.has(fire)){
+		fire_motion.position = player_motion.position + vec3(40, -40, 0);
+		fire_motion.acceleration = vec3(0, 0, 0);
+	}
+	
+	// Update timers
+	for (Entity entity : registry.shootTimers.entities) {
+		// progress timer
+		ShootTimer& counter = registry.shootTimers.get(entity);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+		// restart the game once the death timer expired
+		if (counter.counter_ms < 0) {
+			registry.shootTimers.remove(entity);
+		}
+		else if (registry.motions.has(entity) && registry.motions.get(entity).position[2] < 0){
+			registry.shootTimers.remove(entity);
 		}
 	}
 	
-	if (activated) {
-
-		Motion& object_motion = motions_registry.get(currentObject);
-		
-		if (object_motion.scale.x <= 0.f || object_motion.scale.y <= 0.f) {
-
-			activated = false;
-		}
-		else {
-
-			object_motion.angle = 10.f;
-			object_motion.scale -= 1.f;
-		}
-	}
-	UpdateParallax(player_motion.position);
-
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.fadeTimers.entities) {
+	for (Entity entity : registry.holdTimers.entities) {
 		// progress timer
-		FadeTimer& counter = registry.fadeTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
+		HoldTimer& counter = registry.holdTimers.get(entity);
+
+		if (counter.increasing){
+			counter.counter_ms += elapsed_ms_since_last_update;
+			// restart the game once the death timer expired
+			if (counter.counter_ms > counter.max_ms) {
+				if (counter.reverse_when_max){
+					counter.counter_ms = 2 * counter.max_ms - counter.counter_ms;
+				}
+				else{
+					counter.counter_ms = counter.max_ms;
+				}
+			}
 		}
 
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.fadeTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			// restart_game();
-			return true;
+		else{
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0) {
+				if (counter.reverse_when_max){
+					counter.counter_ms = -counter.counter_ms;
+				}
+				else{
+					counter.counter_ms = 0;
+				}
+			}
 		}
 	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 
 	// handle burnable animations here
@@ -213,10 +211,6 @@ void WorldSystem::restart_game() {
 
 	load_level();
 
-	if (!registry.fadeTimers.has(player_explorer)) {
-		registry.fadeTimers.emplace(player_explorer);
-	}
-
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 }
@@ -252,7 +246,7 @@ void WorldSystem::load_level() {
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
 	// Create a new explorer
-	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
+	player_explorer = createExplorer(renderer, startingpos, cube.size);
 	registry.colors.insert(player_explorer, {1, 1, 1});
 }
 
@@ -265,27 +259,27 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.fire.has(entity) && registry.objects.has(entity_other))
-		{
-			Motion& motion = registry.motions.get(entity);
-			motion.velocity = vec2(0);
-			motion.position = player_destination + vec2(40, -40);
-			interacting = false;
+		// if (registry.fire.has(entity) && registry.objects.has(entity_other))
+		// {
+		// 	Motion& motion = registry.motions.get(entity);
+		// 	motion.velocity = vec2(0);
+		// 	motion.position = player_destination + vec2(40, -40);
+		// 	interacting = false;
 
-			currentObject = entity_other;
-			activated = true;
-        }
+		// 	currentObject = entity_other;
+		// 	activated = true;
+        // }
 
-		if (registry.players.has(entity) && registry.fire.has(entity_other)) 
-		{
-			//Player& player = registry.players.get(entity);
-			if (!obtainedFire) 
-			{
-				obtainedFire = true;
-				Motion& motion = registry.motions.get(entity_other);
-				motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
-			}
-		}
+		// if (registry.players.has(entity) && registry.fire.has(entity_other)) 
+		// {
+		// 	//Player& player = registry.players.get(entity);
+		// 	if (!obtainedFire) 
+		// 	{
+		// 		obtainedFire = true;
+		// 		Motion& motion = registry.motions.get(entity_other);
+		// 		motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
+		// 	}
+		// }
 	}
 
 	// Remove all collisions from this simulation step
@@ -313,6 +307,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
+<<<<<<< HEAD
 			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
 			break;
@@ -330,6 +325,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			dir = Direction::RIGHT;
 			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
+=======
+			player_move(vec3({0, -1, 0}), dir);
+			break;
+		case GLFW_KEY_S:
+			dir = Direction::DOWN;
+			player_move(vec3({0, 1, 0}), dir);
+			break;
+		case GLFW_KEY_A:
+			dir = Direction::LEFT;
+			player_move(vec3({-1, 0, 0}), dir);
+			break;
+		case GLFW_KEY_D:
+			dir = Direction::RIGHT;
+			player_move(vec3({1, 0, 0}), dir);
+>>>>>>> origin/3d_motion_merge
 			break;
 		case GLFW_KEY_I:
 			if (tile->tileState == TileState::B) { break; }
@@ -343,7 +353,22 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	SetSprite(dir); // TODO: causes sprite to dissapear
+	// Fire release
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		if (!registry.shootTimers.has(fire)){
+			// If fire has yet to be shot, add to holdTimer
+			HoldTimer& holdTimer = registry.holdTimers.emplace(fire);
+		}
+	}
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire)) {
+		HoldTimer& holdTimer = registry.holdTimers.get(fire);
+		float power = holdTimer.counter_ms/holdTimer.max_ms;
+		registry.holdTimers.remove(fire);
+		UsePower(currDirection, power);
+	}
+
+	SetSprite(dir);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
@@ -351,7 +376,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
-void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction direction) 
+void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
@@ -362,17 +387,29 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 		return;
 	}
 	Player& player = registry.players.get(player_explorer);
+	Motion& motion = registry.motions.get(player_explorer);
 
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
 		float multiplier = cube.size-1.f;
 		Tile* curTile = cube.getTile(player.playerPos);
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		motion.remaining_time = 1000;
+
 		switch (direction) {
 			case Direction::UP:
+<<<<<<< HEAD
 				for (Tile* t : registry.tiles.components) {
 					if (t->status == BOX_ANIMATION::STILL)
 						t->status = BOX_ANIMATION::DOWN;
+=======
+				
+				motion.destination[1] += (cube.size - 1) * TILE_BB_HEIGHT;
+
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::DOWN;
+>>>>>>> origin/3d_motion_merge
 				}
 				for (Text t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -381,9 +418,18 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
 				break;
 			case Direction::RIGHT:
+<<<<<<< HEAD
 				for (Tile* t : registry.tiles.components) {
 					if (t->status == BOX_ANIMATION::STILL)
 						t->status = BOX_ANIMATION::LEFT;
+=======
+				
+				motion.destination[0] -= (cube.size - 1) * TILE_BB_WIDTH;
+
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::LEFT;
+>>>>>>> origin/3d_motion_merge
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -392,9 +438,18 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * -1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::LEFT:
+<<<<<<< HEAD
 				for (Tile* t : registry.tiles.components) {
 					if (t->status == BOX_ANIMATION::STILL)
 						t->status = BOX_ANIMATION::RIGHT;
+=======
+				
+				motion.destination[0] += (cube.size - 1) * TILE_BB_WIDTH;
+
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::RIGHT;
+>>>>>>> origin/3d_motion_merge
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -403,9 +458,18 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::DOWN:
+<<<<<<< HEAD
 				for (Tile* t : registry.tiles.components) {
 					if (t->status == BOX_ANIMATION::STILL)
 						t->status = BOX_ANIMATION::UP;
+=======
+				
+				motion.destination[1] -= (cube.size - 1) * TILE_BB_HEIGHT;
+
+				for (Tile& t : registry.tiles.components) {
+					if (t.status == BOX_ANIMATION::STILL)
+						t.status = BOX_ANIMATION::UP;
+>>>>>>> origin/3d_motion_merge
 				}
 				for (Text& t : registry.text.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -414,7 +478,11 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * 1.f), 0.f)) * player.model;
 				break;
 		}
-	} else {
+	} 
+	else {
+		motion.remaining_time = 500;
+		motion.destination = motion.position + vec3({TILE_BB_WIDTH, TILE_BB_HEIGHT, 0}) * movement;
+
 		switch (direction) {
 			case Direction::UP:
 				player.model = translate(glm::mat4(1.f), vec3(0.f, 1.f, 0.f)) * player.model;
@@ -451,19 +519,10 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 	// }
 }
 
-void WorldSystem::UpdateParallax(vec2 playerPos)
-{
-	for (Entity entity : registry.parallax.entities)
-	{
-		Parallax& parallax = registry.parallax.get(entity);
-		parallax.displacement = (parallax.position - playerPos) * parallax.factor;
-	}
-}
-
 void WorldSystem::fire_move(vec2 velocity)
 {
-	Motion& motion = registry.motions.get(fire);
-	motion.velocity = velocity;
+	// Motion& motion = registry.motions.get(fire);
+	// motion.velocity = velocity;
 }
 
 void WorldSystem::UpdatePlayerCoordinates(Direction direction) {
@@ -531,6 +590,39 @@ void WorldSystem::Burn(Tile* tile) {
 		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
 		burned.activate = true;
 		tile->tileState = TileState::V;
+	}
+}
+
+void WorldSystem::UsePower(Direction direction, float power) 
+{
+	Player& player = registry.players.get(player_explorer);
+
+	// If fire is already shot, do not reshoot
+	if (registry.shootTimers.has(fire)){
+		return;
+	}
+
+	registry.shootTimers.emplace(fire);
+
+	Motion& motion = registry.motions.get(fire);
+	motion.acceleration = vec3(0, 0, -TILE_BB_WIDTH/3);
+
+	switch (direction) 
+	{
+	case Direction::DOWN:
+		motion.velocity = vec3(0, TILE_BB_HEIGHT, TILE_BB_WIDTH) * power;
+		break;
+	case Direction::UP:
+		motion.velocity = vec3(0, -TILE_BB_HEIGHT, TILE_BB_WIDTH) * power;
+		break;
+	case Direction::LEFT:
+		motion.velocity = vec3(-TILE_BB_WIDTH, 0, TILE_BB_HEIGHT) * power;
+		break;
+	case Direction::RIGHT:
+		motion.velocity = vec3(TILE_BB_WIDTH, 0, TILE_BB_HEIGHT);
+		break;
+	default:
+		motion.velocity = vec3(0, 0, 0);
 	}
 }
 
