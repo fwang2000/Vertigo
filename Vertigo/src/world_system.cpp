@@ -168,6 +168,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if any of the present chickens is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
+
+	// handle burnable animations here
+	for (Entity entity : registry.burnables.entities) {
+		// check if object has been burned by fire
+		Burnable& object = registry.burnables.get(entity);
+		if (object.activate == true) {
+			registry.burnables.remove(entity);
+		}
+	}
+
 	return true;
 }
 
@@ -303,25 +313,30 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
+			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(0, -250), vec2(0, -window_height_px / 3), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
+			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(0, 250), vec2(0, window_height_px / 3), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
+			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(-250, 0), vec2(-window_height_px / 3, 0), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
+			if (tile->tileState == TileState::B) { break; }
 			player_move(vec2(250, 0), vec2(window_height_px / 3, 0), dir);
 			break;
 		case GLFW_KEY_I:
+			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
 		case GLFW_KEY_B:
-			// BURN
+			Burn(tile);
 			break;
 		default:
 			break;
@@ -494,7 +509,6 @@ void WorldSystem::Interact(Tile* tile)
 		return;
 	}
 
-	Coordinates switchCoords = tile->coords;
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
 	if (s_tile->targetTile->tileState == TileState::I) {
@@ -508,6 +522,16 @@ void WorldSystem::Interact(Tile* tile)
 
 	s_tile->action();
 	printf("%d\n", s_tile->targetTile->tileState);
+}
+
+void WorldSystem::Burn(Tile* tile) {
+
+	if (tile->tileState == TileState::B) {
+		registry.burnables.emplace(getCurrentTileEntity());
+		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
+		burned.activate = true;
+		tile->tileState = TileState::V;
+	}
 }
 
 void WorldSystem::SetSprite(Direction direction) {

@@ -533,7 +533,6 @@ void SwitchTile::action() {
 		m_tile->action();
 	}
 
-	this->tileState = TileState::C;
 	toggled = true;
 }
 
@@ -556,6 +555,15 @@ void InvisibleTile::action() {
 
 void MoveableTile::action() {
 	return;
+}
+
+void BurnableTile::action() {
+	printf("Burning\n");
+
+	if (!burned) {
+		burned = true;
+		this->tileState = TileState::V;
+	}
 }
 
 #pragma endregion

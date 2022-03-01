@@ -50,6 +50,7 @@ private:
 	void fire_move(vec2 velocity);
 	void UpdateParallax(vec2 playerPos);
 	void Interact(Tile* tile);
+	void Burn(Tile* tile);
 	// bool checkForTile(Direction direction);
 	float count = 0;
 

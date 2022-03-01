@@ -25,6 +25,13 @@ class RenderSystem {
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
 		  // specify meshes of other assets here
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bushSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flowerSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("treeSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bush0.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flower0.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("tree0.png"))
+
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -39,6 +46,7 @@ class RenderSystem {
 			textures_path("switch_tile_success.png"),
 			textures_path("up_tile.png"),
 			textures_path("up_tile_lightup.png"),
+			textures_path("bushSheet.png"),
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("fire.png"),

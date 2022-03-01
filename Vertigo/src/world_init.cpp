@@ -60,6 +60,9 @@ Entity createTile(Tile* tile)
 	case TileState::D:
 		id = TEXTURE_ASSET_ID::UP_TILE_SUCCESS;
 		break;
+	case TileState::B:
+		id = TEXTURE_ASSET_ID::BURNABLE_TILE;
+		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
 		break;
