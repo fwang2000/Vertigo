@@ -373,7 +373,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		switch (direction) {
 			case Direction::UP:
 				
-				motion.destination[1] += (cube.size - 1) * TILE_BB_HEIGHT;
+				motion.destination[1] += multiplier * TILE_BB_HEIGHT;
 
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -387,7 +387,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				break;
 			case Direction::RIGHT:
 				
-				motion.destination[0] -= (cube.size - 1) * TILE_BB_WIDTH;
+				motion.destination[0] -= multiplier * TILE_BB_WIDTH;
 
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -401,7 +401,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				break;
 			case Direction::LEFT:
 				
-				motion.destination[0] += (cube.size - 1) * TILE_BB_WIDTH;
+				motion.destination[0] += multiplier * TILE_BB_WIDTH;
 
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
@@ -415,7 +415,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 				break;
 			case Direction::DOWN:
 				
-				motion.destination[1] -= (cube.size - 1) * TILE_BB_HEIGHT;
+				motion.destination[1] -= multiplier * TILE_BB_HEIGHT;
 
 				for (Tile& t : registry.tiles.components) {
 					if (t.status == BOX_ANIMATION::STILL)
