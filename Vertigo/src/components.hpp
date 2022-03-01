@@ -44,33 +44,44 @@ enum class BOX_ANIMATION {
 	RIGHT = 4
 };
 
+enum class FACE_DIRECTION {
+	FRONT = 0,
+	LEFT = 1,
+	RIGHT = 2,
+	TOP = 3,
+	BOTTOM = 4,
+	BACK = 5
+};
+
 // Set each character to their placement in the alphabet for easy conversion from the CSV to TileState
 // Letters are 0-indexed: i.e. A = 0
 enum class TileState
 {
-	S = 18,
-	F = 5,
-	V = 21,
-	O = 14,
-	B = 2,
-	I = 8,
-	M = 12,
-	N = 13,
-	W = 22,
-	U = 20,
-	E = 4,
-	Z = 25
+	S = 18,		// Start
+	F = 5,		// Fire
+	V = 21,		// Valid
+	B = 2,		// Burnable
+	I = 8,		// Invisible
+	N = 13,		// Non-interactible
+	W = 22,		// Switch
+	U = 20,		// Up-Tile
+	E = 4,		// Empty
+	Z = 25		// Finish
 };
 
 struct Tile
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	FACE_DIRECTION direction;
 	glm::mat4 model;
 	int degrees = 0;
 	Coordinates coords;
+	Coordinates currentPos;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
-	virtual void action() { printf("Tile\n"); };
+	virtual void action() { return; };
+	
+	void move(vec2 translation, vec2 delta_coords);
 };
 
 struct UpTile : public Tile {
@@ -82,19 +93,13 @@ struct UpTile : public Tile {
 struct SwitchTile : public Tile {
 
 	Tile* targetTile;
-	vec2 movement = vec2(0);
+	Coordinates targetCoords;
 	bool toggled = false;
 	virtual void action();
 };
 
 struct InvisibleTile : public Tile {
 	bool toggled = false;
-	virtual void action();
-};
-
-struct MoveableTile : public Tile {
-	vec2 movement = vec2(0);
-	void move(float x, float y);
 	virtual void action();
 };
 
@@ -251,7 +256,8 @@ enum class TEXTURE_ASSET_ID {
 	BURN = BUSH + 1,
 	INVISIBLE = BURN + 1,
 	SWITCH = INVISIBLE + 1,
-	TEXTURE_COUNT = SWITCH + 1
+	EMPTY = SWITCH + 1,
+	TEXTURE_COUNT = EMPTY + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

@@ -14,33 +14,33 @@ glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	switch (face) {
 	case 0:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(x, y, distance)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, -y, distance)) * matrix;
 		break;
 	case 1:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(-distance, -x, y)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(-distance, -x, -y)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		break;
 	case 2:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(distance, x, y)) * matrix;
-		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(distance, -y, -x)) * matrix;
 		break;
 	case 3:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(x, distance, -y)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, distance, y)) * matrix;
 		break;
 	case 4:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(x, -distance, y)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, -distance, -y)) * matrix;
 		break;
 	case 5:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
-		matrix = translate(glm::mat4(1.0f), vec3(-x, y, -distance)) * matrix;
+		matrix = translate(glm::mat4(1.0f), vec3(x, y, -distance)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(180.0f), vec3(0.0f, 0.0f, 1.0f)) * matrix;
 		break;
 	default:
 		break;
@@ -229,8 +229,8 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		int y = size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
-		if (size % 2 == 0) y -= 0.5f;
+		int y = -size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		if (size % 2 == 0) y += 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
 			int x = (-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
@@ -249,7 +249,9 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(s_tile);
-					s_tile->coords = { i, x + 1, y + 1 };
+					s_tile->coords = { i, y + 1, x + 1 };
+					s_tile->currentPos = s_tile->coords;
+					s_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
 				case TileState::U:
@@ -259,7 +261,9 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(u_tile);
-					u_tile->coords = { i, x + 1, y + 1 };
+					u_tile->coords = { i, y + 1, x + 1 };
+					u_tile->currentPos = u_tile->coords;
+					u_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
 				case TileState::I:
@@ -269,17 +273,9 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(i_tile);
-					i_tile->coords = { i, x + 1, y + 1 };
-					break;
-				}
-				case TileState::M:
-				{
-					MoveableTile* m_tile = new MoveableTile();
-					m_tile->model = tileStartingMatrix(i, x, y, distance);
-					m_tile->tileState = static_cast<TileState>(value[0] - 'A');
-
-					row.push_back(m_tile);
-					m_tile->coords = { i, x + 1, y + 1 };
+					i_tile->coords = { i, y + 1, x + 1 };
+					i_tile->currentPos = i_tile->coords;
+					i_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
 				default:
@@ -289,7 +285,9 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(tile);
-					tile->coords = { i, x + 1, y + 1 };
+					tile->coords = { i, y + 1, x + 1 };
+					tile->currentPos = tile->coords;
+					tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
 				}
@@ -302,7 +300,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 			}
 			this->faces[i].push_back(row);
 			std::vector<Tile*>().swap(row);
-			y -= 1.f;
+			y += 1.f;
 			if (++rows == size) break;
 		}
 	}
@@ -364,7 +362,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 		std::string value;
 		std::stringstream ss(line);
 		std::vector<std::string> modifications;
-		modifications.reserve(10);
+		modifications.reserve(11);
 
 		while (std::getline(ss, value, ','))
 		{
@@ -379,13 +377,24 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 
 			SwitchTile* switch_tile = (SwitchTile*)getTile(Coordinates{ f, r, c });
 
+			int t_f = std::stoi(modifications.at(5));
+			int t_r = std::stoi(modifications.at(6));
+			int t_c = std::stoi(modifications.at(7));
+
 			if (modifications.at(4) == "I") {
 
-				int t_f = std::stoi(modifications.at(5));
-				int t_r = std::stoi(modifications.at(6));
-				int t_c = std::stoi(modifications.at(7));
-
 				switch_tile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+			}
+			else {
+
+				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
+				if (target->tileState == TileState::W) {
+					switch_tile->targetTile = (SwitchTile*)target;
+				}
+				else {
+					switch_tile->targetTile = target;
+				}
+				switch_tile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) } ;
 			}
 		}
 
@@ -517,8 +526,6 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
-	printf("Switch\n");
-
 	if (toggled) {
 		return;
 	}
@@ -527,22 +534,15 @@ void SwitchTile::action() {
 		targetTile->tileState = TileState::V;
 		targetTile->action();
 	}
-	else if (targetTile->tileState == TileState::M) {
-		MoveableTile* m_tile = ((MoveableTile*)targetTile);
-		m_tile->movement = this->movement;
-		m_tile->action();
-	}
 
 	toggled = true;
 }
 
 void UpTile::action() {
-
+	return;
 }
 
 void InvisibleTile::action() {
-
-	printf("Invisible\n");
 
 	if (!toggled) {
 		toggled = true;
@@ -550,8 +550,36 @@ void InvisibleTile::action() {
 	}
 }
 
-void MoveableTile::action() {
-	return;
+void Tile::move(vec2 t, vec2 delta_coord) {
+
+	vec3 translation = vec3(0);
+
+	switch (direction) {
+	case FACE_DIRECTION::FRONT:
+		translation = vec3(t.x, t.y, 0);
+		break;
+	case FACE_DIRECTION::LEFT:
+		translation = vec3(0, t.y, -t.x);
+		break;
+	case FACE_DIRECTION::RIGHT:
+		translation = vec3(0, t.y, -t.x);
+		break;
+	case FACE_DIRECTION::TOP:
+		translation = vec3(t.x, 0, -t.y);
+		break;
+	case FACE_DIRECTION::BOTTOM:
+		translation = vec3(t.x, 0, t.y);
+		break;
+	case FACE_DIRECTION::BACK:
+		translation = vec3(-t.x, -t.y, 0);
+		break;
+	default:
+		break;
+	}
+
+	model = translate(glm::mat4(1.f), translation) * model;
+	currentPos = Coordinates{ currentPos.f, currentPos.r - (int)delta_coord.y , currentPos.c + (int)delta_coord.x };
+	status = BOX_ANIMATION::STILL;
 }
 
 #pragma endregion
