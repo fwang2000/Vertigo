@@ -128,6 +128,8 @@ Entity createFireGauge(RenderSystem* renderer)
 
 	Motion& motion = registry.motions.emplace(entity);
 	motion.scale = vec2({ 50, 0});
+	motion.origin = vec2(100, 100);
+	motion.x_vector = vec2(0, 1);
 
 	registry.renderRequests.insert(
 		entity,
@@ -137,6 +139,7 @@ Entity createFireGauge(RenderSystem* renderer)
 			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
+	
 	return entity;
 }
 
