@@ -16,6 +16,8 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, int size) {
 	motion.velocity = { 0.f , 0.f , 0.f };
 	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
+
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = pos;
 	// explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
@@ -53,8 +55,17 @@ Entity createTile(Tile* tile)
 	case TileState::W:
 		id = TEXTURE_ASSET_ID::SWITCH_TILE;
 		break;
+	case TileState::C:
+		id = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
+		break;
 	case TileState::U:
 		id = TEXTURE_ASSET_ID::UP_TILE;
+		break;
+	case TileState::D:
+		id = TEXTURE_ASSET_ID::UP_TILE_SUCCESS;
+		break;
+	case TileState::B:
+		id = TEXTURE_ASSET_ID::BUSH0;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;

@@ -1,6 +1,7 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
+#include <Windows.h>
 
 // stlib
 #include <cassert>
@@ -208,6 +209,40 @@ void WorldSystem::rotateBox() {
 	}
 }
 
+
+	// handle burnable animations here
+	for (Entity entity : registry.burnables.entities) {
+
+		Burnable& counter = registry.burnables.get(entity);
+		
+		if (counter.counter == 1) {
+			Entity burned = getCurrentTileEntity();
+			RenderRequest& burnRequest = registry.renderRequests.get(burned);
+			if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH4) {
+				counter.counter = 0;
+				burnRequest.used_texture = TEXTURE_ASSET_ID::TILE;
+				registry.burnables.remove(burned);
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH0) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH1;
+				
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH1) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH2;
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH2) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH3;
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH3) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH4;
+			}
+			Sleep(50);
+		} 
+		
+	}
+
+	return true;
+
 void WorldSystem::rotateText() {
 
 	for (Entity entity : registry.text.entities) {
@@ -367,25 +402,30 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
+      if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
+      if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
+      if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
+      if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
+			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
 		case GLFW_KEY_B:
-			// BURN
+			Burn(tile);
 			break;
 		default:
 			break;
@@ -641,6 +681,9 @@ void WorldSystem::Interact(Tile* tile)
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
+		Entity successTile = getCurrentTileEntity();
+		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 	else {
 
@@ -729,6 +772,17 @@ void WorldSystem::UsePower(Direction direction, float power)
 	shot_motion.origin = motion.origin;
 }
 
+void WorldSystem::Burn(Tile* tile) {
+
+	if (tile->tileState == TileState::B) {
+		registry.burnables.emplace(getCurrentTileEntity());
+		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
+		burned.activate = true;
+		burned.counter = 1;
+		tile->tileState == TileState::V;
+	}
+}
+
 void WorldSystem::SetSprite(Direction direction) {
 
 	if (direction == currDirection) {
@@ -796,6 +850,12 @@ Coordinates WorldSystem::searchForTile(Direction direction) {
 	}
 
 	return coords;
+}
+
+// Get entity of the current tile player is on using getTileFromRegistry(player coordinates) 
+Entity WorldSystem::getCurrentTileEntity() {
+	Player& player = registry.players.get(player_explorer);
+	return getTileFromRegistry(player.playerPos);
 }
 
 Entity WorldSystem::getTileFromRegistry(Coordinates coordinates) {

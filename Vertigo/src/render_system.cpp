@@ -156,6 +156,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection);
+
 		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
 		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer

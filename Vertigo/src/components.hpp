@@ -29,6 +29,12 @@ struct Object
 	bool fireInteactible;
 };
 
+struct Burnable
+{
+	int counter = 5;
+	bool activate = false;
+};
+
 struct Fire
 {
 	bool active = false;
@@ -66,7 +72,9 @@ enum class TileState
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
 	E = 4,		// Empty
-	Z = 25		// Finish
+	Z = 25,		// Finish
+  C = 2,    // Switch-Tile Success
+  D = 3,    // Up-Tile Light up
 };
 
 struct Tile
@@ -85,7 +93,6 @@ struct Tile
 };
 
 struct UpTile : public Tile {
-
 	Direction dir = Direction::UP;
 	virtual void action();
 };
@@ -104,7 +111,8 @@ struct InvisibleTile : public Tile {
 };
 
 struct BurnableTile : public Tile {
-	// virtual void action() override;
+	bool burned = false;
+	virtual void action();
 };
 
 struct FinishTile : public Tile {
@@ -276,8 +284,12 @@ enum class TEXTURE_ASSET_ID {
 	FIRE = EMPTY + 1,
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
-	OBJECT = FIRE_GAUGE + 1,
-	TEXTURE_COUNT = OBJECT + 1
+  BUSH0 = FIRE_GAUGE + 1,
+	BUSH1 = BUSH0 + 1,
+	BUSH2 = BUSH1 + 1,
+	BUSH3 = BUSH2 + 1,
+	BUSH4 = BUSH3 + 1,
+	TEXTURE_COUNT = BUSH4 + 1,
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -296,7 +308,7 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	CUBE = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = CUBE + 1
+	GEOMETRY_COUNT = CUBE + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

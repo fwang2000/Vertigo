@@ -25,6 +25,13 @@ class RenderSystem {
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
 		  // specify meshes of other assets here
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bushSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flowerSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("treeSheet.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bush0.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flower0.png")),
+		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("tree0.png"))
+
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -54,7 +61,11 @@ class RenderSystem {
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
-			textures_path("object.png")
+			textures_path("Spritesheets/bush0.png"),
+			textures_path("Spritesheets/bush1.png"),
+			textures_path("Spritesheets/bush2.png"),
+			textures_path("Spritesheets/bush3.png"),
+			textures_path("Spritesheets/bush4.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

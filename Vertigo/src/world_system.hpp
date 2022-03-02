@@ -57,6 +57,7 @@ private:
 	void player_move(vec3 movement, Direction direction);
 	void fire_move(vec2 velocity);
 	void Interact(Tile* tile);
+	void Burn(Tile* tile);
 	void UsePower(Direction direction, float power);
 	// bool checkForTile(Direction direction);
 	float count = 0;
@@ -102,6 +103,7 @@ private:
 
 	// Helper Functions
 	Coordinates searchForTile(Direction direction);
+	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateBox();
 	void rotateText();

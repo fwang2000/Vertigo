@@ -526,6 +526,8 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
+	printf("Switch\n");
+
 	if (toggled) {
 		return;
 	}
@@ -539,10 +541,16 @@ void SwitchTile::action() {
 }
 
 void UpTile::action() {
+	// if up tile facing up {
+	// 	this->tileState = TileState::D;
+	// }
+
 	return;
 }
 
 void InvisibleTile::action() {
+
+	printf("Invisible\n");
 
 	if (!toggled) {
 		toggled = true;
@@ -550,6 +558,14 @@ void InvisibleTile::action() {
 	}
 }
 
+void BurnableTile::action() {
+	printf("Burning\n");
+
+	if (!burned) {
+		burned = true;
+		this->tileState = TileState::V;
+	}
+  
 void Tile::move(vec2 t, vec2 delta_coord) {
 
 	vec3 translation = vec3(0);
