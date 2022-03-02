@@ -47,14 +47,16 @@ class RenderSystem {
 			textures_path("tile.png"),
 			textures_path("invisible_tile.png"),
 			textures_path("switch_tile.png"),
+			textures_path("switch_tile_success.png"),
 			textures_path("up_tile.png"),
+			textures_path("up_tile_lightup.png"),
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("empty_tile.png"),
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
-			textures_path("object.png")
+			textures_path("Spritesheets/bushSheet.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
