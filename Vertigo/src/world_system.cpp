@@ -137,8 +137,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		// progress timer
 		HoldTimer& counter = registry.holdTimers.get(entity);
 		Motion& timer_motion = registry.motions.get(entity);
-		timer_motion.origin = player_motion.origin;
-		timer_motion.position = player_motion.position + vec3(-40, -0, 0);;
 
 		if (counter.increasing){
 			counter.counter_ms += elapsed_ms_since_last_update;
@@ -166,8 +164,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 					counter.counter_ms = 0;
 				}
 			}
-			timer_motion.scale[1] = 100 * counter.counter_ms / counter.max_ms;
 		}
+		timer_motion.scale[1] = 100 * counter.counter_ms / counter.max_ms;
 
 	}
 	rotateBox();
@@ -434,6 +432,10 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
+
+	if (motion.position != motion.destination){
+		return;
+	}
 	
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
@@ -441,6 +443,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		Tile* curTile = cube.getTile(player.playerPos);
 
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		motion.remaining_time = 1000;
 		
 		switch (direction) {
 			case Direction::UP:
