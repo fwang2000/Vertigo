@@ -13,6 +13,14 @@
 
 #include "render_system.hpp"
 
+enum class GameState {
+
+	IDLE = 0,
+	MOVING = 1,
+	INTERACTING = 2,
+	BURNING = 3
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -46,11 +54,11 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	void player_move(vec2 velocity, vec2 distanceTo, Direction direction);
+	void player_move(vec3 movement, Direction direction);
 	void fire_move(vec2 velocity);
-	void UpdateParallax(vec2 playerPos);
 	void Interact(Tile* tile);
 	void Burn(Tile* tile);
+	void UsePower(Direction direction, float power);
 	// bool checkForTile(Direction direction);
 	float count = 0;
 
@@ -86,7 +94,10 @@ private:
 	Entity player_explorer;
 	Cube cube;
 	Entity fire;
+	Entity fire_gauge;
+	Entity fire_shadow;
 	Entity currentObject;
+	GameState gameState = GameState::IDLE;
 
 	Direction currDirection = Direction::DOWN;
 
@@ -94,6 +105,8 @@ private:
 	Coordinates searchForTile(Direction direction);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
+	void rotateBox();
+	void rotateText();
 
 	// C++ random number generator
 	std::default_random_engine rng;

@@ -50,35 +50,46 @@ enum class BOX_ANIMATION {
 	RIGHT = 4
 };
 
+enum class FACE_DIRECTION {
+	FRONT = 0,
+	LEFT = 1,
+	RIGHT = 2,
+	TOP = 3,
+	BOTTOM = 4,
+	BACK = 5
+};
+
 // Set each character to their placement in the alphabet for easy conversion from the CSV to TileState
 // Letters are 0-indexed: i.e. A = 0
 enum class TileState
 {
-	S = 18,
-	F = 5,
-	V = 21,
-	O = 14,
-	B = 1,
-	I = 8,
-	M = 12,
-	N = 13,
-	W = 22,
-	C = 2,
-	U = 20,
-	D = 3,
-	E = 4,
-	Z = 25
+	S = 18,		// Start
+	F = 5,		// Fire
+	V = 21,		// Valid
+	B = 2,		// Burnable
+	I = 8,		// Invisible
+	N = 13,		// Non-interactible
+	W = 22,		// Switch
+	U = 20,		// Up-Tile
+	E = 4,		// Empty
+	Z = 25,		// Finish
+  C = 2,    // Switch-Tile Success
+  D = 3,    // Up-Tile Light up
 };
 
 struct Tile
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	FACE_DIRECTION direction;
 	glm::mat4 model;
 	int degrees = 0;
 	Coordinates coords;
+	Coordinates currentPos;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
-	virtual void action() { printf("Tile\n"); };
+	virtual void action() { return; };
+	
+	void move(vec2 translation, vec2 delta_coords);
 };
 
 struct UpTile : public Tile {
@@ -89,19 +100,13 @@ struct UpTile : public Tile {
 struct SwitchTile : public Tile {
 
 	Tile* targetTile;
-	vec2 movement = vec2(0);
+	Coordinates targetCoords;
 	bool toggled = false;
 	virtual void action();
 };
 
 struct InvisibleTile : public Tile {
 	bool toggled = false;
-	virtual void action();
-};
-
-struct MoveableTile : public Tile {
-	vec2 movement = vec2(0);
-	void move(float x, float y);
 	virtual void action();
 };
 
@@ -153,18 +158,28 @@ struct Oscillate {
 	int steps = 100;
 };
 
-struct Parallax {
-	vec2 position = { 0, 0 };
-	vec2 displacement = { 0, 0 };
-	vec2 factor = { 0.05f, 0.05f };
-};
+struct Motion
+{
+	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
 
-struct Motion {
-	vec2 position = { 0, 0 };
-	vec2 velocity = { 0, 0 };
-	vec2 scale = { 10, 10 };
-	float angle = 0;
-	Direction direction = Direction::DOWN;
+	// Extrapolation
+	vec3 velocity = {0, 0, 0}; // Used if extrapolating
+	vec3 acceleration = {0, 0, 0}; // Used if extrapolating
+
+	// Interpolation
+	vec3 destination = {0, 0, 0}; // Used if interpolating
+	float remaining_time = 0; // Used if interpolating
+
+	// For rendering 3d coordinates to 2d screen
+	vec2 origin = {0, 0};
+	// Please don't change this unless you're changing the viewing angle
+	// It's hard coded based on the current viewing angle of the cube
+	vec2 x_vector = {sin(radians(72.0f)), cos(radians(72.0f))};
+	vec2 y_vector = {0, 1};
+	vec2 z_vector = {-sin(radians(30.0f)), -cos(radians(30.0f))};
+	vec3 position = {0, 0, 0};
+
+	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information
@@ -182,10 +197,18 @@ struct ScreenState
 };
 
 
-// A timer that will be associated to dying chicken
-struct FadeTimer
+// A timer that will be associated to shot fire
+struct ShootTimer
 {
-	float counter_ms = 3000;
+	float counter_ms = 10000;
+};
+
+struct HoldTimer
+{
+	float counter_ms = 0;
+	float max_ms = 3000;
+	bool reverse_when_max = true;
+	bool increasing = true;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
@@ -236,22 +259,7 @@ struct Mesh
  */
 
 enum class TEXTURE_ASSET_ID {
-	EXPLORER_DOWN = 0,
-	EXPLORER_UP = EXPLORER_DOWN + 1,
-	EXPLORER_LEFT = EXPLORER_UP + 1,
-	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
-	TILE = EXPLORER_RIGHT + 1,
-	INVISIBLE_TILE = TILE + 1,
-	SWITCH_TILE = INVISIBLE_TILE + 1,
-	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
-	UP_TILE = SWITCH_TILE_SUCCESS + 1,
-	UP_TILE_SUCCESS = UP_TILE + 1,
-	BURNABLE_TILE = UP_TILE_SUCCESS + 1,
-	END_TILE = BURNABLE_TILE + 1,
-	TILE_SHADOW = END_TILE + 1,
-	FIRE = TILE_SHADOW + 1,
-	OBJECT = FIRE + 1,
-	VERTIGO = OBJECT + 1,
+	VERTIGO = 0,
 	START = VERTIGO + 1,
 	LEVEL = START + 1,
 	ONE = LEVEL + 1,
@@ -262,12 +270,26 @@ enum class TEXTURE_ASSET_ID {
 	BURN = BUSH + 1,
 	INVISIBLE = BURN + 1,
 	SWITCH = INVISIBLE + 1,
-	BUSH0 = SWITCH + 1,
+	EXPLORER_DOWN = SWITCH + 1,
+	EXPLORER_UP = EXPLORER_DOWN + 1,
+	EXPLORER_LEFT = EXPLORER_UP + 1,
+	EXPLORER_RIGHT = EXPLORER_LEFT + 1,
+	TILE = EXPLORER_RIGHT + 1,
+	INVISIBLE_TILE = TILE + 1,
+	SWITCH_TILE = INVISIBLE_TILE + 1,
+	UP_TILE = SWITCH_TILE + 1,
+	END_TILE = UP_TILE + 1,
+	TILE_SHADOW = END_TILE + 1,
+	EMPTY = TILE_SHADOW + 1,
+	FIRE = EMPTY + 1,
+	FIRE_SHADOW = FIRE + 1,
+	FIRE_GAUGE = FIRE_SHADOW + 1,
+  BUSH0 = FIRE_GAUGE + 1,
 	BUSH1 = BUSH0 + 1,
 	BUSH2 = BUSH1 + 1,
 	BUSH3 = BUSH2 + 1,
 	BUSH4 = BUSH3 + 1,
-	TEXTURE_COUNT = BUSH4 + 1
+	TEXTURE_COUNT = BUSH4 + 1,
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

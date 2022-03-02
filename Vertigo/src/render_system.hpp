@@ -36,21 +36,6 @@ class RenderSystem {
 
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, texture_count> texture_paths = {
-			textures_path("explorer_down.png"),
-			textures_path("explorer_up.png"),
-			textures_path("explorer_left.png"), 
-			textures_path("explorer_right.png"),
-			textures_path("tile.png"),
-			textures_path("invisible_tile.png"),
-			textures_path("switch_tile.png"),
-			textures_path("switch_tile_success.png"),
-			textures_path("up_tile.png"),
-			textures_path("up_tile_lightup.png"),
-			textures_path("bushSheet.png"),
-			textures_path("end_tile.png"),
-			textures_path("tileshadow.png"),
-			textures_path("fire.png"),
-			textures_path("object.png"),
 			textures_path("text/Vertigo.png"),
 			textures_path("text/Start.png"),
 			textures_path("text/Level.png"),
@@ -62,6 +47,20 @@ class RenderSystem {
 			textures_path("text/Burn.png"),
 			textures_path("text/Invisible.png"),
 			textures_path("text/Switch.png"),
+			textures_path("explorer_down.png"),
+			textures_path("explorer_up.png"),
+			textures_path("explorer_left.png"),
+			textures_path("explorer_right.png"),
+			textures_path("tile.png"),
+			textures_path("invisible_tile.png"),
+			textures_path("switch_tile.png"),
+			textures_path("up_tile.png"),
+			textures_path("end_tile.png"),
+			textures_path("tileshadow.png"),
+			textures_path("empty_tile.png"),
+			textures_path("fire.png"),
+			textures_path("fire_shadow.png"),
+			textures_path("fire_gauge.png"),
 			textures_path("Spritesheets/bush0.png"),
 			textures_path("Spritesheets/bush1.png"),
 			textures_path("Spritesheets/bush2.png"),
@@ -113,11 +112,12 @@ public:
 	void draw();
 
 	mat4 createViewMatrix();
-	mat4 createProjectionMatrix(int width, int height);
+	mat4 create3DProjectionMatrix(int width, int height);
+	mat3 create2DProjectionMatrix();
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat4& projection, const mat4 &view);
+	void drawTexturedMesh(Entity entity, const mat4& projection3D, const mat3& projection2D, const mat4 &view);
 	void drawToScreen();
 
 	// Window handle
