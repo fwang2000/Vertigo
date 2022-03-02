@@ -42,7 +42,7 @@ class RenderSystem {
 			textures_path("text/Switch.png"),
 			textures_path("explorer_down.png"),
 			textures_path("explorer_up.png"),
-			textures_path("explorer_left.png"), 
+			textures_path("explorer_left.png"),
 			textures_path("explorer_right.png"),
 			textures_path("tile.png"),
 			textures_path("invisible_tile.png"),
@@ -50,10 +50,11 @@ class RenderSystem {
 			textures_path("up_tile.png"),
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
+			textures_path("empty_tile.png"),
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
-			textures_path("object.png"),
+			textures_path("object.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

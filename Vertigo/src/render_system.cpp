@@ -130,32 +130,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		Tile& boxRotate = registry.tiles.get(entity);
+		Tile* boxRotate = registry.tiles.get(entity);
+		if (boxRotate->tileState == TileState::E) {
 
-		switch (boxRotate.status) {
-			case BOX_ANIMATION::UP:
-				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-				boxRotate.degrees++;
-				break;
-			case BOX_ANIMATION::DOWN:
-				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-				boxRotate.degrees++;
-				break;
-			case BOX_ANIMATION::LEFT:
-				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-				boxRotate.degrees++;
-				break;
-			case BOX_ANIMATION::RIGHT:
-				boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-				boxRotate.degrees++;
-				break;
+			model = mat4(0);
 		}
-		if (boxRotate.degrees == 90)
+		else
 		{
-			boxRotate.degrees = 0;
-			boxRotate.status = BOX_ANIMATION::STILL;
+			model = boxRotate->model;
 		}
-		model = boxRotate.model;
 
 		// Get number of indices from index buffer, which has elements uint16_t
 		GLint size = 0;
@@ -267,30 +250,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		Text& boxRotate = registry.text.get(entity);
-
-		switch (boxRotate.status) {
-		case BOX_ANIMATION::UP:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
-			break;
-		case BOX_ANIMATION::DOWN:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
-			break;
-		case BOX_ANIMATION::LEFT:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
-			break;
-		case BOX_ANIMATION::RIGHT:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
-			break;
-		}
-		if (boxRotate.degrees == 90)
-		{
-			boxRotate.degrees = 0;
-			boxRotate.status = BOX_ANIMATION::STILL;
-		}
 		model = boxRotate.model;
 
 		// Get number of indices from index buffer, which has elements uint16_t

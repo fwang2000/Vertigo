@@ -13,6 +13,14 @@
 
 #include "render_system.hpp"
 
+enum class GameState {
+
+	IDLE = 0,
+	MOVING = 1,
+	INTERACTING = 2,
+	BURNING = 3
+};
+
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
 class WorldSystem
@@ -88,11 +96,15 @@ private:
 	Entity fire_gauge;
 	Entity fire_shadow;
 	Entity currentObject;
+	GameState gameState = GameState::IDLE;
 
 	Direction currDirection = Direction::DOWN;
 
 	// Helper Functions
 	Coordinates searchForTile(Direction direction);
+	Entity getTileFromRegistry(Coordinates coordinates);
+	void rotateBox();
+	void rotateText();
 
 	// C++ random number generator
 	std::default_random_engine rng;

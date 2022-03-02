@@ -41,6 +41,9 @@ Entity createTile(Tile* tile)
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
 
 	switch (tile->tileState) {
+	case TileState::E:
+		id = TEXTURE_ASSET_ID::EMPTY;
+		break;
 	case TileState::V:
 		id = TEXTURE_ASSET_ID::TILE;
 		break;
@@ -61,7 +64,8 @@ Entity createTile(Tile* tile)
 	}
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	registry.tiles.insert(entity, *tile);
+	registry.tiles.insert(entity, tile);
+
 	registry.renderRequests.insert(
 		entity,
 		{ id,
