@@ -13,7 +13,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(4) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -148,74 +148,66 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	}
 	UpdateParallax(player_motion.position);
 
-	rotateBox();
-	rotateText();
+	rotateAll(elapsed_ms_since_last_update);
 
 	return true;
 }
 
-void WorldSystem::rotateBox() {
+void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 
 	glm::mat4 model = glm::mat4(1.f);
 
-	for (Entity entity : registry.tiles.entities) {
+	if (rot.status == BOX_ANIMATION::STILL) return;
+		float rads;
+		if (elapsed_ms_since_last_update > rot.remainingTime) {
+			rads = radians((90.f / rot.animationTime) * rot.remainingTime);
+			rot.remainingTime = 0.f;
+		} else {
+			rads = radians((90.f / rot.animationTime) * elapsed_ms_since_last_update);
+			rot.remainingTime -= elapsed_ms_since_last_update;
+		}
 
-		Tile* boxRotate = registry.tiles.get(entity);
-
-		switch (boxRotate->status) {
+	for (Tile* tile : registry.tiles.components) {
+		switch (rot.status) {
 		case BOX_ANIMATION::UP:
-			boxRotate->model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate->model;
-			boxRotate->degrees++;
+			tile->model = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * tile->model;
 			break;
 		case BOX_ANIMATION::DOWN:
-			boxRotate->model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate->model;
-			boxRotate->degrees++;
+			tile->model = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * tile->model;
 			break;
 		case BOX_ANIMATION::LEFT:
-			boxRotate->model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate->model;
-			boxRotate->degrees++;
+			tile->model = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * tile->model;
 			break;
 		case BOX_ANIMATION::RIGHT:
-			boxRotate->model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate->model;
-			boxRotate->degrees++;
+			tile->model = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * tile->model;
 			break;
-		}
-		if (boxRotate->degrees == 90)
-		{
-			boxRotate->degrees = 0;
-			boxRotate->status = BOX_ANIMATION::STILL;
+		default:
+			break;
 		}
 	}
-}
 
-void WorldSystem::rotateText() {
+	for (Text& text : registry.text.components) {
 
-	for (Entity entity : registry.text.entities) {
-		Text& boxRotate = registry.text.get(entity);
-
-		switch (boxRotate.status) {
+		switch (rot.status) {
 		case BOX_ANIMATION::UP:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
+			text.model = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * text.model;
 			break;
 		case BOX_ANIMATION::DOWN:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(1.0f, 0.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
+			text.model = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * text.model;
 			break;
 		case BOX_ANIMATION::LEFT:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(-1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
+			text.model = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * text.model;
 			break;
 		case BOX_ANIMATION::RIGHT:
-			boxRotate.model = rotate(glm::mat4(1.0f), (float)radians(1.0f), vec3(0.0f, 1.0f, 0.0f)) * boxRotate.model;
-			boxRotate.degrees++;
+			text.model = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * text.model;
 			break;
 		}
-		if (boxRotate.degrees == 90)
-		{
-			boxRotate.degrees = 0;
-			boxRotate.status = BOX_ANIMATION::STILL;
-		}
+	}
+
+	// TODO: rotate all objects that are rendered on screen
+	if (rot.remainingTime == 0.f)
+	{
+		rot.status = BOX_ANIMATION::STILL;
 	}
 }
 
@@ -283,7 +275,7 @@ void WorldSystem::load_level() {
 	}
 
 	cube.loadTextFromExcelFile(text_path("text" + std::to_string(level) + ".csv"));
-	for (int i = 0; i < cube.text.size(); i++) {
+	for (uint i = 0; i < cube.text.size(); i++) {
 		createText(cube.text[i]);
 	}
 
@@ -346,7 +338,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
-	if (action == GLFW_RELEASE && tile->status == BOX_ANIMATION::STILL) {
+	if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
 		switch (key)
 		{
 		case GLFW_KEY_W:
@@ -408,122 +400,96 @@ void WorldSystem::player_move(vec2 velocity, vec2 distanceTo, Direction directio
 		Tile* curTile = cube.getTile(player.playerPos);
 
 		faceDirection = mod(faceDirection, curTile->adjList[static_cast<int>(trueDirection)].second);
+		rot.remainingTime = 500.f;
+		rot.animationTime = 500.f;
 		
 		switch (direction) {
 			case Direction::UP:
+				rot.status = BOX_ANIMATION::DOWN;
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL) {
-
-						t->status = BOX_ANIMATION::DOWN;
-
-						switch (t->direction) {
-						case FACE_DIRECTION::FRONT:
-							t->direction = FACE_DIRECTION::BOTTOM;
-							break;
-						case FACE_DIRECTION::TOP:
-							t->direction = FACE_DIRECTION::FRONT;
-							break;
-						case FACE_DIRECTION::BACK:
-							t->direction = FACE_DIRECTION::TOP;
-							break;
-						case FACE_DIRECTION::BOTTOM:
-							t->direction = FACE_DIRECTION::BACK;
-							break;
-						default:
-							break;
-						}
+					switch (t->direction) {
+					case FACE_DIRECTION::FRONT:
+						t->direction = FACE_DIRECTION::BOTTOM;
+						break;
+					case FACE_DIRECTION::TOP:
+						t->direction = FACE_DIRECTION::FRONT;
+						break;
+					case FACE_DIRECTION::BACK:
+						t->direction = FACE_DIRECTION::TOP;
+						break;
+					case FACE_DIRECTION::BOTTOM:
+						t->direction = FACE_DIRECTION::BACK;
+						break;
+					default:
+						break;
 					}
-				}
-				for (Text& t : registry.text.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::DOWN;
 				}
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * -1.f), 0.f)) * player.model;
 				break;
 			case Direction::RIGHT:
+				rot.status = BOX_ANIMATION::LEFT;
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL) {
-						t->status = BOX_ANIMATION::LEFT;
 
-						switch (t->direction) {
-						case FACE_DIRECTION::FRONT:
-							t->direction = FACE_DIRECTION::LEFT;
-							break;
-						case FACE_DIRECTION::LEFT:
-							t->direction = FACE_DIRECTION::BACK;
-							break;
-						case FACE_DIRECTION::BACK:
-							t->direction = FACE_DIRECTION::RIGHT;
-							break;
-						case FACE_DIRECTION::RIGHT:
-							t->direction = FACE_DIRECTION::FRONT;
-							break;
-						default:
-							break;
-						}
+					switch (t->direction) {
+					case FACE_DIRECTION::FRONT:
+						t->direction = FACE_DIRECTION::LEFT;
+						break;
+					case FACE_DIRECTION::LEFT:
+						t->direction = FACE_DIRECTION::BACK;
+						break;
+					case FACE_DIRECTION::BACK:
+						t->direction = FACE_DIRECTION::RIGHT;
+						break;
+					case FACE_DIRECTION::RIGHT:
+						t->direction = FACE_DIRECTION::FRONT;
+						break;
+					default:
+						break;
 					}
-				}
-				for (Text& t : registry.text.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::LEFT;
 				}
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * -1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::LEFT:
+				rot.status = BOX_ANIMATION::RIGHT;
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL) {
-						t->status = BOX_ANIMATION::RIGHT;
-
-						switch (t->direction) {
-						case FACE_DIRECTION::FRONT:
-							t->direction = FACE_DIRECTION::RIGHT;
-							break;
-						case FACE_DIRECTION::LEFT:
-							t->direction = FACE_DIRECTION::FRONT;
-							break;
-						case FACE_DIRECTION::BACK:
-							t->direction = FACE_DIRECTION::LEFT;
-							break;
-						case FACE_DIRECTION::RIGHT:
-							t->direction = FACE_DIRECTION::BACK;
-							break;
-						default:
-							break;
-						}
+					switch (t->direction) {
+					case FACE_DIRECTION::FRONT:
+						t->direction = FACE_DIRECTION::RIGHT;
+						break;
+					case FACE_DIRECTION::LEFT:
+						t->direction = FACE_DIRECTION::FRONT;
+						break;
+					case FACE_DIRECTION::BACK:
+						t->direction = FACE_DIRECTION::LEFT;
+						break;
+					case FACE_DIRECTION::RIGHT:
+						t->direction = FACE_DIRECTION::BACK;
+						break;
+					default:
+						break;
 					}
-				}
-				for (Text& t : registry.text.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::RIGHT;
 				}
 				player.model = translate(glm::mat4(1.f), vec3((multiplier * 1.f), 0.f, 0.f)) * player.model;
 				break;
 			case Direction::DOWN:
+				rot.status = BOX_ANIMATION::UP;
 				for (Tile* t : registry.tiles.components) {
-					if (t->status == BOX_ANIMATION::STILL) {
-						t->status = BOX_ANIMATION::UP;
-
-						switch (t->direction) {
-						case FACE_DIRECTION::FRONT:
-							t->direction = FACE_DIRECTION::TOP;
-							break;
-						case FACE_DIRECTION::TOP:
-							t->direction = FACE_DIRECTION::BACK;
-							break;
-						case FACE_DIRECTION::BACK:
-							t->direction = FACE_DIRECTION::BOTTOM;
-							break;
-						case FACE_DIRECTION::BOTTOM:
-							t->direction = FACE_DIRECTION::FRONT;
-							break;
-						default:
-							break;
-						}
+					switch (t->direction) {
+					case FACE_DIRECTION::FRONT:
+						t->direction = FACE_DIRECTION::TOP;
+						break;
+					case FACE_DIRECTION::TOP:
+						t->direction = FACE_DIRECTION::BACK;
+						break;
+					case FACE_DIRECTION::BACK:
+						t->direction = FACE_DIRECTION::BOTTOM;
+						break;
+					case FACE_DIRECTION::BOTTOM:
+						t->direction = FACE_DIRECTION::FRONT;
+						break;
+					default:
+						break;
 					}
-				}
-				for (Text& t : registry.text.components) {
-					if (t.status == BOX_ANIMATION::STILL)
-						t.status = BOX_ANIMATION::UP;
 				}
 				player.model = translate(glm::mat4(1.f), vec3(0.f, (multiplier * 1.f), 0.f)) * player.model;
 				break;

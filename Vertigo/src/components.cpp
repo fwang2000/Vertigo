@@ -579,7 +579,7 @@ void Tile::move(vec2 t, vec2 delta_coord) {
 
 	model = translate(glm::mat4(1.f), translation) * model;
 	currentPos = Coordinates{ currentPos.f, currentPos.r - (int)delta_coord.y , currentPos.c + (int)delta_coord.x };
-	status = BOX_ANIMATION::STILL;
+	// status = BOX_ANIMATION::STILL;
 }
 
 #pragma endregion

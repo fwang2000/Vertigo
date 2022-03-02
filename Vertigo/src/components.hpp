@@ -69,12 +69,17 @@ enum class TileState
 	Z = 25		// Finish
 };
 
-struct Tile
+struct Rotate
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	float remainingTime = 0.f;
+	float animationTime = 0.f;
+};
+
+struct Tile
+{
 	FACE_DIRECTION direction;
 	glm::mat4 model;
-	int degrees = 0;
 	Coordinates coords;
 	Coordinates currentPos;
 	TileState tileState = TileState::E;
@@ -115,11 +120,9 @@ struct StartTile : public Tile {
 
 };
 
-struct Text {
-
-	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+struct Text 
+{
 	glm::mat4 model;
-	int degrees = 0;
 	int texture_id;
 };
 
