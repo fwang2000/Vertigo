@@ -31,6 +31,7 @@ struct Object
 
 struct Burnable
 {
+	int counter = 5;
 	bool activate = false;
 };
 
@@ -261,7 +262,12 @@ enum class TEXTURE_ASSET_ID {
 	BURN = BUSH + 1,
 	INVISIBLE = BURN + 1,
 	SWITCH = INVISIBLE + 1,
-	TEXTURE_COUNT = SWITCH + 1
+	BUSH0 = SWITCH + 1,
+	BUSH1 = BUSH0 + 1,
+	BUSH2 = BUSH1 + 1,
+	BUSH3 = BUSH2 + 1,
+	BUSH4 = BUSH3 + 1,
+	TEXTURE_COUNT = BUSH4 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

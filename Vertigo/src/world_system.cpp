@@ -1,6 +1,7 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
+#include <Windows.h>
 
 // stlib
 #include <cassert>
@@ -168,14 +169,35 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// reduce window brightness if any of the present chickens is dying
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
-
 	// handle burnable animations here
 	for (Entity entity : registry.burnables.entities) {
-		// check if object has been burned by fire
-		Burnable& object = registry.burnables.get(entity);
-		if (object.activate == true) {
-			registry.burnables.remove(entity);
-		}
+
+		Burnable& counter = registry.burnables.get(entity);
+		
+		if (counter.counter == 1) {
+			Entity burned = getCurrentTileEntity();
+			RenderRequest& burnRequest = registry.renderRequests.get(burned);
+			if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH4) {
+				counter.counter = 0;
+				burnRequest.used_texture = TEXTURE_ASSET_ID::TILE;
+				registry.burnables.remove(burned);
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH0) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH1;
+				
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH1) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH2;
+			} 
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH2) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH3;
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH3) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH4;
+			}
+			Sleep(50);
+		} 
+		
 	}
 
 	return true;
@@ -530,7 +552,8 @@ void WorldSystem::Burn(Tile* tile) {
 		registry.burnables.emplace(getCurrentTileEntity());
 		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
 		burned.activate = true;
-		tile->tileState = TileState::V;
+		burned.counter = 1;
+		tile->tileState == TileState::V;
 	}
 }
 

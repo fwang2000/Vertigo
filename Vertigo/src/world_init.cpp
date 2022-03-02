@@ -61,7 +61,7 @@ Entity createTile(Tile* tile)
 		id = TEXTURE_ASSET_ID::UP_TILE_SUCCESS;
 		break;
 	case TileState::B:
-		id = TEXTURE_ASSET_ID::BURNABLE_TILE;
+		id = TEXTURE_ASSET_ID::BUSH0;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;

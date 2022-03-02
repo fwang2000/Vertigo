@@ -179,10 +179,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
 		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection);
 		
-		GLint burned_uloc = glGetUniformLocation(program, "burned");
-			assert(burned_uloc >= 0);
-		GLint flag = registry.burnables.has(entity) ? 1 : 0;
-		glUniform1i(burned_uloc, flag);
+		// GLint burned_uloc = glGetUniformLocation(program, "burned");
+		// 	assert(burned_uloc >= 0);
+		// GLint flag = registry.burnables.has(entity) ? 1 : 0;
+		// glUniform1i(burned_uloc, flag);
 
 		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
