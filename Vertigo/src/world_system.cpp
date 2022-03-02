@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(4) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -99,17 +99,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
 
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	// for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-	// 	Motion& motion = motions_registry.components[i];
-	// 	if (motion.position.x + abs(motion.scale.x) < 0.f) {
-	// 		if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-	// 			registry.remove_all_components_of(motions_registry.entities[i]);
-	// 	}
-	// }
-
 	// Processing the explorer state
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
@@ -172,6 +161,36 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	rotateBox();
 	rotateText();
 
+	// handle burnable animations here
+	for (Entity entity : registry.burnables.entities) {
+
+		Burnable& counter = registry.burnables.get(entity);
+
+		if (counter.counter == 1) {
+			Entity burned = getCurrentTileEntity();
+			RenderRequest& burnRequest = registry.renderRequests.get(burned);
+			if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH4) {
+				counter.counter = 0;
+				burnRequest.used_texture = TEXTURE_ASSET_ID::TILE;
+				registry.burnables.remove(burned);
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH0) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH1;
+
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH1) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH2;
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH2) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH3;
+			}
+			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH3) {
+				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH4;
+			}
+			Sleep(50);
+		}
+	}
+
 	return true;
 }
 
@@ -208,40 +227,6 @@ void WorldSystem::rotateBox() {
 		}
 	}
 }
-
-
-	// handle burnable animations here
-	for (Entity entity : registry.burnables.entities) {
-
-		Burnable& counter = registry.burnables.get(entity);
-		
-		if (counter.counter == 1) {
-			Entity burned = getCurrentTileEntity();
-			RenderRequest& burnRequest = registry.renderRequests.get(burned);
-			if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH4) {
-				counter.counter = 0;
-				burnRequest.used_texture = TEXTURE_ASSET_ID::TILE;
-				registry.burnables.remove(burned);
-			} 
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH0) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH1;
-				
-			} 
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH1) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH2;
-			} 
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH2) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH3;
-			}
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH3) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH4;
-			}
-			Sleep(50);
-		} 
-		
-	}
-
-	return true;
 
 void WorldSystem::rotateText() {
 
@@ -294,16 +279,6 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
-	// Create a new fire
-	fire = createFire(renderer, vec3(-1, -1, -1));
-	fire_spot = vec2(
-		window_width_px / 2 + -1 * window_height_px / 3,
-		window_height_px / 2 + -1 * window_height_px / 3
-	);
-	registry.colors.insert(fire, vec3{ 1, 0, 0 });
-
-	obtainedFire = false;
-
 	load_level();
 
 	// Debugging for memory/component leaks
@@ -343,6 +318,17 @@ void WorldSystem::load_level() {
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, startingpos, cube.size);
 	registry.colors.insert(player_explorer, {1, 1, 1});
+
+	// Create a new fire
+	fire = createFire(renderer, vec3(-1, -1, -1));
+	fire_spot = vec2(
+		window_width_px / 2 + -1 * window_height_px / 3,
+		window_height_px / 2 + -1 * window_height_px / 3
+	);
+
+	registry.colors.insert(fire, vec3{ 1, 0, 0 });
+
+	obtainedFire = false;
 }
 
 // Compute collisions between entities
@@ -353,28 +339,6 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
-
-		// if (registry.fire.has(entity) && registry.objects.has(entity_other))
-		// {
-		// 	Motion& motion = registry.motions.get(entity);
-		// 	motion.velocity = vec2(0);
-		// 	motion.position = player_destination + vec2(40, -40);
-		// 	interacting = false;
-
-		// 	currentObject = entity_other;
-		// 	activated = true;
-        // }
-
-		// if (registry.players.has(entity) && registry.fire.has(entity_other)) 
-		// {
-		// 	//Player& player = registry.players.get(entity);
-		// 	if (!obtainedFire) 
-		// 	{
-		// 		obtainedFire = true;
-		// 		Motion& motion = registry.motions.get(entity_other);
-		// 		motion.scale = { 0.5 * FIRE_BB_WIDTH, 0.5 * FIRE_BB_HEIGHT };
-		// 	}
-		// }
 	}
 
 	// Remove all collisions from this simulation step
@@ -462,6 +426,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
+
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
@@ -644,23 +609,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	if (tile->tileState == TileState::Z) {
 		next_level();
 	}
-
-	// UpdatePlayerCoordinates(direction);
-	// Motion& motion = registry.motions.get(player_explorer);
-	// motion.velocity = velocity;
-	// player_destination = motion.position + distanceTo;
-	// moving = true;
-
-	// if (obtainedFire) 
-	// {
-	// 	fire_move(velocity);
-	// }
-}
-
-void WorldSystem::fire_move(vec2 velocity)
-{
-	// Motion& motion = registry.motions.get(fire);
-	// motion.velocity = velocity;
 }
 
 void WorldSystem::Interact(Tile* tile) 
@@ -672,7 +620,6 @@ void WorldSystem::Interact(Tile* tile)
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
 	if (s_tile->toggled) {
-		printf("Toggled");
 		return;
 	}
 
@@ -688,8 +635,7 @@ void WorldSystem::Interact(Tile* tile)
 	else {
 
 		if (s_tile->targetTile->tileState == TileState::E) {
-
-			printf("return");
+			
 			return;
 		}
 
@@ -775,11 +721,10 @@ void WorldSystem::UsePower(Direction direction, float power)
 void WorldSystem::Burn(Tile* tile) {
 
 	if (tile->tileState == TileState::B) {
-		registry.burnables.emplace(getCurrentTileEntity());
-		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
+		Burnable& burned = registry.burnables.emplace(getCurrentTileEntity());
 		burned.activate = true;
 		burned.counter = 1;
-		tile->tileState == TileState::V;
+		tile->tileState = TileState::V;
 	}
 }
 
@@ -794,10 +739,10 @@ void WorldSystem::SetSprite(Direction direction) {
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
 	switch (direction) {
 	case Direction::UP:
-		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_LEFT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
 		break;
 	case Direction::DOWN:
-		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_LEFT;
 		break;
 	case Direction::LEFT:
 		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_UP;

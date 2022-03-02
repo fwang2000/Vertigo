@@ -66,15 +66,15 @@ enum class TileState
 	S = 18,		// Start
 	F = 5,		// Fire
 	V = 21,		// Valid
-	B = 2,		// Burnable
+	B = 1,		// Burnable
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
 	E = 4,		// Empty
 	Z = 25,		// Finish
-  C = 2,    // Switch-Tile Success
-  D = 3,    // Up-Tile Light up
+	C = 2,      // Switch-Tile Success
+	D = 3,      // Up-Tile Light up
 };
 
 struct Tile
@@ -277,14 +277,16 @@ enum class TEXTURE_ASSET_ID {
 	TILE = EXPLORER_RIGHT + 1,
 	INVISIBLE_TILE = TILE + 1,
 	SWITCH_TILE = INVISIBLE_TILE + 1,
-	UP_TILE = SWITCH_TILE + 1,
-	END_TILE = UP_TILE + 1,
+	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
+	UP_TILE = SWITCH_TILE_SUCCESS + 1,
+	UP_TILE_SUCCESS = UP_TILE + 1,
+	END_TILE = UP_TILE_SUCCESS + 1,
 	TILE_SHADOW = END_TILE + 1,
 	EMPTY = TILE_SHADOW + 1,
 	FIRE = EMPTY + 1,
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
-  BUSH0 = FIRE_GAUGE + 1,
+	BUSH0 = FIRE_GAUGE + 1,
 	BUSH1 = BUSH0 + 1,
 	BUSH2 = BUSH1 + 1,
 	BUSH3 = BUSH2 + 1,

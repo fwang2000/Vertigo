@@ -55,7 +55,6 @@ private:
 
 	// Movement Functions
 	void player_move(vec3 movement, Direction direction);
-	void fire_move(vec2 velocity);
 	void Interact(Tile* tile);
 	void Burn(Tile* tile);
 	void UsePower(Direction direction, float power);
@@ -70,7 +69,6 @@ private:
 
 	// Player Attributes
 	void SetSprite(Direction direction);
-	void UpdatePlayerCoordinates(Direction direction);
 	vec2 player_destination;
 	bool moving = false;
 	Direction faceDirection = Direction::UP; // always starts as up
