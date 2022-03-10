@@ -308,7 +308,7 @@ void WorldSystem::load_level() {
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
 	// Create a new explorer
-	player_explorer = createExplorer(renderer, startingpos, cube.size);
+	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
 	registry.colors.insert(player_explorer, {1, 1, 1});
 
 	// Create a new fire
@@ -360,12 +360,12 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		case GLFW_KEY_W:
 			dir = Direction::UP;
       		if (tile->tileState == TileState::B) { break; }
-			player_move(vec3({0, -1, 0}), dir);
+			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
       		if (tile->tileState == TileState::B) { break; }
-			player_move(vec3({0, 1, 0}), dir);
+			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
@@ -701,10 +701,10 @@ void WorldSystem::SetSprite(Direction direction) {
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::EXPLORER_DOWN;
 	switch (direction) {
 	case Direction::UP:
-		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_LEFT;
 		break;
 	case Direction::DOWN:
-		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_LEFT;
+		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_RIGHT;
 		break;
 	case Direction::LEFT:
 		request.used_texture = TEXTURE_ASSET_ID::EXPLORER_UP;

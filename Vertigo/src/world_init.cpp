@@ -1,35 +1,33 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
-Entity createExplorer(RenderSystem* renderer, Coordinates pos, int size) {
+Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
-	
+
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
-	motion.origin = vec2{ window_width_px/2, window_height_px/2 };
-	motion.position = vec3(-(size - 0.5)* TILE_BB_WIDTH + pos.c * TILE_BB_WIDTH, -(size/2 - 0.5) * TILE_BB_HEIGHT + pos.r * TILE_BB_HEIGHT, 0);
-	motion.destination = motion.position;
+	motion.origin = vec2{ pos.c, pos.r };
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
 	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
-
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = pos;
-	// explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
-	// explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
-	// explorer.model = translateMatrix * explorer.model;
-	// explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * explorer.model;
+	explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
+	explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
+	explorer.model = translateMatrix * explorer.model;
+	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * explorer.model;
 
 	registry.renderRequests.insert(
 		entity,
 		{
 			TEXTURE_ASSET_ID::EXPLORER_DOWN,
-			EFFECT_ASSET_ID::TEXTURED,
+			EFFECT_ASSET_ID::PLAYER,
 			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
