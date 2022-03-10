@@ -8,23 +8,6 @@
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection, const mat4& view)
 {
-	Transform transform;
-
-	if (registry.motions.has(entity)) {
-		Motion& motion = registry.motions.get(entity);
-
-		// Transformation code, see Rendering and Transformation in the template
-		// specification for more info Incrementally updates transformation matrix,
-		// thus ORDER IS IMPORTANT
-		if (registry.oscillations.has(entity)) {
-			Oscillate oscillate = registry.oscillations.get(entity);
-			transform.translate(oscillate.displacement);
-		}
-		transform.translate(motion.position);
-		transform.rotate(motion.angle);
-		transform.scale(motion.scale);
-	}
-
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
@@ -50,6 +33,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	// Input data location as in the vertex buffer
 	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
 	{
+		Motion& motion = registry.motions.get(entity);
+
+		// Transformation code, see Rendering and Transformation in the template
+		// specification for more info Incrementally updates transformation matrix,
+		// thus ORDER IS IMPORTANT
+		Transform transform;
+
+		transform.translate( motion.position[0] * motion.x_vector
+						   + motion.position[1] * motion.y_vector
+						   + motion.position[2] * motion.z_vector
+						   + motion.origin);
+		transform.scale(motion.scale);
+		transform.rotate(acos(dot(motion.z_vector, vec2({0, 1}))));
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
 		gl_has_errors();
@@ -208,11 +204,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		Player& player = registry.players.get(entity);
 		model = player.model;
 
+		Motion& motion = registry.motions.get(entity);
+		mat4 trans = translate(mat4(1.f), motion.position);
+
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");

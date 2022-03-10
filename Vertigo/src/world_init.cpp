@@ -9,8 +9,12 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.velocity = { 0.f, 0.f };
-	motion.scale = vec2({ EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT });
+	motion.interpolate = true;
+	motion.origin = vec2{ pos.c, pos.r };
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = pos;
@@ -97,26 +101,19 @@ Entity createFire(RenderSystem* renderer, vec3 pos)
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = vec2(
-		window_width_px / 2 + pos.x * distance,
-		window_height_px / 2 + pos.y * distance
-	);
-	motion.velocity = { 0.f, 0.f };
 	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
-
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
 
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = vec3(pos.x + 1, pos.y + 1, pos.z + 1) ;
 
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{
-	// 		TEXTURE_ASSET_ID::FIRE,
-	// 		EFFECT_ASSET_ID::TEXTURED,
-	// 		GEOMETRY_BUFFER_ID::SPRITE
-	// 	}
-	// );
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::FIRE,
+			EFFECT_ASSET_ID::TEXTURED,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
 	return entity;
 }
 
