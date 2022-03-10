@@ -63,6 +63,9 @@ void PhysicsSystem::step(float elapsed_ms)
 			}
 			else{
 				motion.position = motion.position + (motion.destination - motion.position) * (elapsed_ms / motion.remaining_time);
+				if (motion.move_z) {
+					motion.position.z = 2*sin((PI*motion.remaining_time)/500.f);
+				}
 				motion.remaining_time -= elapsed_ms;
 			}
 		}

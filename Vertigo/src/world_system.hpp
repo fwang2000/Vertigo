@@ -91,6 +91,7 @@ private:
 	RenderSystem* renderer;
 	Entity player_explorer;
 	Cube cube;
+	Rotate rot; // command to rotate all tiles and text and objects
 	Entity fire;
 	Entity fire_gauge;
 	Entity fire_shadow;
@@ -103,8 +104,7 @@ private:
 	Coordinates searchForTile(Direction direction);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
-	void rotateBox();
-	void rotateText();
+	void rotateAll(float elapsed_ms_since_last_update);
 
 	// C++ random number generator
 	std::default_random_engine rng;

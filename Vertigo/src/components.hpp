@@ -77,12 +77,17 @@ enum class TileState
 	D = 3,      // Up-Tile Light up
 };
 
-struct Tile
+struct Rotate
 {
 	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+	float remainingTime = 0.f;
+	float animationTime = 0.f;
+};
+
+struct Tile
+{
 	FACE_DIRECTION direction;
 	glm::mat4 model;
-	int degrees = 0;
 	Coordinates coords;
 	Coordinates currentPos;
 	TileState tileState = TileState::E;
@@ -123,11 +128,9 @@ struct StartTile : public Tile {
 
 };
 
-struct Text {
-
-	BOX_ANIMATION status = BOX_ANIMATION::STILL;
+struct Text 
+{
 	glm::mat4 model;
-	int degrees = 0;
 	int texture_id;
 };
 
@@ -161,6 +164,7 @@ struct Oscillate {
 struct Motion
 {
 	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
+	bool move_z = false;
 
 	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
@@ -195,7 +199,6 @@ struct ScreenState
 {
 	float darken_screen_factor = -1;
 };
-
 
 // A timer that will be associated to shot fire
 struct ShootTimer

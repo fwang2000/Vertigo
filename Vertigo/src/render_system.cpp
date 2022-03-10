@@ -205,11 +205,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		Player& player = registry.players.get(entity);
 		model = player.model;
 
+		Motion& motion = registry.motions.get(entity);
+		mat4 trans = translate(mat4(1.f), motion.position);
+
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
