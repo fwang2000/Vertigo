@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -164,29 +164,14 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	for (Entity entity : registry.burnables.entities) {
 
 		Burnable& counter = registry.burnables.get(entity);
+		if (counter.activate == true){
+			counter.counter_ms += elapsed_ms_since_last_update;
+		}
 
-		if (counter.counter == 1) {
-			Entity burned = getCurrentTileEntity();
-			RenderRequest& burnRequest = registry.renderRequests.get(burned);
-			if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH4) {
-				counter.counter = 0;
-				burnRequest.used_texture = TEXTURE_ASSET_ID::TILE;
-				registry.burnables.remove(burned);
-			}
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH0) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH1;
-
-			}
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH1) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH2;
-			}
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH2) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH3;
-			}
-			else if (burnRequest.used_texture == TEXTURE_ASSET_ID::BUSH3) {
-				burnRequest.used_texture = TEXTURE_ASSET_ID::BUSH4;
-			}
-			Sleep(50);
+		if (counter.counter_ms > counter.max_ms) {
+			registry.burnables.remove(entity);
+			Tile* tile = registry.tiles.get(entity);
+			tile->tileState = TileState::V;
 		}
 	}
 
@@ -715,10 +700,9 @@ void WorldSystem::UsePower(Direction direction, float power)
 void WorldSystem::Burn(Tile* tile) {
 
 	if (tile->tileState == TileState::B) {
-		Burnable& burned = registry.burnables.emplace(getCurrentTileEntity());
+		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
 		burned.activate = true;
-		burned.counter = 1;
-		tile->tileState = TileState::V;
+		
 	}
 }
 
