@@ -229,11 +229,11 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 	std::string line;
 	for (int i = 0; i < 6; i++) {
-		int y = int(-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+		float y = -size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 		if (size % 2 == 0) y += 0.5f;
 		int rows = 0;
 		while (std::getline(file, line)) {
-			int x = int(-size / divisor); // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
+			float x = -size / divisor; // divide by: size = 3 --> 3, size = 4 --> 2, size = 5 --> 2.5
 			if (size % 2 == 0) x += 0.5f;
 			std::string value;
 			std::stringstream ss(line);
@@ -241,6 +241,9 @@ bool Cube::loadFromExcelFile(std::string filename) {
 			row.reserve(size);
 			while (std::getline(ss, value, ','))
 			{
+				int x_coord = static_cast<int>(floor(x)) + ceil(size / 3.f);
+				int y_coord = static_cast<int>(floor(y)) + ceil(size / 3.f);
+
 				switch (static_cast<TileState>(value[0] - 'A')) {
 				case TileState::W:
 				{
@@ -249,7 +252,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(s_tile);
-					s_tile->coords = { i, y + 1, x + 1 };
+					s_tile->coords = { i, y_coord, x_coord };
 					s_tile->currentPos = s_tile->coords;
 					s_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
@@ -261,7 +264,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(u_tile);
-					u_tile->coords = { i, y + 1, x + 1 };
+					u_tile->coords = { i, y_coord, x_coord };
 					u_tile->currentPos = u_tile->coords;
 					u_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
@@ -273,7 +276,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(i_tile);
-					i_tile->coords = { i, y + 1, x + 1 };
+					i_tile->coords = { i, y_coord, x_coord };
 					i_tile->currentPos = i_tile->coords;
 					i_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
@@ -285,7 +288,7 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					tile->tileState = static_cast<TileState>(value[0] - 'A');
 
 					row.push_back(tile);
-					tile->coords = { i, y + 1, x + 1 };
+					tile->coords = { i, y_coord, x_coord };
 					tile->currentPos = tile->coords;
 					tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;

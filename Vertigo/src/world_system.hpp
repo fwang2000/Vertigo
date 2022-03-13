@@ -98,7 +98,7 @@ private:
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
 
-	Direction currDirection = Direction::DOWN;
+	Direction currDirection = Direction::RIGHT;
 
 	// Helper Functions
 	Coordinates searchForTile(Direction direction);

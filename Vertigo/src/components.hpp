@@ -22,11 +22,8 @@ struct Player
 
 struct Object
 {
-	vec2 position;
-	int cubeFace;
-	bool alive;
-	bool interactible;
-	bool fireInteactible;
+	Coordinates objectPos;
+	glm::mat4 model = glm::mat4(1.f);
 };
 
 struct Burnable
@@ -69,12 +66,13 @@ enum class TileState
 	B = 1,		// Burnable
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
+	O = 14,		// Constantly-Moving Tile
+	C = 3,		// Controllable Tile
+	T = 19,		// Teleporter
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
 	E = 4,		// Empty
 	Z = 25,		// Finish
-	C = 2,      // Switch-Tile Success
-	D = 3,      // Up-Tile Light up
 };
 
 struct Rotate
@@ -145,7 +143,6 @@ struct Cube
 	std::array<std::vector<std::vector<Tile*>>, 6> faces;
 	std::vector<Text> text;
 	int size = 0;
-	int getSize() { return this->size; }
 	Tile* getTile(Coordinates coord);
 	void reset();
 };
@@ -305,15 +302,16 @@ enum class EFFECT_ASSET_ID {
 	TEXT = TILE + 1,
 	PLAYER = TEXT + 1,
 	FADE = PLAYER + 1,
-	EFFECT_COUNT = FADE + 1
+	OBJECT = FADE + 1,
+	EFFECT_COUNT = OBJECT + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
-	CUBE = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = CUBE + 1,
+	COLUMN = SCREEN_TRIANGLE + 1,
+	GEOMETRY_COUNT = COLUMN + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

@@ -4,9 +4,6 @@
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(entity, &mesh);
-
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
@@ -53,14 +50,8 @@ Entity createTile(Tile* tile)
 	case TileState::W:
 		id = TEXTURE_ASSET_ID::SWITCH_TILE;
 		break;
-	case TileState::C:
-		id = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
-		break;
 	case TileState::U:
 		id = TEXTURE_ASSET_ID::UP_TILE;
-		break;
-	case TileState::D:
-		id = TEXTURE_ASSET_ID::UP_TILE_SUCCESS;
 		break;
 	case TileState::B:
 		id = TEXTURE_ASSET_ID::BUSH0;
@@ -152,31 +143,35 @@ Entity createFireGauge(RenderSystem* renderer)
 	return entity;
 }
 
-void createObject(RenderSystem* renderer, vec3 pos) {
-	// auto entity = Entity();
+void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	 auto entity = Entity();
 
-	// Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	// registry.meshPtrs.emplace(entity, &mesh);
+	 Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
+	 registry.meshPtrs.emplace(entity, &mesh);
 
-	// // Setting initial motion values
-	// int distance = window_height_px / 3;
+	 // Setting initial motion values
+	 Motion& motion = registry.motions.emplace(entity);
+	 motion.interpolate = true;
+	 motion.origin = vec2{ pos.c, pos.r };
+	 motion.position = vec3(0, 0, 0);
+	 motion.destination = vec3(0, 0, 0);
+	 motion.velocity = { 0.f , 0.f , 0.f };
+	 motion.scale = vec2(OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT);
 
-	// Motion& motion = registry.motions.emplace(entity);
-	// motion.position = vec2(
-	// 	window_width_px / 2 + pos.coordinates.x * distance,
-	// 	window_height_px / 2 + pos.coordinates.y * distance
-	// );
-	// motion.velocity = { 0.f, 0.f };
-	// motion.scale = vec2({ OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT });
+	 Object& object = registry.objects.emplace(entity);
+	 object.objectPos = pos;
+	 object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * object.model;
+	 object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
+	 object.model = scale(glm::mat4(1.0f), vec3(0.5f, 0.5f, 1.f)) * object.model;
+	 object.model = translateMatrix * object.model;
+	 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * object.model;
 
-	// registry.objects.emplace(entity);
-
-	// registry.renderRequests.insert(
-	// 	entity,
-	// 	{
-	// 		TEXTURE_ASSET_ID::OBJECT,
-	// 		EFFECT_ASSET_ID::TEXTURED,
-	// 		GEOMETRY_BUFFER_ID::SPRITE
-	// 	}
-	// );
+	 registry.renderRequests.insert(
+	 	entity,
+	 	{
+	 		TEXTURE_ASSET_ID::TEXTURE_COUNT,
+	 		EFFECT_ASSET_ID::OBJECT,
+	 		GEOMETRY_BUFFER_ID::COLUMN
+	 	}
+	 );
 }
