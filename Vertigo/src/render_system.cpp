@@ -224,6 +224,59 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::OBJECT)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_color_loc);
+		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)sizeof(vec3));
+		gl_has_errors();
+
+		// Getting uniform locations for glUniform* calls
+		GLint color_uloc = glGetUniformLocation(program, "fcolor");
+		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+		glUniform3fv(color_uloc, 1, (float*)&color);
+		gl_has_errors();
+
+		// Get number of indices from index buffer, which has elements uint16_t
+		GLint size = 0;
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+		gl_has_errors();
+
+		GLsizei num_indices = size / sizeof(uint16_t);
+		// GLsizei num_triangles = num_indices / 3;
+
+		Object& object = registry.objects.get(entity);
+		model = object.model;
+
+		Motion& motion = registry.motions.get(entity);
+		mat4 translation = translate(mat4(1.f), motion.position);
+		mat4 objScale = scale(mat4(1.f), vec3(motion.scale.x, motion.scale.y, 1));
+
+		GLint currProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+		// Setting uniform values to the currently bound program
+		GLuint model_loc = glGetUniformLocation(currProgram, "model");
+		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&translation);
+		GLuint view_loc = glGetUniformLocation(currProgram, "view");
+		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+		gl_has_errors();
+		// Drawing of num_indices/3 triangles specified in the index buffer
+		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+		gl_has_errors();
+	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
@@ -406,7 +459,7 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = 3.5f; // this number should match the dimension of our box - 0.5;
+    float const view_distance = screen_cube.size; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
 }
@@ -426,4 +479,8 @@ mat3 RenderSystem::create2DProjectionMatrix()
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
 	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+}
+
+void RenderSystem::setCube(Cube cube) {
+	screen_cube = cube;
 }

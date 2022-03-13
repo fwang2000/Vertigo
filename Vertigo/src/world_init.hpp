@@ -12,8 +12,8 @@ const float EXPLORER_BB_WIDTH = 0.8f * TILE_BB_WIDTH;
 const float EXPLORER_BB_HEIGHT = 0.8f * TILE_BB_HEIGHT;
 const float FIRE_BB_WIDTH = 0.5f * EXPLORER_BB_WIDTH;
 const float FIRE_BB_HEIGHT = FIRE_BB_WIDTH;
-const float OBJECT_BB_WIDTH = 0.4 * window_height_px / 3;
-const float OBJECT_BB_HEIGHT = 0.4 * window_height_px / 3;
+const float OBJECT_BB_WIDTH = 0.4 * window_height_px / 6;
+const float OBJECT_BB_HEIGHT = 0.4 * window_height_px / 4;
 
 // the cube
 Entity createCube(RenderSystem* renderer);
@@ -29,4 +29,4 @@ Entity createFire(RenderSystem* renderer, vec3 pos);
 // the fire's power gauge
 Entity createFireGauge(RenderSystem* renderer);
 // the object
-void createObject(RenderSystem* renderer, vec3 pos);
+void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);

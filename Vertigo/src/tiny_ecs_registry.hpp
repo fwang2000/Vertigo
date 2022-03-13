@@ -27,7 +27,6 @@ public:
 	ComponentContainer<Text> text;
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
-	ComponentContainer<Cube> cube;
 	ComponentContainer<Burnable> burnables;
 
 	// constructor that adds all containers for looping over them
@@ -48,7 +47,6 @@ public:
 		registry_list.push_back(&text);
 		registry_list.push_back(&fire);
 		registry_list.push_back(&objects);
-		registry_list.push_back(&cube);
 		registry_list.push_back(&burnables);
 	}
 

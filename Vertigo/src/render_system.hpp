@@ -31,6 +31,7 @@ class RenderSystem {
 		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bush0.png")),
 		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flower0.png")),
 		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("tree0.png"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj"))
 
 	};
 
@@ -78,7 +79,8 @@ class RenderSystem {
 		shader_path("tile"),
 		shader_path("text"),
 		shader_path("player"),
-		shader_path("fade")
+		shader_path("fade"),
+		shader_path("object")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -116,6 +118,7 @@ public:
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
 	mat3 create2DProjectionMatrix();
+	void setCube(Cube cube);
 
 private:
 	// Internal drawing functions for each entity type
@@ -131,6 +134,7 @@ private:
 	GLuint off_screen_render_buffer_depth;
 
 	Entity screen_state_entity;
+	Cube screen_cube;
 };
 
 bool loadEffectFromFile(

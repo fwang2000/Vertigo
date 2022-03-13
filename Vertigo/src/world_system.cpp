@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -244,6 +244,24 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Object& object : registry.objects.components) {
+
+		switch (rot.status) {
+		case BOX_ANIMATION::UP:
+			object.model = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * object.model;
+			break;
+		case BOX_ANIMATION::DOWN:
+			object.model = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * object.model;
+			break;
+		case BOX_ANIMATION::LEFT:
+			object.model = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * object.model;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			object.model = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * object.model;
+			break;
+		}
+	}
+
 	// TODO: rotate all objects that are rendered on screen
 	if (rot.remainingTime == 0.f)
 	{
@@ -267,6 +285,9 @@ void WorldSystem::restart_game() {
 
 	while (registry.text.entities.size() > 0)
 		registry.remove_all_components_of(registry.text.entities.back());
+
+	while (registry.renderRequests.entities.size() > 0)
+		registry.remove_all_components_of(registry.objects.entities.back());
 
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
@@ -296,6 +317,11 @@ void WorldSystem::load_level() {
 					startingpos.c = k;
 					translateMatrix = cube.faces[i][j][k]->model;
 				}
+				
+				/*if (cube.faces[i][j][k]->tileState == TileState::N) {
+
+					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}*/
 			}
 		}
 	}
@@ -306,6 +332,8 @@ void WorldSystem::load_level() {
 	}
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
+
+	renderer->setCube(cube);
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
@@ -441,6 +469,9 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
+
+	// printf("%d, %d, %d\n", newCoords.f, newCoords.r, newCoords.c);
+
 	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I) {
 		return;
 	}
@@ -567,7 +598,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);
+	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);	
 
 	if (tile->tileState == TileState::Z) {
 		next_level();
