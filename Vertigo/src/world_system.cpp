@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -318,10 +318,10 @@ void WorldSystem::load_level() {
 					translateMatrix = cube.faces[i][j][k]->model;
 				}
 				
-				/*if (cube.faces[i][j][k]->tileState == TileState::N) {
+				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
-				}*/
+				}
 			}
 		}
 	}
@@ -470,9 +470,9 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
 
-	// printf("%d, %d, %d\n", newCoords.f, newCoords.r, newCoords.c);
+	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 
-	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I) {
+	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
 		return;
 	}
 	Player& player = registry.players.get(player_explorer);
@@ -724,9 +724,9 @@ void WorldSystem::Burn(Tile* tile) {
 
 void WorldSystem::SetSprite(Direction direction) {
 
-	if (direction == currDirection) {
-		return;
-	}
+	//if (direction == currDirection) {
+	//	return;
+	//}
 
 	RenderRequest& request = registry.renderRequests.get(player_explorer);
 
@@ -799,8 +799,9 @@ Entity WorldSystem::getCurrentTileEntity() {
 
 Entity WorldSystem::getTileFromRegistry(Coordinates coordinates) {
 
-	int index = 9 * coordinates.f + 3 * coordinates.r + coordinates.c;
-
+	int index = 9 * coordinates.f + 3 * coordinates.r + coordinates.c; 
+	Tile* tile = registry.tiles.components.at(index);
+	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 	return registry.tiles.entities.at(index);
 }
 
