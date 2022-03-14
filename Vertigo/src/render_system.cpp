@@ -4,6 +4,7 @@
 
 #include "tiny_ecs_registry.hpp"
 #include "world_system.hpp"
+#include <SDL_opengl.h>
 
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection3D, const mat3& projection2D, const mat4& view)
@@ -278,9 +279,64 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		Object& object = registry.objects.get(entity);
 		model = object.model;
 
+		GLint currProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+		// Setting uniform values to the currently bound program
+		GLuint model_loc = glGetUniformLocation(currProgram, "model");
+		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint view_loc = glGetUniformLocation(currProgram, "view");
+		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+		gl_has_errors();
+		// Drawing of num_indices/3 triangles specified in the index buffer
+		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+		gl_has_errors();
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::FIRE)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "aPos");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		// use 2d
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		// Get number of indices from index buffer, which has elements uint16_t
+		GLint size = 0;
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+		gl_has_errors();
+
+		GLsizei num_indices = size / sizeof(uint16_t);
+		// GLsizei num_triangles = num_indices / 3;
+
+		Fire& player = registry.fire.get(entity);
+		model = player.model;
+
 		Motion& motion = registry.motions.get(entity);
-		mat4 translation = translate(mat4(1.f), motion.position);
-		mat4 objScale = scale(mat4(1.f), vec3(motion.scale.x, motion.scale.y, 1));
+		mat4 trans = translate(mat4(1.f), motion.position);
 
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
@@ -288,7 +344,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
-		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&translation);
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -480,7 +536,7 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = screen_cube.size; // this number should match the dimension of our box - 0.5;
+    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
 }

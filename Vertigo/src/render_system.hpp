@@ -64,7 +64,8 @@ class RenderSystem {
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
-			textures_path("Spritesheets/bushSheet.png")
+			textures_path("Spritesheets/bushSheet.png"),
+			textures_path("Spritesheets/fire_spritesheet.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -76,7 +77,8 @@ class RenderSystem {
 		shader_path("text"),
 		shader_path("player"),
 		shader_path("fade"),
-		shader_path("object")
+		shader_path("object"),
+		shader_path("fire")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -98,6 +100,10 @@ public:
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 	// MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
+
+	void initializeSingleMeshes();
+	
+	void initializeFireMeshes();
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
