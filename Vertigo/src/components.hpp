@@ -26,6 +26,14 @@ struct Object
 	glm::mat4 model = glm::mat4(1.f);
 };
 
+struct Burnable
+{
+	int counter_ms = 0;
+	int max_ms = 1000;
+	int num_intervals = 5;
+	bool activate = false;
+};
+
 struct Fire
 {
 	bool active = false;
@@ -290,13 +298,9 @@ enum class TEXTURE_ASSET_ID {
 	FIRE = EMPTY + 1,
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
-	BUSH0 = FIRE_GAUGE + 1,
-	BUSH1 = BUSH0 + 1,
-	BUSH2 = BUSH1 + 1,
-	BUSH3 = BUSH2 + 1,
-	BUSH4 = BUSH3 + 1,
-	FIRE_SHEET = BUSH4 + 1,
-	TEXTURE_COUNT = FIRE_SHEET + 1,
+	BUSH_SHEET = FIRE_GAUGE + 1,
+	FIRE_SHEET = BUSH_SHEET + 1,
+	TEXTURE_COUNT = FIRE_SHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -317,7 +321,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	COLUMN = SCREEN_TRIANGLE + 1,
-	GEOMETRY_COUNT = COLUMN + 1,
+	ANIMATED = COLUMN + 1,
+	GEOMETRY_COUNT = ANIMATED + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

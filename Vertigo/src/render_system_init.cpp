@@ -165,6 +165,7 @@ void RenderSystem::initializeGlGeometryBuffers()
 		0, 1, 2,
 		0, 3, 2};
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::ANIMATED, textured_vertices, textured_indices);
 
 	///////////////////////////////////////////////////////
 	// Initialize screen triangle (yes, triangle, not quad; its more efficient).

@@ -36,6 +36,7 @@ Entity createTile(Tile* tile)
 	Entity entity = Entity();
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
+	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::SPRITE;
 
 	switch (tile->tileState) {
 	case TileState::E:
@@ -54,7 +55,9 @@ Entity createTile(Tile* tile)
 		id = TEXTURE_ASSET_ID::UP_TILE;
 		break;
 	case TileState::B:
-		id = TEXTURE_ASSET_ID::BUSH0;
+		id = TEXTURE_ASSET_ID::BUSH_SHEET;
+		registry.burnables.emplace(entity);
+		gid = GEOMETRY_BUFFER_ID::ANIMATED;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
@@ -70,7 +73,7 @@ Entity createTile(Tile* tile)
 		entity,
 		{ id,
 		 EFFECT_ASSET_ID::TILE,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 gid });
 
 	return entity;
 }

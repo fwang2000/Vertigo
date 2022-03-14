@@ -64,11 +64,7 @@ class RenderSystem {
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
-			textures_path("Spritesheets/bush0.png"),
-			textures_path("Spritesheets/bush1.png"),
-			textures_path("Spritesheets/bush2.png"),
-			textures_path("Spritesheets/bush3.png"),
-			textures_path("Spritesheets/bush4.png"),
+			textures_path("Spritesheets/bushSheet.png"),
 			textures_path("Spritesheets/fire_spritesheet.png")
 	};
 
