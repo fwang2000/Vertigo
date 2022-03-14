@@ -26,17 +26,21 @@ struct Object
 	glm::mat4 model = glm::mat4(1.f);
 };
 
-struct Burnable
-{
-	int counter = 5;
-	bool activate = false;
-};
-
 struct Fire
 {
 	bool active = false;
 	bool inUse = false;
-	vec3 firePos;
+	Coordinates firePos;
+	glm::mat4 model = glm::mat4(1.f);
+	int currFrame = 0;
+	int spriteWidth, spriteHeight;
+	int texWidth, texHeight;
+};
+
+struct Burnable
+{
+	int counter = 5;
+	bool activate = false;
 };
 
 enum class BOX_ANIMATION {
@@ -291,7 +295,8 @@ enum class TEXTURE_ASSET_ID {
 	BUSH2 = BUSH1 + 1,
 	BUSH3 = BUSH2 + 1,
 	BUSH4 = BUSH3 + 1,
-	TEXTURE_COUNT = BUSH4 + 1,
+	FIRE_SHEET = BUSH4 + 1,
+	TEXTURE_COUNT = FIRE_SHEET + 1,
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -303,7 +308,8 @@ enum class EFFECT_ASSET_ID {
 	PLAYER = TEXT + 1,
 	FADE = PLAYER + 1,
 	OBJECT = FADE + 1,
-	EFFECT_COUNT = OBJECT + 1
+	FIRE = OBJECT + 1,
+	EFFECT_COUNT = FIRE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

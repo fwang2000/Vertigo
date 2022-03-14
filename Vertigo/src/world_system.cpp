@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -104,22 +104,27 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	ScreenState& screen = registry.screenStates.components[0];
 
 	Motion& player_motion = motions_registry.get(player_explorer);
-	Motion& fire_motion = motions_registry.get(fire);
 
-	if (!registry.shootTimers.has(fire_shadow)){
-		fire_motion.origin = player_motion.origin;
-		fire_motion.position = player_motion.position + vec3(-40, 40, 10);
-		fire_motion.acceleration = vec3(0, 0, 0);
-	}
-	
-	// Update timers
-	for (Entity entity : registry.shootTimers.entities) {
-		// progress timer
-		ShootTimer& counter = registry.shootTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0 || fire_motion.position[2] < 0){
-			registry.remove_all_components_of(entity);
+	if (motions_registry.has(fire)) {
+
+
+		Motion& fire_motion = motions_registry.get(fire);
+
+		if (!registry.shootTimers.has(fire_shadow)) {
+			fire_motion.origin = player_motion.origin;
+			fire_motion.position = player_motion.position + vec3(-40, 40, 10);
+			fire_motion.acceleration = vec3(0, 0, 0);
+		}
+
+		// Update timers
+		for (Entity entity : registry.shootTimers.entities) {
+			// progress timer
+			ShootTimer& counter = registry.shootTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0 || fire_motion.position[2] < 0) {
+				registry.remove_all_components_of(entity);
+			}
 		}
 	}
 	
@@ -322,6 +327,11 @@ void WorldSystem::load_level() {
 
 					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::F) {
+
+					fire = createFire(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
 			}
 		}
 	}
@@ -339,17 +349,9 @@ void WorldSystem::load_level() {
 	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
 	registry.colors.insert(player_explorer, {1, 1, 1});
 
-	// Create a new fire
-	fire = createFire(renderer, vec3(-1, -1, -1));
-	fire_spot = vec2(
-		window_width_px / 2 + -1 * window_height_px / 3,
-		window_height_px / 2 + -1 * window_height_px / 3
-	);
-
-	registry.colors.insert(fire, vec3{ 1, 0, 0 });
-
 	obtainedFire = false;
 	faceDirection = Direction::UP;
+	SetSprite(currDirection = Direction::RIGHT);
 }
 
 // Compute collisions between entities
@@ -374,7 +376,7 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (moving || interacting) {
+	if (gameState != GameState::IDLE) {
 		return;
 	}
 
@@ -463,7 +465,6 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
-
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
@@ -481,6 +482,8 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	if (motion.position != motion.destination){
 		return;
 	}
+
+	gameState = GameState::MOVING;
 	
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
@@ -617,6 +620,8 @@ void WorldSystem::Interact(Tile* tile)
 		return;
 	}
 
+	gameState = GameState::INTERACTING;
+
 	if (s_tile->targetTile->tileState == TileState::I) {
 
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
@@ -715,6 +720,7 @@ void WorldSystem::UsePower(Direction direction, float power)
 void WorldSystem::Burn(Tile* tile) {
 
 	if (tile->tileState == TileState::B) {
+		gameState = GameState::BURNING;
 		Burnable& burned = registry.burnables.emplace(getCurrentTileEntity());
 		burned.activate = true;
 		burned.counter = 1;

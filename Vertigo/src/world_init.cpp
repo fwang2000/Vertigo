@@ -91,29 +91,58 @@ Entity createText(Text text) {
 	return entity;
 }
 
-Entity createFire(RenderSystem* renderer, vec3 pos)
+Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix)
 {
 	auto entity = Entity();
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(entity, &mesh);
-	int distance = window_height_px / 3;
-
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.scale = vec2({ FIRE_BB_WIDTH, FIRE_BB_HEIGHT });
+	motion.interpolate = true;
+	motion.origin = vec2{ pos.c, pos.r };
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = vec2(FIRE_BB_WIDTH, FIRE_BB_HEIGHT);
 
 	Fire& fire = registry.fire.emplace(entity);
-	fire.firePos = vec3(pos.x + 1, pos.y + 1, pos.z + 1) ;
+	fire.firePos = pos;
+	fire.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * fire.model;
+	fire.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * fire.model;
+	fire.model = scale(glm::mat4(1.0f), vec3(0.5f, 0.5f, 1.f)) * fire.model;
+	fire.model = translateMatrix * fire.model;
+
+	switch (pos.f) {
+	case 0:
+		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * fire.model;
+		break;
+	case 1:
+		fire.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * fire.model;
+		break;
+	case 2:
+		fire.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * fire.model;
+		break;
+	case 3:
+		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * fire.model;
+		break;
+	case 4:
+		fire.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * fire.model;
+		break;
+	case 5:
+		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * fire.model;
+		break;
+	default:
+		break;
+	}
 
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::FIRE,
-			EFFECT_ASSET_ID::TEXTURED,
+			TEXTURE_ASSET_ID::FIRE_SHEET,
+			EFFECT_ASSET_ID::FIRE,
 			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
+
 	return entity;
 }
 
@@ -164,7 +193,29 @@ void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	 object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
 	 object.model = scale(glm::mat4(1.0f), vec3(0.5f, 0.5f, 1.f)) * object.model;
 	 object.model = translateMatrix * object.model;
-	 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * object.model;
+
+	 switch (pos.f) {
+	 case 0:
+		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * object.model;
+		 break;
+	 case 1:
+		 object.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * object.model;
+		 break;
+	 case 2:
+		 object.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * object.model;
+		 break;
+	 case 3:
+		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * object.model;
+		 break;
+	 case 4:
+		 object.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * object.model;
+		 break;
+	 case 5:
+		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * object.model;
+		 break;
+	 default:
+		 break;
+	 }
 
 	 registry.renderRequests.insert(
 	 	entity,

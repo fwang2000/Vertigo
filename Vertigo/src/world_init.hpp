@@ -25,7 +25,7 @@ Entity createTile(Tile* tile);
 // the text
 Entity createText(Text text);
 // the fire
-Entity createFire(RenderSystem* renderer, vec3 pos);
+Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the fire's power gauge
 Entity createFireGauge(RenderSystem* renderer);
 // the object
