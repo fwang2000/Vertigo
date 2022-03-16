@@ -107,13 +107,13 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	if (motions_registry.has(fire)) {
 
-
 		Motion& fire_motion = motions_registry.get(fire);
 
 		if (!registry.shootTimers.has(fire_shadow)) {
-			fire_motion.origin = player_motion.origin;
-			fire_motion.position = player_motion.position + vec3(-40, 40, 10);
+			fire_motion.position = player_motion.position;
 			fire_motion.acceleration = vec3(0, 0, 0);
+
+			printf("%d %d %d \t %d %d %d\n", fire_motion.position.x, fire_motion.position.y, fire_motion.position.z, player_motion.position.x, player_motion.position.y, player_motion.position.z);
 		}
 
 		// Update timers
