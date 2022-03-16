@@ -25,14 +25,8 @@ class RenderSystem {
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
 		  // specify meshes of other assets here
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bushSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flowerSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("treeSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bush0.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flower0.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("tree0.png"))
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj"))
-
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -65,7 +59,6 @@ class RenderSystem {
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
 			textures_path("Spritesheets/bushSheet.png"),
-			textures_path("Spritesheets/fire_spritesheet.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -100,10 +93,6 @@ public:
 	void initializeGlMeshes();
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 	// MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
-
-	void initializeSingleMeshes();
-	
-	void initializeFireMeshes();
 
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target

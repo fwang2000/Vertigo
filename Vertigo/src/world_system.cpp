@@ -361,9 +361,9 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE) {
+	/*if (gameState != GameState::IDLE) {
 		return;
-	}
+	}*/
 
 	Direction dir = currDirection;
 

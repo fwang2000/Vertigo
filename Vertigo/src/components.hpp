@@ -38,17 +38,10 @@ struct Fire
 {
 	bool active = false;
 	bool inUse = false;
+	float index = 0;
+	int maxIndex = 24;
 	Coordinates firePos;
 	glm::mat4 model = glm::mat4(1.f);
-	int currFrame = 0;
-	int spriteWidth, spriteHeight;
-	int texWidth, texHeight;
-};
-
-struct Burnable
-{
-	int counter = 5;
-	bool activate = false;
 };
 
 enum class BOX_ANIMATION {
@@ -299,8 +292,7 @@ enum class TEXTURE_ASSET_ID {
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
 	BUSH_SHEET = FIRE_GAUGE + 1,
-	FIRE_SHEET = BUSH_SHEET + 1,
-	TEXTURE_COUNT = FIRE_SHEET + 1
+	TEXTURE_COUNT = BUSH_SHEET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -322,7 +314,8 @@ enum class GEOMETRY_BUFFER_ID {
 	SCREEN_TRIANGLE = SPRITE + 1,
 	COLUMN = SCREEN_TRIANGLE + 1,
 	ANIMATED = COLUMN + 1,
-	GEOMETRY_COUNT = ANIMATED + 1,
+	FIRE = ANIMATED + 1,
+	GEOMETRY_COUNT = FIRE + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
