@@ -45,11 +45,11 @@ struct Fire
 	int texWidth, texHeight;
 };
 
-struct Burnable
-{
-	int counter = 5;
-	bool activate = false;
-};
+//struct Burnable
+//{
+//	int counter = 5;
+//	bool activate = false;
+//};
 
 enum class BOX_ANIMATION {
 	STILL = 0,
@@ -79,7 +79,7 @@ enum class TileState
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
 	O = 14,		// Constantly-Moving Tile
-	C = 3,		// Controllable Tile
+	C = 2,		// Controllable Tile
 	T = 19,		// Teleporter
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
@@ -105,6 +105,10 @@ struct Tile
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
+};
+
+struct ControlTile : public Tile {
+	bool controled = 0; // 0 is not controlled, 1 is controlled
 };
 
 struct UpTile : public Tile {
@@ -292,7 +296,8 @@ enum class TEXTURE_ASSET_ID {
 	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
 	UP_TILE = SWITCH_TILE_SUCCESS + 1,
 	UP_TILE_SUCCESS = UP_TILE + 1,
-	END_TILE = UP_TILE_SUCCESS + 1,
+	CONTROL_TILE = UP_TILE_SUCCESS + 1,
+	END_TILE = CONTROL_TILE + 1,
 	TILE_SHADOW = END_TILE + 1,
 	EMPTY = TILE_SHADOW + 1,
 	FIRE = EMPTY + 1,

@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(8) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -361,13 +361,15 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE) {
+	/*if (gameState != GameState::IDLE) {
 		return;
-	}
+	}*/
 
 	Direction dir = currDirection;
 
 	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
+
+
 
 	if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
 		switch (key)
@@ -375,24 +377,67 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		case GLFW_KEY_W:
 			dir = Direction::UP;
       		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					if (!(tile_move(dir, tile))) {
+						break;
+					}
+				}
+			}
 			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
       		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					if (!(tile_move(dir, tile))) {
+						break;
+					}
+				}
+			}
 			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
       		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					if (!(tile_move(dir, tile))) {
+						break;
+					}
+				}
+			}
 			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
       		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					if (!(tile_move(dir, tile))) {
+						break;
+					}
+				}
+			}
 			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 0) {
+					c_tile->controled = 1;
+				}
+				else
+				{
+					c_tile->controled = 0;
+				}
+				break;
+			}
 			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
@@ -448,6 +493,34 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
+bool WorldSystem::tile_move(Direction direction, Tile* tile) {
+	int dir = static_cast<int>(faceDirection) * -1;
+	Direction trueDirection = mod(direction, dir);
+	Coordinates newCoords = searchForTile(trueDirection);
+	Tile* ntile = cube.getTile(newCoords);
+	if (ntile->direction != tile->direction)
+	{
+		return false;
+	}
+	if (ntile->tileState == TileState::E)
+	{
+		Entity next_tile_entity = getTileFromRegistry(newCoords);
+		RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
+		ntile->tileState = TileState::C;
+		ControlTile* co_tile = (ControlTile*)ntile;
+		co_tile->controled = 1;
+		ntile = co_tile;
+		next_request.used_texture = TEXTURE_ASSET_ID::CONTROL_TILE;
+
+		Entity cur_tile_entity = getTileFromRegistry(tile->coords);
+		RenderRequest& cur_request = registry.renderRequests.get(cur_tile_entity);
+		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
+		tile->tileState = TileState::E;
+		return true;
+	}
+	return false;
+}
+
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
 	int dir = static_cast<int>(faceDirection) * -1;
@@ -457,6 +530,12 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Tile* tile = cube.getTile(newCoords);
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
+	/*if (tile->tileState == TileState::U) {
+		if (currDirection != Direction::UP)
+		{
+			return;
+		}
+	}*/
 
 	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
 		return;

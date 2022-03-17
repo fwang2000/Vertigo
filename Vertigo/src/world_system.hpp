@@ -54,6 +54,7 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
+	bool tile_move(Direction direction, Tile* tile);
 	void player_move(vec3 movement, Direction direction);
 	void Interact(Tile* tile);
 	void Burn(Tile* tile);
