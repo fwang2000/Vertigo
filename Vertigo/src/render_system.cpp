@@ -6,6 +6,11 @@
 #include "world_system.hpp"
 #include <SDL_opengl.h>
 
+void setVec3(GLint ID, const std::string &name, float x, float y, float z)
+{ 
+	glUniform3f(glGetUniformLocation(ID, name.c_str()), x, y, z); 
+}
+
 void RenderSystem::drawTexturedMesh(Entity entity,
 	const mat4& projection3D, const mat3& projection2D, const mat4& view)
 {
@@ -51,94 +56,33 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	glm::mat4 model = glm::mat4(1.f);
+	GLint currProgram;
 
-	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
-	{
-		Motion& motion = registry.motions.get(entity);
-
-		// Transformation code, see Rendering and Transformation in the template
-		// specification for more info Incrementally updates transformation matrix,
-		// thus ORDER IS IMPORTANT
-		Transform transform;
-
-		transform.translate( motion.position[0] * motion.x_vector
-						   + motion.position[1] * motion.y_vector
-						   + motion.position[2] * motion.z_vector
-						   + motion.origin);
-		transform.scale(motion.scale);
-		transform.rotate(-acos(dot(motion.x_vector, vec2({0, 1}))));
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-		gl_has_errors();
-		assert(in_texcoord_loc >= 0);
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(TexturedVertex), (void*)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_texcoord_loc);
-		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void*)sizeof(
-				vec3)); // note the stride to skip the preceeding vertex position
-
-		// Enabling and binding texture to slot 0
-		glActiveTexture(GL_TEXTURE0);
-		gl_has_errors();
-
-		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
-
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		gl_has_errors();
-
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
-		gl_has_errors();
-
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-		glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection2D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+		GLint in_normal_loc = glGetAttribLocation(program, "aNormal");
 		gl_has_errors();
 		assert(in_texcoord_loc >= 0);
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
+							  sizeof(LightedVertex), (void *)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
-		// remember to change this if tex0's type changes vec2/vec3
+
 		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(LightedVertex),
 			(void *)sizeof(
 				vec3)); // note the stride to skip the preceeding vertex position
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_normal_loc);
+		glVertexAttribPointer(
+			in_normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(LightedVertex),
+			(void *)(5 * sizeof(float))); // note the stride to skip the preceeding vertex position
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
@@ -162,28 +106,22 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			model = boxRotate->model;
 		}
 
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
-		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
 
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
+		glUniform3f(glGetUniformLocation(currProgram, "light.position"), 0.f, 0.f, 2.5f);
+		glUniform3f(glGetUniformLocation(currProgram, "viewPos"), 6.f, 3.f, 6.f);
+
+		// light properties
+		glUniform3f(glGetUniformLocation(currProgram, "light.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(currProgram, "light.diffuse"), 0.5f, 0.5f, 0.5f);
+		glUniform3f(glGetUniformLocation(currProgram, "light.specular"), 1.0f, 1.0f, 1.0f);
+
+		// material properties
+		glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
+		glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
+        glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f); 
+
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::PLAYER)
 	{
@@ -198,7 +136,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
-		// remember to change this if tex0's type changes vec2/vec3
+
 		glVertexAttribPointer(
 			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
 			(void *)sizeof(
@@ -216,40 +154,23 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
 		Player& player = registry.players.get(entity);
 		model = player.model;
 
 		Motion& motion = registry.motions.get(entity);
 		mat4 trans = translate(mat4(1.f), motion.position);
 
-		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
+
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::OBJECT)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		GLint in_normal_loc = glGetAttribLocation(program, "in_normal");
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_position_loc);
@@ -262,36 +183,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			sizeof(ColoredVertex), (void*)sizeof(vec3));
 		gl_has_errors();
 
+		glEnableVertexAttribArray(in_normal_loc);
+		glVertexAttribPointer(in_normal_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(ColoredVertex), (void*)(6*sizeof(float)));
+		gl_has_errors();
+
 		// Getting uniform locations for glUniform* calls
 		GLint color_uloc = glGetUniformLocation(program, "fcolor");
 		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
 		glUniform3fv(color_uloc, 1, (float*)&color);
 		gl_has_errors();
 
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
 		Object& object = registry.objects.get(entity);
 		model = object.model;
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::FIRE)
 	{
@@ -324,35 +228,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
 		Fire& player = registry.fire.get(entity);
 		model = player.model;
 
 		Motion& motion = registry.motions.get(entity);
 		mat4 trans = translate(mat4(1.f), motion.position);
 
-		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
 	{
@@ -387,33 +271,82 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		Text& boxRotate = registry.text.get(entity);
 		model = boxRotate.model;
+	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::BILLBOARD)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "aPos");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
 
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
 		gl_has_errors();
 
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
+		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
 
-		GLint currProgram;
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		// use 2d
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		Object& obj = registry.objects.get(entity);
+		model = obj.model;
+
+		// set the upper 3x3 matrix to identity matrix OR the transpose of the view matrix
+		model[0][0] = view[0][0];
+		model[0][1] = view[1][0];
+		model[0][2] = view[2][0];
+
+		model[1][0] = view[0][1];
+		model[1][1] = view[1][1]; // set equal to scale
+		model[1][2] = view[2][1];
+
+		model[2][0] = view[0][2];
+		model[2][1] = view[1][2];
+		model[2][2] = view[2][2];
+
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniform1f(scale_loc, 0.5f);
 	}
 	else
 	{
 		assert(false && "Type of render request not supported");
 	}
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint model_loc = glGetUniformLocation(currProgram, "model");
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+	GLuint view_loc = glGetUniformLocation(currProgram, "view");
+	glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+	gl_has_errors();
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
 }
 
 void RenderSystem::drawToScreen()
@@ -451,7 +384,6 @@ void RenderSystem::drawToScreen()
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	ScreenState& screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
-	printf("%f", screen.darken_screen_factor);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
@@ -482,7 +414,7 @@ void RenderSystem::draw()
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
 	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // have to set this variable to 0 instead of frame_buffer in order for it to render
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer); // have to set this variable to 0 instead of frame_buffer in order for it to render
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
@@ -514,7 +446,7 @@ void RenderSystem::draw()
 	}
 
 	// Truely render to the screen
-	// drawToScreen();
+	drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
@@ -536,7 +468,7 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    float const view_distance = screen_cube.size + 0.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
 }

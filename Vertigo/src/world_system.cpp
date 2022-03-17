@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(1) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -311,6 +311,7 @@ void WorldSystem::load_level() {
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createSun(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::F) {
@@ -361,9 +362,9 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE) {
-		return;
-	}
+	// if (gameState != GameState::IDLE) {
+	// 	return;
+	// }
 
 	Direction dir = currDirection;
 

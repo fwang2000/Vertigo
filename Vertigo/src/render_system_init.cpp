@@ -167,6 +167,24 @@ void RenderSystem::initializeGlGeometryBuffers()
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::ANIMATED, textured_vertices, textured_indices);
 
+	std::vector<LightedVertex> lighting_vertices(4);
+	lighting_vertices[0].position = { -0.5f,  -0.5f,  0.0f };
+	lighting_vertices[1].position = { -0.5f,  0.5f,  0.0f };
+	lighting_vertices[2].position = {  0.5f,  0.5f,  0.0f };
+	lighting_vertices[3].position = {  0.5f,  -0.5f,  0.0f };
+
+	lighting_vertices[0].texcoord = {  0.0f,  0.0f };
+	lighting_vertices[1].texcoord = {  0.0f,  1.0f };
+	lighting_vertices[2].texcoord = {  1.0f,  1.0f };
+	lighting_vertices[3].texcoord = {  1.0f,  0.0f };
+
+	lighting_vertices[0].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[1].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[2].normal = { 0.f,  0.f,  1.0f };
+	lighting_vertices[3].normal = { 0.f,  0.f,  1.0f };
+
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::LIGHTING, lighting_vertices, textured_indices);
+
 	///////////////////////////////////////////////////////
 	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
 	std::vector<vec3> screen_vertices(3);

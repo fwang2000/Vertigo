@@ -65,7 +65,8 @@ class RenderSystem {
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
 			textures_path("Spritesheets/bushSheet.png"),
-			textures_path("Spritesheets/fire_spritesheet.png")
+			textures_path("Spritesheets/fire_spritesheet.png"),
+			textures_path("sun.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -78,7 +79,8 @@ class RenderSystem {
 		shader_path("player"),
 		shader_path("fade"),
 		shader_path("object"),
-		shader_path("fire")
+		shader_path("fire"),
+		shader_path("billboard")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

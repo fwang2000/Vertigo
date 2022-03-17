@@ -36,7 +36,7 @@ Entity createTile(Tile* tile)
 	Entity entity = Entity();
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
-	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::SPRITE;
+	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::LIGHTING;
 
 	switch (tile->tileState) {
 	case TileState::E:
@@ -226,6 +226,24 @@ void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	 		TEXTURE_ASSET_ID::TEXTURE_COUNT,
 	 		EFFECT_ASSET_ID::OBJECT,
 	 		GEOMETRY_BUFFER_ID::COLUMN
+	 	}
+	 );
+}
+
+void createSun(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	Object& object = registry.objects.emplace(entity);
+	object.objectPos = pos;
+	object.model = translateMatrix * object.model;
+	object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 1.5f)) * object.model;
+
+	registry.renderRequests.insert(
+	 	entity,
+	 	{
+	 		TEXTURE_ASSET_ID::SUN,
+	 		EFFECT_ASSET_ID::BILLBOARD,
+	 		GEOMETRY_BUFFER_ID::SPRITE
 	 	}
 	 );
 }
