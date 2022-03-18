@@ -162,8 +162,8 @@ struct Cube
 // TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
 
 struct Oscillate {
-	vec2 displacement = { 0, 0 };
-	vec2 amplitude = { 0, 10 };
+	vec3 center = vec3({0, 0, 0});
+	vec3 amplitude = vec3({0, 0, 0});
 	double phase = 0;
 	int steps = 100;
 };
@@ -283,7 +283,9 @@ enum class TEXTURE_ASSET_ID {
 	UP_TILE_SUCCESS = UP_TILE + 1,
 	END_TILE = UP_TILE_SUCCESS + 1,
 	TILE_SHADOW = END_TILE + 1,
-	EMPTY = TILE_SHADOW + 1,
+	CONST_MOV_TILE = TILE_SHADOW + 1,
+	CONST_MOV_TILE_SUCCESS = CONST_MOV_TILE + 1,
+	EMPTY = CONST_MOV_TILE_SUCCESS + 1,
 	FIRE = EMPTY + 1,
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,

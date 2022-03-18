@@ -31,6 +31,6 @@ Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 transl
 // the column
 void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the constantly moving tile
-Entity createConstMovingTile(Tile* tile, RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion);

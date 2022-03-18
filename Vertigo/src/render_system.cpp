@@ -72,6 +72,17 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		{
 			model = boxRotate->model;
 		}
+		mat4 trans;
+		mat4 sca;
+		if (registry.motions.has(entity)){
+			Motion& motion = registry.motions.get(entity);
+			trans = translate(mat4(1.f), motion.position);
+			sca = scale(mat4(1.0f), motion.scale);
+		}
+		else{
+			trans = mat4(1.f);
+			sca = mat4(1.f);
+		}
 
 		// Get number of indices from index buffer, which has elements uint16_t
 		GLint size = 0;
@@ -86,6 +97,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float *)&sca);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -195,11 +210,11 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		if (registry.motions.has(entity)){
 			Motion& motion = registry.motions.get(entity);
 			trans = translate(mat4(1.f), motion.position);
-			sca = scale(glm::mat4(1.0f), motion.scale);
+			sca = scale(mat4(1.0f), motion.scale);
 		}
 		else{
 			trans = mat4(1.f);
-			sca = scale(glm::mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
+			sca = mat4(1.f);
 		}
 
 		GLint currProgram;

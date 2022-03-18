@@ -38,9 +38,12 @@ void PhysicsSystem::oscillate()
 	for (uint i = 0; i < oscillate_registry.size(); i++)
 	{
 		Oscillate& oscillate = oscillate_registry.components[i];
+		Entity& e = oscillate_registry.entities[i];
+		Motion& motion = registry.motions.get(e);
 		oscillate.phase += 2 * PI / oscillate.steps;
 		oscillate.phase = fmod(oscillate.phase, 2 * PI);
-		oscillate.displacement = oscillate.amplitude * vec2(sin(oscillate.phase));
+		motion.position = oscillate.center + oscillate.amplitude * vec3(sin(oscillate.phase));
+		
 	}
 }
 

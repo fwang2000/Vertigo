@@ -401,7 +401,6 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				switch_tile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
 			}
 			else {
-
 				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
 				if (target->tileState == TileState::W) {
 					switch_tile->targetTile = (SwitchTile*)target;
@@ -411,6 +410,19 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				}
 				switch_tile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) } ;
 			}
+		}
+		else if (modifications.at(0) == "O"){
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			int t_f = std::stoi(modifications.at(4));
+			int t_r = std::stoi(modifications.at(5));
+			int t_c = std::stoi(modifications.at(6));
+
+			ConstMovingTile* cTile = (ConstMovingTile*)getTile(Coordinates{ f, r, c });
+			cTile->startCoords = Coordinates{ f, r, c };
+			cTile->endCoords = Coordinates{ t_f, t_r, t_c};
 		}
 
 		std::vector<std::string>().swap(modifications);
