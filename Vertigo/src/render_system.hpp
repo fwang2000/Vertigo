@@ -54,6 +54,8 @@ class RenderSystem {
 			textures_path("up_tile_lightup.png"),
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
+			textures_path("moving_tile.png"),
+			textures_path("moving_tile_success.png"),
 			textures_path("empty_tile.png"),
 			textures_path("fire.png"),
 			textures_path("fire_shadow.png"),

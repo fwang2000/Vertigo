@@ -173,6 +173,7 @@ struct Motion
 	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
 	bool move_z = false;
 	vec3 position = {0, 0, 0};
+	vec3 scale = {1, 1, 1};
 
 	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
