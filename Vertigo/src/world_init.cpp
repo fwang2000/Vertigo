@@ -108,14 +108,14 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	motion.position = vec3(0, 0, 0);
 	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = vec2(OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT);
+	motion.scale = vec2(FIRE_BB_WIDTH, FIRE_BB_HEIGHT);
 
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = pos;
-	fire.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * fire.model;
-	fire.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * fire.model;
-	// fire.model = scale(glm::mat4(1.0f), vec3(0.25f, 0.25f, 0.25f)) * fire.model;
+	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * fire.model;
+	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * fire.model;
 	fire.model = translateMatrix * fire.model;
+	// fire.model = scale(glm::mat4(1.0f), vec3(0.25f, 0.25f, 0.25f)) * fire.model;
 
 	switch (pos.f) {
 	case 0:
@@ -143,9 +143,9 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			TEXTURE_ASSET_ID::FIRE,
 			EFFECT_ASSET_ID::FIRE,
-			GEOMETRY_BUFFER_ID::FIRE
+			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
 
