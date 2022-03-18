@@ -133,20 +133,23 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	rotateAll(elapsed_ms_since_last_update);
 
 	// Update fire position
-	Fire& fire_component = registry.fire.get(fire);
 
-	if (motions_registry.has(fire) && fire_component.active == true){
-		Object& fire_object = registry.objects.get(fire);
-		Motion& fire_motion = motions_registry.get(fire);
-		Player& player = registry.players.get(player_explorer);
-		if (fire_motion.position.z < 0){
-			fire_motion.acceleration = vec3({0, 0, 0});
-			fire_motion.velocity = vec3({0, 0, 0});
-			fire_component.inUse = false;
-		}
-		if (fire_component.inUse == false) {
-			fire_object.model = player.model;
-			fire_motion.position = player_motion.position + vec3({0.5, 0.5, 1});
+	if (registry.fire.has(fire)){
+		Fire& fire_component = registry.fire.get(fire);
+
+		if (motions_registry.has(fire) && fire_component.active == true){
+			Object& fire_object = registry.objects.get(fire);
+			Motion& fire_motion = motions_registry.get(fire);
+			Player& player = registry.players.get(player_explorer);
+			if (fire_motion.position.z < 0){
+				fire_motion.acceleration = vec3({0, 0, 0});
+				fire_motion.velocity = vec3({0, 0, 0});
+				fire_component.inUse = false;
+			}
+			if (fire_component.inUse == false) {
+				fire_object.model = player.model;
+				fire_motion.position = player_motion.position + vec3({0.5, 0.5, 1});
+			}
 		}
 	}
 	
@@ -271,6 +274,27 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Oscillate& oscillate : registry.oscillations.components){
+		switch (rot.status) {
+		case BOX_ANIMATION::UP:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::DOWN:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::LEFT:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		}
+	}
+
 	// TODO: rotate all objects that are rendered on screen
 	if (rot.remainingTime == 0.f)
 	{
@@ -339,7 +363,7 @@ void WorldSystem::load_level() {
 
 				if (cube.faces[i][j][k]->tileState == TileState::O) {
 					// Create constantly moving tile
-					createConstMovingTile(tile, renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createConstMovingTile(tile, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 			}
 		}
@@ -351,6 +375,17 @@ void WorldSystem::load_level() {
 	}
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
+
+	for (uint i = 0; i < registry.oscillations.size(); i++){
+		Entity e = registry.oscillations.entities[i];
+		Oscillate& o = registry.oscillations.components[i];
+		if (registry.tiles.has(e)){
+			Tile* tile = registry.tiles.get(e);
+			ConstMovingTile* t = (ConstMovingTile*) cube.getTile(tile->coords);
+			o.center = (vec3({t->endCoords.c, t->endCoords.r, 0}) - vec3({t->startCoords.c, t->startCoords.r, 0})) / vec3(2.0f);
+			o.amplitude = o.center;
+		}
+	}
 
 	renderer->setCube(cube);
 
@@ -425,6 +460,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	// Fire release
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+		if (!registry.fire.has(fire)){
+			return;
+		}
 		Fire& fire_component = registry.fire.get(fire);
 		if (!(fire_component.inUse) && fire_component.active){
 			// If fire is picked up and has yet to be shot, add to holdTimer

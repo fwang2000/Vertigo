@@ -35,6 +35,7 @@ Entity createTile(Tile* tile)
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
 	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::SPRITE;
+	EFFECT_ASSET_ID eid = EFFECT_ASSET_ID::TILE;
 
 	switch (tile->tileState) {
 	case TileState::E:
@@ -57,6 +58,9 @@ Entity createTile(Tile* tile)
 		registry.burnables.emplace(entity);
 		gid = GEOMETRY_BUFFER_ID::ANIMATED;
 		break;
+	case TileState::O:
+		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
+		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
 		break;
@@ -70,8 +74,8 @@ Entity createTile(Tile* tile)
 	registry.renderRequests.insert(
 		entity,
 		{ id,
-		 EFFECT_ASSET_ID::TILE,
-		 gid });
+		eid,
+		gid });
 
 	return entity;
 }
@@ -153,6 +157,19 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 			GEOMETRY_BUFFER_ID::COLUMN
 		}
 	);
+}
+
+void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) {
+	
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = {1.0f, 1.0f, 1.0f};
+	
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
 }
 
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion){
