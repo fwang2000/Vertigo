@@ -105,26 +105,12 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Motion& player_motion = motions_registry.get(player_explorer);
 
-	if (motions_registry.has(fire)) {
-
+	if (motions_registry.has(fire) && registry.fire.get(fire).active == true) {
 
 		Motion& fire_motion = motions_registry.get(fire);
 
 		if (!registry.shootTimers.has(fire_shadow)) {
-			fire_motion.origin = player_motion.origin;
-			fire_motion.position = player_motion.position + vec3(-40, 40, 10);
-			fire_motion.acceleration = vec3(0, 0, 0);
-		}
-
-		// Update timers
-		for (Entity entity : registry.shootTimers.entities) {
-			// progress timer
-			ShootTimer& counter = registry.shootTimers.get(entity);
-			counter.counter_ms -= elapsed_ms_since_last_update;
-			// restart the game once the death timer expired
-			if (counter.counter_ms < 0 || fire_motion.position[2] < 0) {
-				registry.remove_all_components_of(entity);
-			}
+			fire_motion.position = player_motion.position;
 		}
 	}
 	
@@ -461,8 +447,16 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
 		return;
 	}
+	
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
+
+	if (tile->tileState == TileState::F){
+		Fire& fire_object = registry.fire.get(fire);
+		fire_object.active = true;
+		fire_object.model = player.model;
+	}
+
 
 	if (motion.position != motion.destination){
 		return;

@@ -279,11 +279,22 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		Object& object = registry.objects.get(entity);
 		model = object.model;
 
+		mat4 trans;
+		if (registry.motions.has(entity)){
+			Motion& motion = registry.motions.get(entity);
+			trans = translate(mat4(1.f), motion.position);
+		}
+		else{
+			trans = mat4(1.f);
+		}
+
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -323,6 +334,9 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLsizei num_indices = size / sizeof(uint16_t);
 		// GLsizei num_triangles = num_indices / 3;
 
+		Motion& motion = registry.motions.get(entity);
+		mat4 trans = translate(mat4(1.f), motion.position);
+
 		Fire& object = registry.fire.get(entity);
 		model = object.model;
 		int index = (int)floor(object.index);
@@ -337,6 +351,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniform1i(index_loc, index);
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
