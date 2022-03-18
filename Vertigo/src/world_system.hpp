@@ -54,7 +54,7 @@ private:
 	void on_mouse_move(vec2 pos);
 
 	// Movement Functions
-	bool tile_move(Direction direction, Tile* tile);
+	void tile_move(Direction direction, Tile* tile, ControlTile* ctile);
 	void player_move(vec3 movement, Direction direction);
 	void Interact(Tile* tile);
 	void Burn(Tile* tile);
@@ -102,6 +102,7 @@ private:
 	Direction currDirection = Direction::RIGHT;
 
 	// Helper Functions
+	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
 	Coordinates searchForTile(Direction direction);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);

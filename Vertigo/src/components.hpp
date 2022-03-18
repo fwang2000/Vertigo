@@ -80,6 +80,7 @@ enum class TileState
 	N = 13,		// Non-interactible
 	O = 14,		// Constantly-Moving Tile
 	C = 2,		// Controllable Tile
+	M = 12,		// Move Tile
 	T = 19,		// Teleporter
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
@@ -109,6 +110,7 @@ struct Tile
 
 struct ControlTile : public Tile {
 	bool controled = 0; // 0 is not controlled, 1 is controlled
+	Tile* targetTile;
 };
 
 struct UpTile : public Tile {
@@ -297,7 +299,8 @@ enum class TEXTURE_ASSET_ID {
 	UP_TILE = SWITCH_TILE_SUCCESS + 1,
 	UP_TILE_SUCCESS = UP_TILE + 1,
 	CONTROL_TILE = UP_TILE_SUCCESS + 1,
-	END_TILE = CONTROL_TILE + 1,
+	MOVE_TILE = CONTROL_TILE + 1,
+	END_TILE = MOVE_TILE + 1,
 	TILE_SHADOW = END_TILE + 1,
 	EMPTY = TILE_SHADOW + 1,
 	FIRE = EMPTY + 1,

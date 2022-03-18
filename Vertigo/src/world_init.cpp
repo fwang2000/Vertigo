@@ -57,6 +57,9 @@ Entity createTile(Tile* tile)
 	case TileState::C:
 		id = TEXTURE_ASSET_ID::CONTROL_TILE;
 		break;
+	case TileState::M:
+		id = TEXTURE_ASSET_ID::MOVE_TILE;
+		break;
 	case TileState::B:
 		id = TEXTURE_ASSET_ID::BUSH_SHEET;
 		registry.burnables.emplace(entity);

@@ -384,6 +384,20 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			modifications.push_back(value);
 		}
 
+		if (modifications.at(0) == "C") {
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			ControlTile* control_tile = (ControlTile*)getTile(Coordinates{ f, r, c });
+
+			int t_f = std::stoi(modifications.at(5));
+			int t_r = std::stoi(modifications.at(6));
+			int t_c = std::stoi(modifications.at(7));
+
+			control_tile->targetTile = (Tile*)getTile(Coordinates{ t_f, t_r, t_c });
+		}
+
 		if (modifications.at(0) == "W") {
 
 			int f = std::stoi(modifications.at(1));
