@@ -288,7 +288,7 @@ void WorldSystem::load_level() {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
 
-				createTile(cube.faces[i][j][k]);
+				Tile* tile = createTile(cube.faces[i][j][k]);
 
 				if (cube.faces[i][j][k]->tileState == TileState::S) {
 					startingpos.f = i;
@@ -309,6 +309,7 @@ void WorldSystem::load_level() {
 
 				if (cube.faces[i][j][k]->tileState == TileState::O) {
 					// Create constantly moving tile
+					createConstMovingTile(tile, renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 			}
 		}
