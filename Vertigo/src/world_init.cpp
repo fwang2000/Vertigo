@@ -103,7 +103,7 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
-	motion.interpolate = true;
+	motion.interpolate = false;
 	motion.origin = vec2{ pos.c, pos.r };
 	motion.position = vec3(0, 0, 0);
 	motion.destination = vec3(0, 0, 0);
