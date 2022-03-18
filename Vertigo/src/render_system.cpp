@@ -295,67 +295,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::FIRE)
 	{
-		GLint in_position_loc = glGetAttribLocation(program, "aPos");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
-		gl_has_errors();
-		assert(in_texcoord_loc >= 0);
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(TexturedVertex), (void*)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_texcoord_loc);
-		// remember to change this if tex0's type changes vec2/vec3
-		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void*)sizeof(
-				vec3)); // note the stride to skip the preceeding vertex position
-
-		// Enabling and binding texture to slot 0
-		glActiveTexture(GL_TEXTURE0);
-		gl_has_errors();
-
-		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
-
-		// use 2d
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		gl_has_errors();
-
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
-		Fire& fire = registry.fire.get(entity);
-		model = fire.model;
-		int index = (int)floor(fire.index);
-
-		Motion& motion = registry.motions.get(entity);
-		mat4 trans = translate(mat4(1.f), motion.position);
-		fire.index += 1;
-		if (fire.index >= fire.maxIndex - 1) { fire.index = 0; }
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint index_loc = glGetUniformLocation(currProgram, "index");
-		glUniform1i(index_loc, index);
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
 	{
@@ -417,6 +356,97 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	{
 		assert(false && "Type of render request not supported");
 	}
+}
+
+void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4& view) {
+
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+
+	// Setting shaders
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glm::mat4 model = glm::mat4(1.f);
+
+	GLint in_position_loc = glGetAttribLocation(program, "in_position");
+	GLint in_color_loc = glGetAttribLocation(program, "in_color");
+	gl_has_errors();
+
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(ColoredVertex), (void*)0);
+	gl_has_errors();
+
+	glEnableVertexAttribArray(in_color_loc);
+	glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(ColoredVertex), (void*)sizeof(vec3));
+	gl_has_errors();
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	// Enabling and binding texture to slot 0
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	assert(registry.renderRequests.has(entity));
+	GLuint texture_id =
+		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+	// use 2d
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+	// GLsizei num_triangles = num_indices / 3;
+
+	Fire& fire = registry.fire.get(entity);
+	model = fire.model;
+	int index = (int)floor(fire.index);
+
+	Motion& motion = registry.motions.get(entity);
+	mat4 trans = translate(mat4(1.f), motion.position);
+	fire.index += 1;
+	if (fire.index >= fire.maxIndex - 1) { fire.index = 0; }
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint index_loc = glGetUniformLocation(currProgram, "index");
+	glUniform1i(index_loc, index);
+	GLuint model_loc = glGetUniformLocation(currProgram, "model");
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+	GLuint view_loc = glGetUniformLocation(currProgram, "view");
+	glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+	gl_has_errors();
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
 }
 
 void RenderSystem::drawToScreen()
@@ -521,6 +551,11 @@ void RenderSystem::draw()
 		}
 
 		drawTexturedMesh(entity, projection_3D, projection_2D, view);
+	}
+
+	if (fire_entity) {
+
+		drawFire(fire_entity, projection_3D, view);
 	}
 
 	// Truely render to the screen

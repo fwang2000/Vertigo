@@ -114,8 +114,8 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	fire.firePos = pos;
 	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * fire.model;
 	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * fire.model;
+	fire.model = scale(glm::mat4(1.0f), vec3(0.01f, 1.f, 1.f)) * fire.model;
 	fire.model = translateMatrix * fire.model;
-	// fire.model = scale(glm::mat4(1.0f), vec3(0.25f, 0.25f, 0.25f)) * fire.model;
 
 	switch (pos.f) {
 	case 0:
@@ -145,7 +145,7 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 		{
 			TEXTURE_ASSET_ID::FIRE,
 			EFFECT_ASSET_ID::FIRE,
-			GEOMETRY_BUFFER_ID::SPRITE
+			GEOMETRY_BUFFER_ID::FIRE
 		}
 	);
 

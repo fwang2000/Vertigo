@@ -105,7 +105,7 @@ public:
 
 	// Draw all entities
 	void draw();
-	void drawFire(Entity entity);
+	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
