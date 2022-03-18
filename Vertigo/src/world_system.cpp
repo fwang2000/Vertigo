@@ -389,26 +389,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
-			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
 		case GLFW_KEY_B:
@@ -502,7 +497,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 
-	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
+	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
 		return;
 	}
 	
