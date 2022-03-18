@@ -191,12 +191,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		model = object.model;
 
 		mat4 trans;
+		mat4 sca;
 		if (registry.motions.has(entity)){
 			Motion& motion = registry.motions.get(entity);
 			trans = translate(mat4(1.f), motion.position);
+			sca = scale(glm::mat4(1.0f), motion.scale);
 		}
 		else{
 			trans = mat4(1.f);
+			sca = scale(glm::mat4(1.0f), vec3(1.0f, 1.0f, 1.0f));
 		}
 
 		GLint currProgram;
@@ -206,6 +209,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -247,6 +252,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		Motion& motion = registry.motions.get(entity);
 		mat4 trans = translate(mat4(1.f), motion.position);
+		mat4 sca = scale(mat4(1.f), motion.scale);
 
 		Object& object = registry.objects.get(entity);
 		model = object.model;
@@ -265,6 +271,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");

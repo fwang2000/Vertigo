@@ -115,10 +115,12 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	return entity;
 }
 
-void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	createObject(entity, pos, translateMatrix, false);
+	createObject(entity, pos, translateMatrix, true);
+
+	registry.holdTimers.emplace(entity);
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -131,14 +133,14 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 			GEOMETRY_BUFFER_ID::COLUMN
 		}
 	);
+
+	return entity;
 }
 
-void createConstMovingTile(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	createObject(entity, pos, translateMatrix, true);
-
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
+	createObject(entity, pos, translateMatrix, false);
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -161,6 +163,7 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 		motion.position = vec3(0, 0, 0);
 		motion.destination = vec3(0, 0, 0);
 		motion.velocity = { 0.f , 0.f , 0.f };
+		motion.scale = {1.0f, 1.0f, 1.0f};
 	}
 
 	Object& object = registry.objects.emplace(entity);
