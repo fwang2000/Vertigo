@@ -328,6 +328,10 @@ void WorldSystem::load_level() {
 
 					fire = createFire(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::O) {
+					// Create constantly moving tile
+				}
 			}
 		}
 	}

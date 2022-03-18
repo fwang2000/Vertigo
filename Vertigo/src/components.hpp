@@ -118,6 +118,13 @@ struct InvisibleTile : public Tile {
 	virtual void action();
 };
 
+struct ConstMovingTile : public Tile {
+	Coordinates startCoords;
+	Coordinates endCoords;
+	bool toggled = false;
+	virtual void action();
+};
+
 struct BurnableTile : public Tile {
 	bool burned = false;
 	virtual void action();
