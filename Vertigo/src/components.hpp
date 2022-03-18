@@ -39,9 +39,7 @@ struct Fire
 	bool active = false;
 	bool inUse = false;
 	float index = 0;
-	int maxIndex = 64;
-	Coordinates firePos;
-	glm::mat4 model = glm::mat4(1.f);
+	int maxIndex = 24;
 };
 
 enum class BOX_ANIMATION {
@@ -311,8 +309,7 @@ const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	TEXTURED = COLOURED + 1,
-	TILE = TEXTURED + 1,
+	TILE = COLOURED + 1,
 	TEXT = TILE + 1,
 	PLAYER = TEXT + 1,
 	FADE = PLAYER + 1,

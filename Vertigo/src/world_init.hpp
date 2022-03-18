@@ -27,8 +27,8 @@ Entity createText(Text text);
 // the fire
 Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the fire's power gauge
-Entity createFireGauge(RenderSystem* renderer);
-// the object
-void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
-// menu
-Entity createMenu(RenderSystem* renderer);
+Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the column
+void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// general objects
+void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion);
