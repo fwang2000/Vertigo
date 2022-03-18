@@ -133,6 +133,26 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	);
 }
 
+void createConstMovingTile(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, true);
+
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::COLUMN
+		}
+	);
+}
+
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion){
 	if (hasMotion){
 		// Setting initial motion values
