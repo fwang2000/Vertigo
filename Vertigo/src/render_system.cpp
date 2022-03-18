@@ -295,24 +295,33 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::FIRE)
 	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
+		GLint in_position_loc = glGetAttribLocation(program, "aPos");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
 		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)0);
+			sizeof(TexturedVertex), (void*)0);
 		gl_has_errors();
 
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)sizeof(vec3));
+		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
 		gl_has_errors();
 
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		// use 2d
+		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
 		// Get number of indices from index buffer, which has elements uint16_t
@@ -323,12 +332,14 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLsizei num_indices = size / sizeof(uint16_t);
 		// GLsizei num_triangles = num_indices / 3;
 
-		Fire& object = registry.fire.get(entity);
-		model = object.model;
-		int index = (int)floor(object.index);
+		Fire& fire = registry.fire.get(entity);
+		model = fire.model;
+		int index = (int)floor(fire.index);
 
-		object.index += 0.24;
-		if (object.index >= object.maxIndex) { object.index = 0; }
+		Motion& motion = registry.motions.get(entity);
+		mat4 trans = translate(mat4(1.f), motion.position);
+		fire.index += 1;
+		if (fire.index >= fire.maxIndex - 1) { fire.index = 0; }
 
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
@@ -495,6 +506,8 @@ void RenderSystem::draw()
 	mat3 projection_2D = create2DProjectionMatrix();
 	mat4 view = createViewMatrix();
 
+	Entity fire_entity;
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -502,6 +515,11 @@ void RenderSystem::draw()
 		// 	continue;
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
+		if (registry.fire.has(entity)) {
+			fire_entity = entity;
+			// continue;
+		}
+
 		drawTexturedMesh(entity, projection_3D, projection_2D, view);
 	}
 
