@@ -26,27 +26,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	// Setting vertex and index buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	if (registry.burnables.has(entity)){
-
-		Burnable& counter = registry.burnables.get(entity);
-		int idx = floor(counter.num_intervals * counter.counter_ms / counter.max_ms);
-		idx = min(idx, counter.num_intervals - 1);
-
-		std::vector<TexturedVertex> vertices(4);
-		vertices[0].position = {  0.5f,  0.5f,  0.0f };
-		vertices[1].position = {  0.5f, -0.5f,  0.0f };
-		vertices[2].position = { -0.5f, -0.5f,  0.0f };
-		vertices[3].position = { -0.5f,  0.5f,  0.0f };
-		
-		vertices[0].texcoord = {  1.0f / counter.num_intervals * idx  , 0.0f };
-		vertices[1].texcoord = {  1.0f / counter.num_intervals * idx  , 1.0f };
-		vertices[2].texcoord = {  1.0f / counter.num_intervals * (idx + 1) , 1.0f };
-		vertices[3].texcoord = {  1.0f / counter.num_intervals * (idx + 1) , 0.0f };
-
-		glBufferData(GL_ARRAY_BUFFER,
-			sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-		gl_has_errors();
-	}
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	gl_has_errors();
 
@@ -269,12 +248,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		Motion& motion = registry.motions.get(entity);
 		mat4 trans = translate(mat4(1.f), motion.position);
 
-		Fire& object = registry.fire.get(entity);
+		Object& object = registry.objects.get(entity);
 		model = object.model;
-		int index = (int)floor(object.index);
+		Fire& fire = registry.fire.get(entity);
+		int index = (int)floor(fire.index);
 
-		object.index += 0.24;
-		if (object.index >= object.maxIndex) { object.index = 0; }
+		fire.index += 0.24;
+		if (fire.index >= fire.maxIndex) { fire.index = 0; }
 
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);

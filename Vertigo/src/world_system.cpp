@@ -105,11 +105,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Motion& player_motion = motions_registry.get(player_explorer);
 
+	rotateAll(elapsed_ms_since_last_update);
+
+	// Update fire position
 	if (motions_registry.has(fire) && registry.fire.get(fire).active == true) {
-
-		Motion& fire_motion = motions_registry.get(fire);
-
 		if (!registry.shootTimers.has(fire_shadow)) {
+			Motion& fire_motion = motions_registry.get(fire);
+			Object& fire_object = registry.objects.get(fire);
+			Player& player = registry.players.get(player_explorer);
+
+			fire_object.model = player.model;
 			fire_motion.position = player_motion.position;
 		}
 	}
@@ -146,10 +151,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				}
 			}
 		}
-		timer_motion.scale[1] = 100 * counter.counter_ms / counter.max_ms;
+		// TODO: Update timer scale timer_motion.scale[1] = 100 * counter.counter_ms / counter.max_ms;
 	}
-
-	rotateAll(elapsed_ms_since_last_update);
 
 	// handle burnable animations here
 	for (Entity entity : registry.burnables.entities) {
@@ -296,7 +299,7 @@ void WorldSystem::load_level() {
 				
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
-					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::F) {
@@ -393,7 +396,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 		if (!registry.shootTimers.has(fire_shadow)){
 			// If fire has yet to be shot, add to holdTimer
-			fire_gauge = createFireGauge(renderer);
+			// fire_gauge = createFireGauge(renderer);
 		}
 	}
 
@@ -451,11 +454,11 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Motion& motion = registry.motions.get(player_explorer);
 
 	if (tile->tileState == TileState::F){
-		Fire& fire_object = registry.fire.get(fire);
-		fire_object.active = true;
+		Object& fire_object = registry.objects.get(fire);
+		Fire& fire_component = registry.fire.get(fire);
+		fire_component.active = true;
 		fire_object.model = player.model;
 	}
-
 
 	if (motion.position != motion.destination){
 		return;
@@ -645,54 +648,46 @@ void WorldSystem::Interact(Tile* tile)
 
 void WorldSystem::UsePower(Direction direction, float power) 
 {
-	Player& player = registry.players.get(player_explorer);
+	return;
+	// Player& player = registry.players.get(player_explorer);
 
-	// If fire is already shot, do not reshoot
-	if (registry.shootTimers.has(fire_shadow)){
-		return;
-	}
+	// // If fire is already shot, do not reshoot
+	// if (registry.shootTimers.has(fire_shadow)){
+	// 	return;
+	// }
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(fire_shadow, &mesh);
-	registry.renderRequests.insert(
-		fire_shadow,
-		{
-			TEXTURE_ASSET_ID::FIRE_SHADOW,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE
-		}
-	);
-	ShootTimer& shootTimer = registry.shootTimers.emplace(fire_shadow);
-	shootTimer.counter_ms = 10000;
-	Motion& shot_motion = registry.motions.emplace(fire_shadow);
+	// Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	// registry.meshPtrs.emplace(fire_shadow, &mesh);
+	// registry.renderRequests.insert(
+	// 	fire_shadow,
+	// 	{
+	// 		TEXTURE_ASSET_ID::FIRE_SHADOW,
+	// 		EFFECT_ASSET_ID::TEXTURED,
+	// 		GEOMETRY_BUFFER_ID::SPRITE
+	// 	}
+	// );
 
-	Motion& motion = registry.motions.get(fire);
-	float power_factor = 3.0f;
-	motion.acceleration = vec3(0, 0, -TILE_BB_WIDTH * power_factor);
+	// Motion& motion = registry.motions.get(fire);
+	// float power_factor = 3.0f;
+	// motion.acceleration = vec3(0, 0, -TILE_BB_WIDTH * power_factor);
 
-	switch (direction) 
-	{
-	case Direction::DOWN:
-		motion.velocity = vec3(0, TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
-		break;
-	case Direction::UP:
-		motion.velocity = vec3(0, -TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
-		break;
-	case Direction::LEFT:
-		motion.velocity = vec3(-TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
-		break;
-	case Direction::RIGHT:
-		motion.velocity = vec3(TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
-		break;
-	default:
-		motion.velocity = vec3(0, 0, 0);
-	}
-	
-	shot_motion.position = motion.position + vec3(40, -40, 0);
-	shot_motion.scale = motion.scale;
-	shot_motion.velocity = motion.velocity;
-	shot_motion.velocity[2] = 0;
-	shot_motion.origin = motion.origin;
+	// switch (direction) 
+	// {
+	// case Direction::DOWN:
+	// 	motion.velocity = vec3(0, TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
+	// 	break;
+	// case Direction::UP:
+	// 	motion.velocity = vec3(0, -TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
+	// 	break;
+	// case Direction::LEFT:
+	// 	motion.velocity = vec3(-TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
+	// 	break;
+	// case Direction::RIGHT:
+	// 	motion.velocity = vec3(TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
+	// 	break;
+	// default:
+	// 	motion.velocity = vec3(0, 0, 0);
+	// }
 }
 
 void WorldSystem::Burn(Tile* tile) {

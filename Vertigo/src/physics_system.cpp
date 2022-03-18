@@ -10,7 +10,9 @@
 vec2 get_bounding_box(const Motion& motion)
 {
 	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
+	// return { abs(motion.scale.x), abs(motion.scale.y) };
+	// TODO: Update or remove
+	return {0, 0};
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
