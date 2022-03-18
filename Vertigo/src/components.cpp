@@ -281,6 +281,18 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					i_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
+				case TileState::O:
+				{
+					ConstMovingTile* c_tile = new ConstMovingTile();
+					c_tile->model = tileStartingMatrix(i, x, y, distance);
+					c_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(c_tile);
+					c_tile->coords = { i, y_coord, x_coord };
+					c_tile->currentPos = c_tile->coords;
+					c_tile->direction = static_cast<FACE_DIRECTION>(i);
+					break;
+				}
 				default:
 				{
 					Tile* tile = new Tile();
@@ -544,6 +556,14 @@ void SwitchTile::action() {
 }
 
 void UpTile::action() {
+	// if up tile facing up {
+	// 	this->tileState = TileState::D;
+	// }
+
+	return;
+}
+
+void ConstMovingTile::action() {
 	// if up tile facing up {
 	// 	this->tileState = TileState::D;
 	// }
