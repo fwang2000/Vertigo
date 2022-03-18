@@ -7,11 +7,9 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
-	motion.origin = vec2{ pos.c, pos.r };
 	motion.position = vec3(0, 0, 0);
 	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = pos;
@@ -104,11 +102,8 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = false;
-	motion.origin = vec2{ pos.c, pos.r };
 	motion.position = vec3(0, 0, 0);
-	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = vec2(OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT);
 
 	Fire& fire = registry.fire.emplace(entity);
 	fire.firePos = pos;
@@ -162,10 +157,6 @@ Entity createFireGauge(RenderSystem* renderer)
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	Motion& motion = registry.motions.emplace(entity);
-	motion.scale = vec2({ 50, 0});
-	motion.origin = vec2(100, 100);
-	motion.x_vector = vec2(0, 1);
-
 	registry.renderRequests.insert(
 		entity,
 		{
@@ -187,11 +178,9 @@ void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	 // Setting initial motion values
 	 Motion& motion = registry.motions.emplace(entity);
 	 motion.interpolate = true;
-	 motion.origin = vec2{ pos.c, pos.r };
 	 motion.position = vec3(0, 0, 0);
 	 motion.destination = vec3(0, 0, 0);
 	 motion.velocity = { 0.f , 0.f , 0.f };
-	 motion.scale = vec2(OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT);
 
 	 Object& object = registry.objects.emplace(entity);
 	 object.objectPos = pos;
