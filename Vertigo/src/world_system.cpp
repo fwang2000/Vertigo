@@ -524,8 +524,14 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Tile* tile = cube.getTile(newCoords);
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
-	if (tile->tileState == TileState::U) {
+	/*if (tile->tileState == TileState::U) {
 		if (abs(static_cast<int>(direction) - static_cast<int>(trueDirection)) != 2)
+		{
+			return;
+		}
+	}*/
+	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
+		if (static_cast<int>(direction) != 0)
 		{
 			return;
 		}

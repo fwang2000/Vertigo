@@ -84,6 +84,9 @@ enum class TileState
 	T = 19,		// Teleporter
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
+	R = 17,		// Right-Tile
+	D = 3,		// Left-Tile
+	L = 11,		// Down-Tile
 	E = 4,		// Empty
 	Z = 25,		// Finish
 };
@@ -296,7 +299,10 @@ enum class TEXTURE_ASSET_ID {
 	INVISIBLE_TILE = TILE + 1,
 	SWITCH_TILE = INVISIBLE_TILE + 1,
 	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
-	UP_TILE = SWITCH_TILE_SUCCESS + 1,
+	RIGHT_TILE = SWITCH_TILE_SUCCESS + 1,
+	LEFT_TILE = RIGHT_TILE + 1,
+	DOWN_TILE = LEFT_TILE + 1,
+	UP_TILE = DOWN_TILE + 1,
 	UP_TILE_SUCCESS = UP_TILE + 1,
 	CONTROL_TILE = UP_TILE_SUCCESS + 1,
 	MOVE_TILE = CONTROL_TILE + 1,
