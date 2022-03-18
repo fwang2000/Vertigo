@@ -174,6 +174,7 @@ struct Motion
 {
 	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
 	bool move_z = false;
+	vec3 position = {0, 0, 0};
 
 	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
@@ -182,17 +183,6 @@ struct Motion
 	// Interpolation
 	vec3 destination = {0, 0, 0}; // Used if interpolating
 	float remaining_time = 0; // Used if interpolating
-
-	// For rendering 3d coordinates to 2d screen
-	vec2 origin = {0, 0};
-	// Please don't change this unless you're changing the viewing angle
-	// It's hard coded based on the current viewing angle of the cube
-	vec2 x_vector = {sin(radians(72.0f)), cos(radians(72.0f))};
-	vec2 y_vector = {0, 1};
-	vec2 z_vector = {-sin(radians(30.0f)), -cos(radians(30.0f))};
-	vec3 position = {0, 0, 0};
-
-	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information
