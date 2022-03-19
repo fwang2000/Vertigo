@@ -620,24 +620,28 @@ void Tile::move(vec2 t, vec2 delta_coord) {
 // enter = 4
 void Menu::changeOption(int dir) {
 
-	if (this->sound == true) {
+	if (sound == true) {
 		switch(dir) {
 		case 0:
-			this->option = (this->option - 1) % 4;
+			if (option == 0) {
+				option = 3;
+			} else {
+				option = (option - 1) % 4;
+			}
 			break;
 		case 1:
-			this->option = (this->option + 1) % 4;
+			option = (option + 1) % 4;
 			break;
 		case 2:
-			this->option = 0;
+			option = 0;
 			break;
 		case 3:
-			this->option = 0;
+			option = 0;
 			break;
 		case 4:
-			if (this->option == 2) {
+			if (option == 2) {
 				toggleSound();
-				this->option = 6;
+				option = 6;
 			}
 			break;
 		default:
@@ -646,21 +650,21 @@ void Menu::changeOption(int dir) {
 	} else {
 		switch(dir) {
 		case 0:
-			this->option = ((this->option - 1) % 4) + 4;
+			option = ((option - 1) % 4) + 4;
 			break;
 		case 1:
-			this->option = ((this->option + 1) % 4) + 4;
+			option = ((option + 1) % 4) + 4;
 			break;
 		case 2:
-			this->option = 4;
+			option = 4;
 			break;
 		case 3:
-			this->option = 4;
+			option = 4;
 			break;
 		case 4:
-			if (this->option == 6) {
+			if (option == 6) {
 				toggleSound();
-				this->option = 2;
+				option = 2;
 			}
 			break;
 		default:
