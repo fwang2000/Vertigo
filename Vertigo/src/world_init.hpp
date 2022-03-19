@@ -34,3 +34,4 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion);
+Entity createMenu(RenderSystem* renderer);
