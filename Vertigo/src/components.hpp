@@ -202,6 +202,14 @@ struct ScreenState
 	float darken_screen_factor = -1;
 };
 
+struct Menu
+{
+	int option = 1;
+	bool sound = true;
+	void changeOption(int dir);
+	void toggleSound() {sound = !sound;}
+};
+
 // A timer that will be associated to shot fire
 struct ShootTimer
 {
@@ -292,7 +300,15 @@ enum class TEXTURE_ASSET_ID {
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
 	BUSH_SHEET = FIRE_GAUGE + 1,
-	TEXTURE_COUNT = BUSH_SHEET + 1
+	ON_LEVELS = BUSH_SHEET + 1,
+	ON_SOUND = ON_LEVELS + 1,
+	ON_TUTORIAL = ON_SOUND + 1,
+	ON_X = ON_TUTORIAL + 1,
+	OFF_LEVELS = ON_X + 1,
+	OFF_SOUND = OFF_LEVELS + 1,
+	OFF_TUTORIAL = OFF_SOUND + 1,
+	OFF_X = OFF_TUTORIAL + 1,
+	TEXTURE_COUNT = OFF_X + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -305,7 +321,8 @@ enum class EFFECT_ASSET_ID {
 	FADE = PLAYER + 1,
 	OBJECT = FADE + 1,
 	FIRE = OBJECT + 1,
-	EFFECT_COUNT = FIRE + 1
+	MENU = FIRE + 1,
+	EFFECT_COUNT = MENU + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 

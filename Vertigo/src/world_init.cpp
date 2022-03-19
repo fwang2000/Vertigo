@@ -232,3 +232,22 @@ void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	 	}
 	 );
 }
+
+Entity createMenu(RenderSystem* renderer) {
+	Entity entity = Entity();
+
+	Menu& menu = registry.menus.emplace(entity);
+	Object& object = registry.objects.emplace(entity);
+	
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::ON_LEVELS,
+		 EFFECT_ASSET_ID::MENU,
+		 GEOMETRY_BUFFER_ID::SPRITE 
+		}
+	);
+
+	return entity;
+}

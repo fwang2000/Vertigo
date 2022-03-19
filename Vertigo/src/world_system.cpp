@@ -391,14 +391,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Fire release
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && gameState != GameState::MENU) {
 		if (!registry.shootTimers.has(fire_shadow)){
 			// If fire has yet to be shot, add to holdTimer
 			fire_gauge = createFireGauge(renderer);
 		}
 	}
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge)) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
 		HoldTimer& holdTimer = registry.holdTimers.get(fire_gauge);
 		float power = holdTimer.counter_ms/holdTimer.max_ms;
 		registry.remove_all_components_of(fire_gauge);
@@ -412,14 +412,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	// Fire release
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && gameState != GameState::MENU) {
 		if (!registry.shootTimers.has(fire)){
 			// If fire has yet to be shot, add to holdTimer
 			HoldTimer& holdTimer = registry.holdTimers.emplace(fire);
 		}
 	}
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire)) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire) && gameState != GameState::MENU) {
 		HoldTimer& holdTimer = registry.holdTimers.get(fire);
 		float power = holdTimer.counter_ms/holdTimer.max_ms;
 		registry.holdTimers.remove(fire);
@@ -427,6 +427,35 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	}
 
 	SetSprite(dir);
+
+	// Menu page esc
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
+		gameState = GameState::MENU;
+		menu = createMenu(renderer);
+	}
+
+	if (action == GLFW_RELEASE && gameState == GameState::MENU) {
+		switch (key)
+		{
+		case GLFW_KEY_UP:
+			changeMenu(0);
+			break;
+		case GLFW_KEY_DOWN:
+			changeMenu(1);
+			break;
+		case GLFW_KEY_RIGHT:
+			changeMenu(2);
+			break;
+		case GLFW_KEY_LEFT:
+			changeMenu(3);
+			break;
+		case GLFW_KEY_ENTER:
+			changeMenu(4);
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
@@ -587,6 +616,51 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 }
 
+void WorldSystem::changeMenu(int dir){
+	Menu& curr = registry.menus.get(menu);
+	
+	if ((dir == 4) && (curr.option == 0 || curr.option == 4)) {
+		gameState = GameState::IDLE;
+		restart_game();
+		return;
+	}
+	curr.changeOption(dir);
+
+	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::ON_LEVELS;
+
+	switch (curr.option) {
+	case 0:
+		id = TEXTURE_ASSET_ID::ON_X;
+		break;
+	case 1:
+		id = TEXTURE_ASSET_ID::ON_LEVELS;
+		break;
+	case 2:
+		id = TEXTURE_ASSET_ID::ON_SOUND;
+		break;
+	case 3:
+		id = TEXTURE_ASSET_ID::ON_TUTORIAL;
+		break;
+	case 4:
+		id = TEXTURE_ASSET_ID::OFF_X;
+		break;
+	case 5:
+		id = TEXTURE_ASSET_ID::OFF_LEVELS;
+		break;
+	case 6:
+		id = TEXTURE_ASSET_ID::OFF_SOUND;
+		break;
+	case 7:
+		id = TEXTURE_ASSET_ID::OFF_TUTORIAL;
+		break;
+	default:
+		id = TEXTURE_ASSET_ID::ON_X;
+	}
+	
+	RenderRequest& menuRequest = registry.renderRequests.get(menu);
+	menuRequest.used_texture = id;
+}
+
 void WorldSystem::Interact(Tile* tile) 
 {
 	if (tile->tileState != TileState::W) {
@@ -601,14 +675,18 @@ void WorldSystem::Interact(Tile* tile)
 
 	gameState = GameState::INTERACTING;
 
+	// change texture of switch tile to success switch tile
+	if (tile->tileState == TileState::W) {
+		Entity successTile = getCurrentTileEntity();
+		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
+	}
+
 	if (s_tile->targetTile->tileState == TileState::I) {
 
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
-		Entity successTile = getCurrentTileEntity();
-		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
-		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 	else {
 

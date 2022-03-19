@@ -601,4 +601,72 @@ void Tile::move(vec2 t, vec2 delta_coord) {
 	currentPos = Coordinates{ currentPos.f, currentPos.r - (int)delta_coord.y , currentPos.c + (int)delta_coord.x };
 }
 
+
+// Screen states:
+// 0: on_x
+// 1: on_levels
+// 2: on_sound
+// 3: on_tutorial
+// 4: off_x
+// 5: off_levels
+// 6: off_sound
+// 7: off_tutorial
+
+// direction:
+// up: 0
+// down: 1
+// right: 2
+// left: 3
+// enter = 4
+void Menu::changeOption(int dir) {
+
+	if (this->sound == true) {
+		switch(dir) {
+		case 0:
+			this->option = (this->option - 1) % 4;
+			break;
+		case 1:
+			this->option = (this->option + 1) % 4;
+			break;
+		case 2:
+			this->option = 0;
+			break;
+		case 3:
+			this->option = 0;
+			break;
+		case 4:
+			if (this->option == 2) {
+				toggleSound();
+				this->option = 6;
+			}
+			break;
+		default:
+			break;
+		}
+	} else {
+		switch(dir) {
+		case 0:
+			this->option = ((this->option - 1) % 4) + 4;
+			break;
+		case 1:
+			this->option = ((this->option + 1) % 4) + 4;
+			break;
+		case 2:
+			this->option = 4;
+			break;
+		case 3:
+			this->option = 4;
+			break;
+		case 4:
+			if (this->option == 6) {
+				toggleSound();
+				this->option = 2;
+			}
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 #pragma endregion
