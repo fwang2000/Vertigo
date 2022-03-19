@@ -30,3 +30,5 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 Entity createFireGauge(RenderSystem* renderer);
 // the object
 void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// menu
+Entity createMenu(RenderSystem* renderer);
