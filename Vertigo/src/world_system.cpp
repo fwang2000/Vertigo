@@ -621,6 +621,8 @@ void WorldSystem::changeMenu(int dir){
 	
 	if ((dir == 4) && (curr.option == 0 || curr.option == 4)) {
 		gameState = GameState::IDLE;
+		cube.reset();
+		faceDirection = Direction::UP;
 		restart_game();
 		return;
 	}
