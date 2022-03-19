@@ -26,7 +26,7 @@ class RenderSystem {
 	{
 		  // specify meshes of other assets here
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire/fire.obj"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
