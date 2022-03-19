@@ -26,7 +26,7 @@ class RenderSystem {
 	{
 		  // specify meshes of other assets here
 		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj"))
+		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire/fire.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -55,7 +55,7 @@ class RenderSystem {
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
 			textures_path("empty_tile.png"),
-			textures_path("fire.png"),
+			textures_path("fire/firesheet.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
 			textures_path("Spritesheets/bushSheet.png"),
@@ -114,6 +114,7 @@ public:
 
 	// Draw all entities
 	void draw();
+	void drawFire(Entity entity);
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);

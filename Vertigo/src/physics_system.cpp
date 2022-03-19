@@ -74,6 +74,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			motion.position = motion.position + motion.velocity * step_seconds;
 
 		}
+		
 	}
 
 	// Check for collisions between all moving entities

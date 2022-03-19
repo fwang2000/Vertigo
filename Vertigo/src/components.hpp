@@ -39,7 +39,7 @@ struct Fire
 	bool active = false;
 	bool inUse = false;
 	float index = 0;
-	int maxIndex = 24;
+	int maxIndex = 64;
 	Coordinates firePos;
 	glm::mat4 model = glm::mat4(1.f);
 };
