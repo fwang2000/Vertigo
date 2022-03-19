@@ -544,7 +544,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		Fire& fire_component = registry.fire.get(fire);
 		fire_component.active = true;
 		fire_object.model = player.model;
-		fire_motion.scale = {0.2f, 0.2f, 0.2f};
+		fire_motion.scale = {0.4f, 0.4f, 0.4f};
 	}
 
 	if (motion.position != motion.destination){
