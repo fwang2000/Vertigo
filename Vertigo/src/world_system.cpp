@@ -148,7 +148,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			}
 			if (fire_component.inUse == false) {
 				fire_object.model = player.model;
-				fire_motion.position = player_motion.position + vec3({0.5, 0.5, 1});
+				fire_motion.position = player_motion.position + vec3({0.2, 0.2, 1});
 			}
 		}
 	}
