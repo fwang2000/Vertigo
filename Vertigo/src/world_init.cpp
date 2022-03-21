@@ -55,8 +55,7 @@ Entity createTile(Tile* tile)
 		break;
 	case TileState::B:
 		id = TEXTURE_ASSET_ID::BUSH_SHEET;
-		registry.burnables.emplace(entity);
-		gid = GEOMETRY_BUFFER_ID::ANIMATED;
+		registry.animated.emplace(entity);
 		break;
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;

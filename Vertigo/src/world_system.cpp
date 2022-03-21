@@ -187,16 +187,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		timer_motion.scale.z = counter.counter_ms/counter.max_ms;
 	}
 
-	// handle burnable animations here
-	for (Entity entity : registry.burnables.entities) {
+	// handle animations here
+	for (Entity entity : registry.animated.entities) {
 
-		Burnable& counter = registry.burnables.get(entity);
+		Animated& counter = registry.animated.get(entity);
 		if (counter.activate == true){
 			counter.counter_ms += elapsed_ms_since_last_update;
 		}
 
 		if (counter.counter_ms > counter.max_ms) {
-			registry.burnables.remove(entity);
+			registry.animated.remove(entity);
 			Tile* tile = registry.tiles.get(entity);
 			tile->tileState = TileState::V;
 		}
@@ -406,6 +406,10 @@ void WorldSystem::handle_collisions() {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
+
+		if (registry.fire.has(entity) && registry.animated.has(entity_other)){
+			Burn(entity_other);
+		}
 	}
 
 	// Remove all collisions from this simulation step
@@ -449,9 +453,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			break;
 		case GLFW_KEY_I:
 			Interact(tile);
-			break;
-		case GLFW_KEY_B:
-			Burn(tile);
 			break;
 		default:
 			break;
@@ -818,13 +819,10 @@ void WorldSystem::UsePower(Direction direction, float power)
 	}
 }
 
-void WorldSystem::Burn(Tile* tile) {
-
-	if (tile->tileState == TileState::B) {
-		gameState = GameState::BURNING;
-		Burnable& burned = registry.burnables.get(getCurrentTileEntity());
-		burned.activate = true;
-	}
+void WorldSystem::Burn(Entity entity) {
+	gameState = GameState::BURNING;
+	Animated& animated = registry.animated.get(entity);
+	animated.activate = true;
 }
 
 void WorldSystem::SetSprite(Direction direction) {

@@ -26,7 +26,7 @@ struct Object
 	glm::mat4 model = glm::mat4(1.f);
 };
 
-struct Burnable
+struct Animated
 {
 	int counter_ms = 0;
 	int max_ms = 1000;
@@ -327,8 +327,7 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	COLUMN = SCREEN_TRIANGLE + 1,
-	ANIMATED = COLUMN + 1,
-	FIRE = ANIMATED + 1,
+	FIRE = COLUMN + 1,
 	GEOMETRY_COUNT = FIRE + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;

@@ -104,6 +104,20 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		
+		if (registry.animated.has(entity)){
+			Animated& animated = registry.animated.get(entity);
+			GLuint animated_loc = glGetUniformLocation(currProgram, "animated");
+			glUniform1i(animated_loc, true);
+			GLuint length_loc = glGetUniformLocation(currProgram, "sheet_length");
+			glUniform1i(length_loc, animated.num_intervals);
+			GLuint index_loc = glGetUniformLocation(currProgram, "index");
+			glUniform1i(index_loc, floor(animated.counter_ms * animated.num_intervals / animated.max_ms));
+		}
+		else{
+			GLuint animated_loc = glGetUniformLocation(currProgram, "animated");
+			glUniform1i(animated_loc, false);
+		}
 
 		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
 		gl_has_errors();
