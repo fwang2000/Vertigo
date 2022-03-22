@@ -1,22 +1,16 @@
-#version 330
+#version 330 core
 
-// From Vertex Shader
-in vec3 vcolor;
-in vec2 vpos; // Distance from local origin
+// Outputs colors in RGBA
+out vec4 FragColor;
 
-// Application data
-uniform sampler2D sampler0;
+// Inputs the texture coordinates from the Vertex Shader
+in vec2 texCoord;
 uniform vec3 fcolor;
-uniform int index;
 
-// Output color
-layout(location = 0) out vec4 color;
+// Gets the Texture Unit from the main function
+uniform sampler2D tex0;
 
 void main()
 {
-	int row = index / 7;
-	int column = index % 9;
-
-	vec2 texCoord = vec2((vpos.x + column - 0.5)/9, (vpos.y + row - 0.5)/7);
-	color = texture(sampler0, texCoord) * vec4(fcolor * vcolor, 1.0);
+	FragColor = texture(tex0, texCoord);
 }

@@ -28,6 +28,7 @@ public:
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
 	ComponentContainer<Burnable> burnables;
+	ComponentContainer<Menu> menus;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -48,6 +49,7 @@ public:
 		registry_list.push_back(&fire);
 		registry_list.push_back(&objects);
 		registry_list.push_back(&burnables);
+		registry_list.push_back(&menus);
 	}
 
 	void clear_all_components() {

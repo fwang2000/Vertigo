@@ -26,102 +26,13 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	// Setting vertex and index buffers
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	if (registry.burnables.has(entity)){
-
-		Burnable& counter = registry.burnables.get(entity);
-		int idx = floor(counter.num_intervals * counter.counter_ms / counter.max_ms);
-		idx = min(idx, counter.num_intervals - 1);
-
-		std::vector<TexturedVertex> vertices(4);
-		vertices[0].position = {  0.5f,  0.5f,  0.0f };
-		vertices[1].position = {  0.5f, -0.5f,  0.0f };
-		vertices[2].position = { -0.5f, -0.5f,  0.0f };
-		vertices[3].position = { -0.5f,  0.5f,  0.0f };
-		
-		vertices[0].texcoord = {  1.0f / counter.num_intervals * idx  , 0.0f };
-		vertices[1].texcoord = {  1.0f / counter.num_intervals * idx  , 1.0f };
-		vertices[2].texcoord = {  1.0f / counter.num_intervals * (idx + 1) , 1.0f };
-		vertices[3].texcoord = {  1.0f / counter.num_intervals * (idx + 1) , 0.0f };
-
-		glBufferData(GL_ARRAY_BUFFER,
-			sizeof(vertices[0]) * vertices.size(), vertices.data(), GL_STATIC_DRAW);
-		gl_has_errors();
-	}
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	gl_has_errors();
 
 	glm::mat4 model = glm::mat4(1.f);
 
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
-	{
-		Motion& motion = registry.motions.get(entity);
-
-		// Transformation code, see Rendering and Transformation in the template
-		// specification for more info Incrementally updates transformation matrix,
-		// thus ORDER IS IMPORTANT
-		Transform transform;
-
-		transform.translate( motion.position[0] * motion.x_vector
-						   + motion.position[1] * motion.y_vector
-						   + motion.position[2] * motion.z_vector
-						   + motion.origin);
-		transform.scale(motion.scale);
-		transform.rotate(-acos(dot(motion.x_vector, vec2({0, 1}))));
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
-		gl_has_errors();
-		assert(in_texcoord_loc >= 0);
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(TexturedVertex), (void*)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_texcoord_loc);
-		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
-			(void*)sizeof(
-				vec3)); // note the stride to skip the preceeding vertex position
-
-		// Enabling and binding texture to slot 0
-		glActiveTexture(GL_TEXTURE0);
-		gl_has_errors();
-
-		assert(registry.renderRequests.has(entity));
-		GLuint texture_id =
-			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
-
-		glBindTexture(GL_TEXTURE_2D, texture_id);
-		gl_has_errors();
-
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
-		gl_has_errors();
-
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-		glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection2D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
@@ -161,6 +72,17 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		{
 			model = boxRotate->model;
 		}
+		mat4 trans;
+		mat4 sca;
+		if (registry.motions.has(entity)){
+			Motion& motion = registry.motions.get(entity);
+			trans = translate(mat4(1.f), motion.position);
+			sca = scale(mat4(1.0f), motion.scale);
+		}
+		else{
+			trans = mat4(1.f);
+			sca = mat4(1.f);
+		}
 
 		// Get number of indices from index buffer, which has elements uint16_t
 		GLint size = 0;
@@ -175,6 +97,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
+		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float *)&sca);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -246,56 +172,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::OBJECT)
-	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_color_loc = glGetAttribLocation(program, "in_color");
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_position_loc);
-		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)0);
-		gl_has_errors();
-
-		glEnableVertexAttribArray(in_color_loc);
-		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-			sizeof(ColoredVertex), (void*)sizeof(vec3));
-		gl_has_errors();
-
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
-		gl_has_errors();
-
-		// Get number of indices from index buffer, which has elements uint16_t
-		GLint size = 0;
-		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
-		gl_has_errors();
-
-		GLsizei num_indices = size / sizeof(uint16_t);
-		// GLsizei num_triangles = num_indices / 3;
-
-		Object& object = registry.objects.get(entity);
-		model = object.model;
-
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program
-		GLuint model_loc = glGetUniformLocation(currProgram, "model");
-		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-		GLuint view_loc = glGetUniformLocation(currProgram, "view");
-		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
-		gl_has_errors();
-		// Drawing of num_indices/3 triangles specified in the index buffer
-		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
-		gl_has_errors();
-	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::FIRE)
-	{
-	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
@@ -352,6 +228,52 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
 	}
+	else if (render_request.used_effect == EFFECT_ASSET_ID::MENU)
+	{
+		GLint in_position_loc = glGetAttribLocation(program, "in_position");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		gl_has_errors();
+		assert(in_texcoord_loc >= 0);
+
+		glEnableVertexAttribArray(in_position_loc);
+		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+			sizeof(TexturedVertex), (void*)0);
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_texcoord_loc);
+		glVertexAttribPointer(
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			(void*)sizeof(
+				vec3)); // note the stride to skip the preceeding vertex position
+
+		// Enabling and binding texture to slot 0
+		glActiveTexture(GL_TEXTURE0);
+		gl_has_errors();
+
+		assert(registry.renderRequests.has(entity));
+		GLuint texture_id =
+			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+		glBindTexture(GL_TEXTURE_2D, texture_id);
+		gl_has_errors();
+
+		// Getting uniform locations for glUniform* calls
+		GLint color_uloc = glGetUniformLocation(program, "fcolor");
+		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+		glUniform3fv(color_uloc, 1, (float*)&color);
+		gl_has_errors();
+
+		// Get number of indices from index buffer, which has elements uint16_t
+		GLint size = 0;
+		glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+		gl_has_errors();
+
+		GLsizei num_indices = size / sizeof(uint16_t);
+		// GLsizei num_triangles = num_indices / 3;
+		// Drawing of num_indices/3 triangles specified in the index buffer
+		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+		gl_has_errors();
+	}
 	else
 	{
 		assert(false && "Type of render request not supported");
@@ -360,7 +282,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4& view) {
 
-	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
@@ -382,7 +303,102 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 	gl_has_errors();
 
 	glm::mat4 model = glm::mat4(1.f);
+	GLint in_position_loc = glGetAttribLocation(program, "aPos");
+	GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+	gl_has_errors();
+	assert(in_texcoord_loc >= 0);
 
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(TexturedVertex), (void*)0);
+	gl_has_errors();
+
+	glEnableVertexAttribArray(in_texcoord_loc);
+	glVertexAttribPointer(in_texcoord_loc, 2, GL_FLOAT, GL_FALSE,
+		sizeof(TexturedVertex), (void*)sizeof(vec3));
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+	// GLsizei num_triangles = num_indices / 3;
+
+	Motion& motion = registry.motions.get(entity);
+	mat4 trans = translate(mat4(1.f), motion.position);
+	mat4 sca = scale(mat4(1.f), motion.scale);
+
+	Object& object = registry.objects.get(entity);
+	model = object.model;
+	Fire& fire = registry.fire.get(entity);
+	int index = (int)floor(fire.index);
+
+	fire.index += 1;
+	if (fire.index >= fire.maxIndex - 1) { fire.index = 0; }
+
+	GLint currProgram;
+	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	// Setting uniform values to the currently bound program
+	GLuint index_loc = glGetUniformLocation(currProgram, "index");
+	glUniform1i(index_loc, index);
+	GLuint model_loc = glGetUniformLocation(currProgram, "model");
+	glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+	GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+	glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
+	GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+	glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
+	GLuint view_loc = glGetUniformLocation(currProgram, "view");
+	glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+	GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+	GLuint mainTexture = glGetUniformLocation(currProgram, "tex0");
+	glUniform1i(mainTexture, 0);
+	gl_has_errors();
+
+	GLuint texture_id =
+		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+
+	// use 2d
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
+}
+
+void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat4& view) 
+{
+	if (registry.fire.has(entity)) {
+		return;
+	}
+
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+
+	// Setting shaders
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	glm::mat4 model = glm::mat4(1.f);
 	GLint in_position_loc = glGetAttribLocation(program, "in_position");
 	GLint in_color_loc = glGetAttribLocation(program, "in_color");
 	gl_has_errors();
@@ -403,18 +419,6 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 	glUniform3fv(color_uloc, 1, (float*)&color);
 	gl_has_errors();
 
-	// Enabling and binding texture to slot 0
-	glActiveTexture(GL_TEXTURE0);
-	gl_has_errors();
-
-	assert(registry.renderRequests.has(entity));
-	GLuint texture_id =
-		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
-
-	// use 2d
-	glBindTexture(GL_TEXTURE_2D, texture_id);
-	gl_has_errors();
-
 	// Get number of indices from index buffer, which has elements uint16_t
 	GLint size = 0;
 	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
@@ -423,27 +427,54 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 	GLsizei num_indices = size / sizeof(uint16_t);
 	// GLsizei num_triangles = num_indices / 3;
 
-	Fire& fire = registry.fire.get(entity);
-	model = fire.model;
-	int index = (int)floor(fire.index);
+	Object& object = registry.objects.get(entity);
+	model = object.model;
 
-	Motion& motion = registry.motions.get(entity);
-	mat4 trans = translate(mat4(1.f), motion.position);
-	fire.index += 1;
-	if (fire.index >= fire.maxIndex - 1) { fire.index = 0; }
+	mat4 trans;
+	mat4 sca;
+	if (registry.motions.has(entity)) {
+		Motion& motion = registry.motions.get(entity);
+		trans = translate(mat4(1.f), motion.position);
+		sca = scale(mat4(1.0f), motion.scale);
+	}
+	else {
+		trans = mat4(1.f);
+		sca = mat4(1.f);
+	}
+
+	if (object.alpha > 0.0f && object.burning) {
+		object.alpha -= 0.005f;
+	}
 
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
-	GLuint index_loc = glGetUniformLocation(currProgram, "index");
-	glUniform1i(index_loc, index);
+	GLuint alpha_loc = glGetUniformLocation(currProgram, "alpha");
+	glUniform1f(alpha_loc, object.alpha);
 	GLuint model_loc = glGetUniformLocation(currProgram, "model");
 	glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+	GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
+	glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
+	GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+	glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
 	GLuint view_loc = glGetUniformLocation(currProgram, "view");
 	glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
 	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+	GLuint mainTexture = glGetUniformLocation(currProgram, "mainTexture");
+	glUniform1i(mainTexture, 0);
 	gl_has_errors();
+
+	/*GLuint texture_id =
+		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];*/
+
+	// Bind our texture in Texture Unit 0
+	glActiveTexture(GL_TEXTURE0);
+
+	// use 2d
+	glBindTexture(GL_TEXTURE_2D, (GLuint)TEXTURE_ASSET_ID::WOOD);
+	gl_has_errors();
+
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 	gl_has_errors();
@@ -536,26 +567,29 @@ void RenderSystem::draw()
 	mat3 projection_2D = create2DProjectionMatrix();
 	mat4 view = createViewMatrix();
 
-	Entity fire_entity;
-
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		// if (!registry.motions.has(entity))
-		// 	continue;
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		if (registry.fire.has(entity)) {
-			fire_entity = entity;
-			// continue;
+		if (registry.objects.has(entity)) {
+			continue;
 		}
 
+		if (registry.fire.has(entity)) {
+			continue;
+		}
+		// Note, its not very efficient to access elements indirectly via the entity
+		// albeit iterating through all Sprites in sequence. A good point to optimize
 		drawTexturedMesh(entity, projection_3D, projection_2D, view);
 	}
 
-	if (fire_entity) {
+	for (Entity entity : registry.objects.entities) {
 
-		drawFire(fire_entity, projection_3D, view);
+		drawObject(entity, projection_3D, view);
+	}
+
+	if (registry.fire.entities.size() != 0) {
+
+		drawFire(registry.fire.entities.at(0), projection_3D, view);
 	}
 
 	// Truely render to the screen

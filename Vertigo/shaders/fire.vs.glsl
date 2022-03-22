@@ -1,20 +1,30 @@
-#version 330
+#version 330 core
 
-// Input attributes
-in vec3 in_position;
-in vec3 in_color;
+// Positions/Coordinates
+layout (location = 0) in vec3 aPos;
+// Texture Coordinates
+layout (location = 1) in vec2 aTex;
 
-out vec3 vcolor;
-out vec2 vpos;
+// Outputs the texture coordinates to the fragment shader
+out vec2 texCoord;
+
+// Controls the scale of the vertices
+uniform int index;
 
 // Inputs the matrices needed for 3D viewing with perspective
 uniform mat4 model;
+uniform mat4 translate;
+uniform mat4 scale;
 uniform mat4 view;
 uniform mat4 proj;
 
 void main()
 {
-	vpos = in_position.xy; // local coordinated before transform
-	vcolor = in_color;
-	gl_Position = proj * view * model * vec4(in_position.xyz, 1.0);
+	int row = index / 7;
+	int column = index % 9;
+
+	// Outputs the positions/coordinates of all vertices
+	gl_Position = proj * view * translate * model * scale * vec4(aPos.xyz, 1.0);
+	// Assigns the texture coordinates from the Vertex Data to "texCoord"
+	texCoord = vec2((aTex.x + column)/ 9, (aTex.y + row)/ 7);
 }

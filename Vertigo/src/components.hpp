@@ -24,6 +24,8 @@ struct Object
 {
 	Coordinates objectPos;
 	glm::mat4 model = glm::mat4(1.f);
+	float alpha = 0.7f;
+	bool burning = false;
 };
 
 struct Burnable
@@ -39,9 +41,7 @@ struct Fire
 	bool active = false;
 	bool inUse = false;
 	float index = 0;
-	int maxIndex = 64;
-	Coordinates firePos;
-	glm::mat4 model = glm::mat4(1.f);
+	int maxIndex = 24;
 };
 
 enum class BOX_ANIMATION {
@@ -118,6 +118,13 @@ struct InvisibleTile : public Tile {
 	virtual void action();
 };
 
+struct ConstMovingTile : public Tile {
+	Coordinates startCoords;
+	Coordinates endCoords;
+	bool toggled = false;
+	virtual void action();
+};
+
 struct BurnableTile : public Tile {
 	bool burned = false;
 	virtual void action();
@@ -157,8 +164,8 @@ struct Cube
 // TODO: MOTION SEEMS LIKE A VERY INEFFICIENT WAY TO RENDER AND UPDATE ITEMS
 
 struct Oscillate {
-	vec2 displacement = { 0, 0 };
-	vec2 amplitude = { 0, 10 };
+	vec3 center = vec3({0, 0, 0});
+	vec3 amplitude = vec3({0, 0, 0});
 	double phase = 0;
 	int steps = 100;
 };
@@ -167,6 +174,8 @@ struct Motion
 {
 	bool interpolate = false; // 0 for interpolation, 1 for extrapolation
 	bool move_z = false;
+	vec3 position = {0, 0, 0};
+	vec3 scale = {1, 1, 1};
 
 	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
@@ -175,17 +184,6 @@ struct Motion
 	// Interpolation
 	vec3 destination = {0, 0, 0}; // Used if interpolating
 	float remaining_time = 0; // Used if interpolating
-
-	// For rendering 3d coordinates to 2d screen
-	vec2 origin = {0, 0};
-	// Please don't change this unless you're changing the viewing angle
-	// It's hard coded based on the current viewing angle of the cube
-	vec2 x_vector = {sin(radians(72.0f)), cos(radians(72.0f))};
-	vec2 y_vector = {0, 1};
-	vec2 z_vector = {-sin(radians(30.0f)), -cos(radians(30.0f))};
-	vec3 position = {0, 0, 0};
-
-	vec2 scale = {10, 10};
 };
 
 // Stucture to store collision information
@@ -200,6 +198,14 @@ struct Collision
 struct ScreenState
 {
 	float darken_screen_factor = -1;
+};
+
+struct Menu
+{
+	int option = 1;
+	bool sound = true;
+	void changeOption(int dir);
+	void toggleSound() {sound = !sound;}
 };
 
 // A timer that will be associated to shot fire
@@ -287,25 +293,39 @@ enum class TEXTURE_ASSET_ID {
 	UP_TILE_SUCCESS = UP_TILE + 1,
 	END_TILE = UP_TILE_SUCCESS + 1,
 	TILE_SHADOW = END_TILE + 1,
-	EMPTY = TILE_SHADOW + 1,
+	CONST_MOV_TILE = TILE_SHADOW + 1,
+	CONST_MOV_TILE_SUCCESS = CONST_MOV_TILE + 1,
+	EMPTY = CONST_MOV_TILE_SUCCESS + 1,
 	FIRE = EMPTY + 1,
 	FIRE_SHADOW = FIRE + 1,
 	FIRE_GAUGE = FIRE_SHADOW + 1,
 	BUSH_SHEET = FIRE_GAUGE + 1,
-	TEXTURE_COUNT = BUSH_SHEET + 1
+	ON_LEVELS = BUSH_SHEET + 1,
+	ON_SOUND = ON_LEVELS + 1,
+	ON_TUTORIAL = ON_SOUND + 1,
+	ON_X = ON_TUTORIAL + 1,
+	OFF_LEVELS = ON_X + 1,
+	OFF_SOUND = OFF_LEVELS + 1,
+	OFF_TUTORIAL = OFF_SOUND + 1,
+	OFF_X = OFF_TUTORIAL + 1,
+	WOOD = OFF_X + 1,
+	MARBLE = WOOD + 1,
+	DISSOLVE = MARBLE + 1,
+	TEXTURE_COUNT = DISSOLVE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
 	COLOURED = 0,
-	TEXTURED = COLOURED + 1,
-	TILE = TEXTURED + 1,
+	TILE = COLOURED + 1,
 	TEXT = TILE + 1,
 	PLAYER = TEXT + 1,
 	FADE = PLAYER + 1,
 	OBJECT = FADE + 1,
 	FIRE = OBJECT + 1,
-	EFFECT_COUNT = FIRE + 1
+	MENU = FIRE + 1,
+	BURNABLE = MENU + 1,
+	EFFECT_COUNT = BURNABLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -315,7 +335,9 @@ enum class GEOMETRY_BUFFER_ID {
 	COLUMN = SCREEN_TRIANGLE + 1,
 	ANIMATED = COLUMN + 1,
 	FIRE = ANIMATED + 1,
-	GEOMETRY_COUNT = FIRE + 1,
+	TREE = FIRE + 1,
+	GAUGE = TREE + 1,
+	GEOMETRY_COUNT = GAUGE + 1,
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

@@ -20,6 +20,9 @@ WorldSystem::WorldSystem()
 }
 
 WorldSystem::~WorldSystem() {
+	// Destroy music components
+	if (background_music != nullptr)
+		Mix_FreeMusic(background_music);
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -75,11 +78,33 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 
+	//////////////////////////////////////
+	// Loading music and sounds with SDL
+	if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+		fprintf(stderr, "Failed to initialize SDL Audio");
+		return nullptr;
+	}
+	if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1) {
+		fprintf(stderr, "Failed to open audio device");
+		return nullptr;
+	}
+
+	background_music = Mix_LoadMUS(audio_path("time-9307.wav").c_str());
+
+	if (background_music == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
+			audio_path("time-9307.wav").c_str()
+			);
+		return nullptr;
+	}
+
 	return window;
 }
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
+	// Playing background music indefinitely
+	Mix_PlayMusic(background_music, -1);
 
 	// Set all states to default
 	restart_game();
@@ -105,25 +130,25 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	Motion& player_motion = motions_registry.get(player_explorer);
 
-	if (motions_registry.has(fire)) {
+	rotateAll(elapsed_ms_since_last_update);
 
+	// Update fire position
 
-		Motion& fire_motion = motions_registry.get(fire);
+	if (registry.fire.has(fire)){
+		Fire& fire_component = registry.fire.get(fire);
 
-		if (!registry.shootTimers.has(fire_shadow)) {
-			fire_motion.origin = player_motion.origin;
-			fire_motion.position = player_motion.position + vec3(-40, 40, 10);
-			fire_motion.acceleration = vec3(0, 0, 0);
-		}
-
-		// Update timers
-		for (Entity entity : registry.shootTimers.entities) {
-			// progress timer
-			ShootTimer& counter = registry.shootTimers.get(entity);
-			counter.counter_ms -= elapsed_ms_since_last_update;
-			// restart the game once the death timer expired
-			if (counter.counter_ms < 0 || fire_motion.position[2] < 0) {
-				registry.remove_all_components_of(entity);
+		if (motions_registry.has(fire) && fire_component.active == true){
+			Object& fire_object = registry.objects.get(fire);
+			Motion& fire_motion = motions_registry.get(fire);
+			Player& player = registry.players.get(player_explorer);
+			if (fire_motion.position.z < 0){
+				fire_motion.acceleration = vec3({0, 0, 0});
+				fire_motion.velocity = vec3({0, 0, 0});
+				fire_component.inUse = false;
+			}
+			if (fire_component.inUse == false) {
+				fire_object.model = player.model;
+				fire_motion.position = player_motion.position + vec3({0.5, 0.5, 1});
 			}
 		}
 	}
@@ -135,7 +160,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		if (counter.increasing){
 			counter.counter_ms += elapsed_ms_since_last_update;
-			// restart the game once the death timer expired
 			if (counter.counter_ms > counter.max_ms) {
 				if (counter.reverse_when_max){
 					counter.counter_ms = 2 * counter.max_ms - counter.counter_ms;
@@ -149,7 +173,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 		else{
 			counter.counter_ms -= elapsed_ms_since_last_update;
-			// restart the game once the death timer expired
 			if (counter.counter_ms < 0) {
 				if (counter.reverse_when_max){
 					counter.counter_ms = -counter.counter_ms;
@@ -160,10 +183,11 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				}
 			}
 		}
-		timer_motion.scale[1] = 100 * counter.counter_ms / counter.max_ms;
-	}
 
-	rotateAll(elapsed_ms_since_last_update);
+		timer_motion.scale.z = counter.counter_ms/counter.max_ms;
+		timer_motion.position.y = timer_motion.scale.z / 2 + player_motion.position.y;
+		timer_motion.position.z = player_motion.position.z + 1;
+	}
 
 	// handle burnable animations here
 	for (Entity entity : registry.burnables.entities) {
@@ -252,6 +276,27 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Oscillate& oscillate : registry.oscillations.components){
+		switch (rot.status) {
+		case BOX_ANIMATION::UP:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::DOWN:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::LEFT:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			oscillate.amplitude = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * vec4(oscillate.amplitude, 0);
+			oscillate.center = oscillate.amplitude;
+			break;
+		}
+	}
+
 	// TODO: rotate all objects that are rendered on screen
 	if (rot.remainingTime == 0.f)
 	{
@@ -299,7 +344,7 @@ void WorldSystem::load_level() {
 		for (int j = 0; j < cube.size; j++) {
 			for (int k = 0; k < cube.size; k++) {
 
-				createTile(cube.faces[i][j][k]);
+				Entity tile = createTile(cube.faces[i][j][k]);
 
 				if (cube.faces[i][j][k]->tileState == TileState::S) {
 					startingpos.f = i;
@@ -310,12 +355,22 @@ void WorldSystem::load_level() {
 				
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
-					createObject(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::B) {
+
+					createBurnable(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::F) {
 
 					fire = createFire(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::O) {
+					// Create constantly moving tile
+					createConstMovingTile(tile, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 			}
 		}
@@ -327,6 +382,17 @@ void WorldSystem::load_level() {
 	}
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
+
+	for (uint i = 0; i < registry.oscillations.size(); i++){
+		Entity e = registry.oscillations.entities[i];
+		Oscillate& o = registry.oscillations.components[i];
+		if (registry.tiles.has(e)){
+			Tile* tile = registry.tiles.get(e);
+			ConstMovingTile* t = (ConstMovingTile*) cube.getTile(tile->coords);
+			o.center = (vec3({t->endCoords.c, t->endCoords.r, 0}) - vec3({t->startCoords.c, t->startCoords.r, 0})) / vec3(2.0f);
+			o.amplitude = o.center;
+		}
+	}
 
 	renderer->setCube(cube);
 
@@ -374,26 +440,21 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
-      		if (tile->tileState == TileState::B) { break; }
 			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
-			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
 		case GLFW_KEY_B:
@@ -406,13 +467,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	// Fire release
 	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-		if (!registry.shootTimers.has(fire_shadow)){
-			// If fire has yet to be shot, add to holdTimer
-			fire_gauge = createFireGauge(renderer);
+		if (!registry.fire.has(fire)){
+			return;
+		}
+		Fire& fire_component = registry.fire.get(fire);
+		if (!(fire_component.inUse) && fire_component.active){
+			// If fire is picked up and has yet to be shot, add to holdTimer
+			Player& player = registry.players.get(player_explorer);
+			fire_gauge = createFireGauge(renderer, player.playerPos, player.model);
 		}
 	}
 
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge)) {
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
 		HoldTimer& holdTimer = registry.holdTimers.get(fire_gauge);
 		float power = holdTimer.counter_ms/holdTimer.max_ms;
 		registry.remove_all_components_of(fire_gauge);
@@ -425,22 +491,36 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		restart_game();
 	}
 
-	// Fire release
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-		if (!registry.shootTimers.has(fire)){
-			// If fire has yet to be shot, add to holdTimer
-			HoldTimer& holdTimer = registry.holdTimers.emplace(fire);
+	SetSprite(dir);
+
+	// Menu page esc
+	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
+		gameState = GameState::MENU;
+		menu = createMenu(renderer);
+	}
+
+	if (action == GLFW_RELEASE && gameState == GameState::MENU) {
+		switch (key)
+		{
+		case GLFW_KEY_UP:
+			changeMenu(0);
+			break;
+		case GLFW_KEY_DOWN:
+			changeMenu(1);
+			break;
+		case GLFW_KEY_RIGHT:
+			changeMenu(2);
+			break;
+		case GLFW_KEY_LEFT:
+			changeMenu(3);
+			break;
+		case GLFW_KEY_ENTER:
+			changeMenu(4);
+			break;
+		default:
+			break;
 		}
 	}
-
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire)) {
-		HoldTimer& holdTimer = registry.holdTimers.get(fire);
-		float power = holdTimer.counter_ms/holdTimer.max_ms;
-		registry.holdTimers.remove(fire);
-		UsePower(currDirection, power);
-	}
-
-	SetSprite(dir);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
@@ -458,11 +538,22 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 
-	if (tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
+	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
+		tile->tileState == TileState::N || tile->tileState == TileState::B) {
 		return;
 	}
+	
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
+
+	if (tile->tileState == TileState::F){
+		Object& fire_object = registry.objects.get(fire);
+		Motion& fire_motion = registry.motions.get(fire);
+		Fire& fire_component = registry.fire.get(fire);
+		fire_component.active = true;
+		fire_object.model = player.model;
+		fire_motion.scale = {0.4f, 0.4f, 0.4f};
+	}
 
 	if (motion.position != motion.destination){
 		return;
@@ -593,6 +684,53 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 }
 
+void WorldSystem::changeMenu(int dir){
+	Menu& curr = registry.menus.get(menu);
+	
+	if ((dir == 4) && (curr.option == 0 || curr.option == 4)) {
+		gameState = GameState::IDLE;
+		cube.reset();
+		faceDirection = Direction::UP;
+		restart_game();
+		return;
+	}
+	curr.changeOption(dir);
+
+	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::ON_LEVELS;
+
+	switch (curr.option) {
+	case 0:
+		id = TEXTURE_ASSET_ID::ON_X;
+		break;
+	case 1:
+		id = TEXTURE_ASSET_ID::ON_LEVELS;
+		break;
+	case 2:
+		id = TEXTURE_ASSET_ID::ON_SOUND;
+		break;
+	case 3:
+		id = TEXTURE_ASSET_ID::ON_TUTORIAL;
+		break;
+	case 4:
+		id = TEXTURE_ASSET_ID::OFF_X;
+		break;
+	case 5:
+		id = TEXTURE_ASSET_ID::OFF_LEVELS;
+		break;
+	case 6:
+		id = TEXTURE_ASSET_ID::OFF_SOUND;
+		break;
+	case 7:
+		id = TEXTURE_ASSET_ID::OFF_TUTORIAL;
+		break;
+	default:
+		id = TEXTURE_ASSET_ID::ON_X;
+	}
+	
+	RenderRequest& menuRequest = registry.renderRequests.get(menu);
+	menuRequest.used_texture = id;
+}
+
 void WorldSystem::Interact(Tile* tile) 
 {
 	if (tile->tileState != TileState::W) {
@@ -607,14 +745,18 @@ void WorldSystem::Interact(Tile* tile)
 
 	gameState = GameState::INTERACTING;
 
+	// change texture of switch tile to success switch tile
+	if (tile->tileState == TileState::W) {
+		Entity successTile = getCurrentTileEntity();
+		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
+	}
+
 	if (s_tile->targetTile->tileState == TileState::I) {
 
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
-		Entity successTile = getCurrentTileEntity();
-		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
-		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 	else {
 
@@ -652,54 +794,36 @@ void WorldSystem::Interact(Tile* tile)
 
 void WorldSystem::UsePower(Direction direction, float power) 
 {
-	Player& player = registry.players.get(player_explorer);
+	Fire& fire_component = registry.fire.get(fire);
 
 	// If fire is already shot, do not reshoot
-	if (registry.shootTimers.has(fire_shadow)){
+	if (fire_component.inUse){
 		return;
 	}
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
-	registry.meshPtrs.emplace(fire_shadow, &mesh);
-	registry.renderRequests.insert(
-		fire_shadow,
-		{
-			TEXTURE_ASSET_ID::FIRE_SHADOW,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE
-		}
-	);
-	ShootTimer& shootTimer = registry.shootTimers.emplace(fire_shadow);
-	shootTimer.counter_ms = 10000;
-	Motion& shot_motion = registry.motions.emplace(fire_shadow);
+	fire_component.inUse = true;
 
 	Motion& motion = registry.motions.get(fire);
-	float power_factor = 3.0f;
-	motion.acceleration = vec3(0, 0, -TILE_BB_WIDTH * power_factor);
+	float p = 3.0f;
+	motion.acceleration = vec3(0, 0, -2 * p);
 
 	switch (direction) 
 	{
 	case Direction::DOWN:
-		motion.velocity = vec3(0, TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
+		motion.velocity = vec3(0, -p, 2 * p) * (power + 0.2f);
 		break;
 	case Direction::UP:
-		motion.velocity = vec3(0, -TILE_BB_HEIGHT, TILE_BB_WIDTH * power_factor) * (power + 0.2f);
+		motion.velocity = vec3(0, p, 2 * p) * (power + 0.2f);
 		break;
 	case Direction::LEFT:
-		motion.velocity = vec3(-TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
+		motion.velocity = vec3(-p, 0, 2 * p) * (power + 0.2f);
 		break;
 	case Direction::RIGHT:
-		motion.velocity = vec3(TILE_BB_WIDTH, 0, TILE_BB_HEIGHT * power_factor) * (power + 0.2f);
+		motion.velocity = vec3(p, 0, 2 * p) * (power + 0.2f);
 		break;
 	default:
 		motion.velocity = vec3(0, 0, 0);
 	}
-	
-	shot_motion.position = motion.position + vec3(40, -40, 0);
-	shot_motion.scale = motion.scale;
-	shot_motion.velocity = motion.velocity;
-	shot_motion.velocity[2] = 0;
-	shot_motion.origin = motion.origin;
 }
 
 void WorldSystem::Burn(Tile* tile) {

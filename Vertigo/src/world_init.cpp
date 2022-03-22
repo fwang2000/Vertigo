@@ -7,11 +7,9 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
-	motion.origin = vec2{ pos.c, pos.r };
 	motion.position = vec3(0, 0, 0);
 	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = vec2( EXPLORER_BB_WIDTH, EXPLORER_BB_HEIGHT );
 
 	Player& explorer = registry.players.emplace(entity);
 	explorer.playerPos = pos;
@@ -37,6 +35,7 @@ Entity createTile(Tile* tile)
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
 	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::SPRITE;
+	EFFECT_ASSET_ID eid = EFFECT_ASSET_ID::TILE;
 
 	switch (tile->tileState) {
 	case TileState::E:
@@ -55,9 +54,12 @@ Entity createTile(Tile* tile)
 		id = TEXTURE_ASSET_ID::UP_TILE;
 		break;
 	case TileState::B:
-		id = TEXTURE_ASSET_ID::BUSH_SHEET;
+		id = TEXTURE_ASSET_ID::TILE;
 		registry.burnables.emplace(entity);
 		gid = GEOMETRY_BUFFER_ID::ANIMATED;
+		break;
+	case TileState::O:
+		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
@@ -72,8 +74,8 @@ Entity createTile(Tile* tile)
 	registry.renderRequests.insert(
 		entity,
 		{ id,
-		 EFFECT_ASSET_ID::TILE,
-		 gid });
+		eid,
+		gid });
 
 	return entity;
 }
@@ -98,137 +100,158 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 {
 	auto entity = Entity();
 
+	createObject(entity, pos, translateMatrix, true, vec3(1), -1);
+
+	registry.fire.emplace(entity);
+
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::FIRE);
 	registry.meshPtrs.emplace(entity, &mesh);
-
-	// Setting initial motion values
-	Motion& motion = registry.motions.emplace(entity);
-	motion.interpolate = true;
-	motion.origin = vec2{ pos.c, pos.r };
-	motion.position = vec3(0, 0, 0);
-	motion.destination = vec3(0, 0, 0);
-	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = vec2(FIRE_BB_WIDTH, FIRE_BB_HEIGHT);
-
-	Fire& fire = registry.fire.emplace(entity);
-	fire.firePos = pos;
-	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * fire.model;
-	fire.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * fire.model;
-	fire.model = scale(glm::mat4(1.0f), vec3(0.01f, 1.f, 1.f)) * fire.model;
-	fire.model = translateMatrix * fire.model;
-
-	switch (pos.f) {
-	case 0:
-		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * fire.model;
-		break;
-	case 1:
-		fire.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * fire.model;
-		break;
-	case 2:
-		fire.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * fire.model;
-		break;
-	case 3:
-		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * fire.model;
-		break;
-	case 4:
-		fire.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * fire.model;
-		break;
-	case 5:
-		fire.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * fire.model;
-		break;
-	default:
-		break;
-	}
 
 	registry.renderRequests.insert(
 		entity,
 		{
 			TEXTURE_ASSET_ID::FIRE,
 			EFFECT_ASSET_ID::FIRE,
-			GEOMETRY_BUFFER_ID::FIRE
+			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
 
 	return entity;
 }
 
-Entity createFireGauge(RenderSystem* renderer)
-{
+Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, true, vec3(1.5, 0.5, 0.5), 1);
+
+	Object& gauge = registry.objects.get(entity);
+	gauge.alpha = 1.0;
 
 	registry.holdTimers.emplace(entity);
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::GAUGE);
 	registry.meshPtrs.emplace(entity, &mesh);
-
-	Motion& motion = registry.motions.emplace(entity);
-	motion.scale = vec2({ 50, 0});
-	motion.origin = vec2(100, 100);
-	motion.x_vector = vec2(0, 1);
 
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::FIRE_GAUGE,
-			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::GAUGE
 		}
 	);
-	
+
 	return entity;
 }
 
-void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
-	 auto entity = Entity();
+void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
 
-	 Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
-	 registry.meshPtrs.emplace(entity, &mesh);
+	createObject(entity, pos, translateMatrix, false, vec3(0.5f, 0.5f, 1.f), 1);
 
-	 // Setting initial motion values
-	 Motion& motion = registry.motions.emplace(entity);
-	 motion.interpolate = true;
-	 motion.origin = vec2{ pos.c, pos.r };
-	 motion.position = vec3(0, 0, 0);
-	 motion.destination = vec3(0, 0, 0);
-	 motion.velocity = { 0.f , 0.f , 0.f };
-	 motion.scale = vec2(OBJECT_BB_WIDTH, OBJECT_BB_HEIGHT);
+	Object& column = registry.objects.get(entity);
+	column.alpha = 1.0;
 
-	 Object& object = registry.objects.emplace(entity);
-	 object.objectPos = pos;
-	 object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * object.model;
-	 object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
-	 object.model = scale(glm::mat4(1.0f), vec3(0.5f, 0.5f, 1.f)) * object.model;
-	 object.model = translateMatrix * object.model;
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
+	registry.meshPtrs.emplace(entity, &mesh);
 
-	 switch (pos.f) {
-	 case 0:
-		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * object.model;
-		 break;
-	 case 1:
-		 object.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * object.model;
-		 break;
-	 case 2:
-		 object.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * object.model;
-		 break;
-	 case 3:
-		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * object.model;
-		 break;
-	 case 4:
-		 object.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * object.model;
-		 break;
-	 case 5:
-		 object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * object.model;
-		 break;
-	 default:
-		 break;
-	 }
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::MARBLE,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::COLUMN
+		}
+	);
+}
 
-	 registry.renderRequests.insert(
-	 	entity,
-	 	{
-	 		TEXTURE_ASSET_ID::TEXTURE_COUNT,
-	 		EFFECT_ASSET_ID::OBJECT,
-	 		GEOMETRY_BUFFER_ID::COLUMN
-	 	}
-	 );
+void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, false, vec3(1.5), 1);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::TREE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::WOOD,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::TREE
+		}
+	);
+}
+
+void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) {
+	
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = {1.0f, 1.0f, 1.0f};
+	
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
+}
+
+void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
+	if (hasMotion){
+		// Setting initial motion values
+		Motion& motion = registry.motions.emplace(entity);
+		motion.interpolate = false;
+		motion.position = vec3(0, 0, 0);
+		motion.destination = vec3(0, 0, 0);
+		motion.velocity = { 0.f , 0.f , 0.f };
+		motion.scale = {1.0f, 1.0f, 1.0f};
+	}
+
+	Object& object = registry.objects.emplace(entity);
+	object.objectPos = pos;
+	object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * object.model;
+	object.model = rotate(glm::mat4(1.0f), (float)radians(reflect * 90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
+	object.model = scale(glm::mat4(1.0f), scaleVec) * object.model;
+	object.model = translateMatrix * object.model;
+
+	switch (pos.f) {
+	case 0:
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, scaleVec.z / 2)) * object.model;
+		break;
+	case 1:
+		object.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * object.model;
+		break;
+	case 2:
+		object.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * object.model;
+		break;
+	case 3:
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * object.model;
+		break;
+	case 4:
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * object.model;
+		break;
+	case 5:
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * object.model;
+		break;
+	default:
+		break;
+	}
+}
+
+Entity createMenu(RenderSystem* renderer) {
+	Entity entity = Entity();
+	Menu& menu = registry.menus.emplace(entity);
+	Object& object = registry.objects.emplace(entity);
+	
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::ON_LEVELS,
+		 EFFECT_ASSET_ID::MENU,
+		 GEOMETRY_BUFFER_ID::SPRITE 
+		}
+	);
+
+	return entity;
 }
