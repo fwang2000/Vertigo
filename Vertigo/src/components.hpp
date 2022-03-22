@@ -28,7 +28,7 @@ struct Object
 	bool burning = false;
 };
 
-struct Burnable
+struct Animated
 {
 	int counter_ms = 0;
 	int max_ms = 1000;
@@ -337,7 +337,7 @@ enum class GEOMETRY_BUFFER_ID {
 	FIRE = ANIMATED + 1,
 	TREE = FIRE + 1,
 	GAUGE = TREE + 1,
-	GEOMETRY_COUNT = GAUGE + 1,
+	GEOMETRY_COUNT = GAUGE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

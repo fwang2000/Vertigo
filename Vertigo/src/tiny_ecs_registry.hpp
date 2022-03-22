@@ -28,6 +28,7 @@ public:
 	ComponentContainer<Fire> fire;
 	ComponentContainer<Object> objects;
 	ComponentContainer<Burnable> burnables;
+	ComponentContainer<Animated> animated;
 	ComponentContainer<Menu> menus;
 
 	// constructor that adds all containers for looping over them
@@ -49,6 +50,7 @@ public:
 		registry_list.push_back(&fire);
 		registry_list.push_back(&objects);
 		registry_list.push_back(&burnables);
+		registry_list.push_back(&animated);
 		registry_list.push_back(&menus);
 	}
 

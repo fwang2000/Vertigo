@@ -130,6 +130,7 @@ Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 transl
 	registry.holdTimers.emplace(entity);
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::GAUGE);
+  
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	registry.renderRequests.insert(
@@ -198,6 +199,7 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 }
 
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
+  
 	if (hasMotion){
 		// Setting initial motion values
 		Motion& motion = registry.motions.emplace(entity);

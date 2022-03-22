@@ -57,7 +57,7 @@ private:
 	// Movement Functions
 	void player_move(vec3 movement, Direction direction);
 	void Interact(Tile* tile);
-	void Burn(Tile* tile);
+	void Burn(Entity entity);
 	void UsePower(Direction direction, float power);
 	// bool checkForTile(Direction direction);
 	float count = 0;
