@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(4) {
+	: level(13) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -534,6 +534,13 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		if (static_cast<int>(direction) != 0)
 		{
 			return;
+		}
+		else
+		{
+			tile->tileState = TileState::V;
+			Entity next_tile_entity = getTileFromRegistry(tile->coords);
+			RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
+			next_request.used_texture = TEXTURE_ASSET_ID::DIRECTION_TILE_SUCCESS;
 		}
 	}
 
