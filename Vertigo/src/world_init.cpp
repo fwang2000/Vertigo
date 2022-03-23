@@ -54,8 +54,9 @@ Entity createTile(Tile* tile)
 		id = TEXTURE_ASSET_ID::UP_TILE;
 		break;
 	case TileState::B:
-		id = TEXTURE_ASSET_ID::BUSH_SHEET;
-		registry.animated.emplace(entity);
+		id = TEXTURE_ASSET_ID::TILE;
+		registry.burnables.emplace(entity);
+		gid = GEOMETRY_BUFFER_ID::ANIMATED;
 		break;
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
@@ -99,7 +100,7 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 {
 	auto entity = Entity();
 
-	createObject(entity, pos, translateMatrix, true);
+	createObject(entity, pos, translateMatrix, true, vec3(1), -1);
 
 	registry.fire.emplace(entity);
 
@@ -121,11 +122,15 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	createObject(entity, pos, translateMatrix, true);
+	createObject(entity, pos, translateMatrix, true, vec3(1.5, 0.5, 0.5), 1);
+
+	Object& gauge = registry.objects.get(entity);
+	gauge.alpha = 1.0;
 
 	registry.holdTimers.emplace(entity);
 
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::GAUGE);
+  
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	registry.renderRequests.insert(
@@ -133,7 +138,7 @@ Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 transl
 		{
 			TEXTURE_ASSET_ID::TEXTURE_COUNT,
 			EFFECT_ASSET_ID::OBJECT,
-			GEOMETRY_BUFFER_ID::COLUMN
+			GEOMETRY_BUFFER_ID::GAUGE
 		}
 	);
 
@@ -143,7 +148,10 @@ Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 transl
 void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	createObject(entity, pos, translateMatrix, false);
+	createObject(entity, pos, translateMatrix, false, vec3(0.5f, 0.5f, 1.f), 1);
+
+	Object& column = registry.objects.get(entity);
+	column.alpha = 1.0;
 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::COLUMN);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -151,9 +159,28 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			TEXTURE_ASSET_ID::MARBLE,
 			EFFECT_ASSET_ID::OBJECT,
 			GEOMETRY_BUFFER_ID::COLUMN
+		}
+	);
+}
+
+void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, false, vec3(1.5), 1);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::TREE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::WOOD,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::TREE
 		}
 	);
 }
@@ -171,7 +198,8 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
 }
 
-void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion){
+void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
+  
 	if (hasMotion){
 		// Setting initial motion values
 		Motion& motion = registry.motions.emplace(entity);
@@ -185,12 +213,13 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 	Object& object = registry.objects.emplace(entity);
 	object.objectPos = pos;
 	object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * object.model;
-	object.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
+	object.model = rotate(glm::mat4(1.0f), (float)radians(reflect * 90.0f), vec3(1.0f, 0.0f, 0.0f)) * object.model;
+	object.model = scale(glm::mat4(1.0f), scaleVec) * object.model;
 	object.model = translateMatrix * object.model;
 
 	switch (pos.f) {
 	case 0:
-		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, scaleVec.z / 2)) * object.model;
 		break;
 	case 1:
 		object.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * object.model;

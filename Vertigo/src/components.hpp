@@ -24,6 +24,8 @@ struct Object
 {
 	Coordinates objectPos;
 	glm::mat4 model = glm::mat4(1.f);
+	float alpha = 0.7f;
+	bool burning = false;
 };
 
 struct Animated
@@ -306,7 +308,10 @@ enum class TEXTURE_ASSET_ID {
 	OFF_SOUND = OFF_LEVELS + 1,
 	OFF_TUTORIAL = OFF_SOUND + 1,
 	OFF_X = OFF_TUTORIAL + 1,
-	TEXTURE_COUNT = OFF_X + 1
+	WOOD = OFF_X + 1,
+	MARBLE = WOOD + 1,
+	DISSOLVE = MARBLE + 1,
+	TEXTURE_COUNT = DISSOLVE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -319,7 +324,8 @@ enum class EFFECT_ASSET_ID {
 	OBJECT = FADE + 1,
 	FIRE = OBJECT + 1,
 	MENU = FIRE + 1,
-	EFFECT_COUNT = MENU + 1
+	BURNABLE = MENU + 1,
+	EFFECT_COUNT = BURNABLE + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -327,8 +333,11 @@ enum class GEOMETRY_BUFFER_ID {
 	SPRITE = 0,
 	SCREEN_TRIANGLE = SPRITE + 1,
 	COLUMN = SCREEN_TRIANGLE + 1,
-	FIRE = COLUMN + 1,
-	GEOMETRY_COUNT = FIRE + 1,
+	ANIMATED = COLUMN + 1,
+	FIRE = ANIMATED + 1,
+	TREE = FIRE + 1,
+	GAUGE = TREE + 1,
+	GEOMETRY_COUNT = GAUGE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

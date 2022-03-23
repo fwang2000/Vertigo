@@ -185,6 +185,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 
 		timer_motion.scale.z = counter.counter_ms/counter.max_ms;
+		timer_motion.position.y = timer_motion.scale.z / 2 + player_motion.position.y;
+		timer_motion.position.z = player_motion.position.z + 1;
 	}
 
 	// handle animations here
@@ -354,6 +356,11 @@ void WorldSystem::load_level() {
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::B) {
+
+					createBurnable(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::F) {
@@ -532,7 +539,8 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 
-	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || tile->tileState == TileState::N) {
+	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
+		tile->tileState == TileState::N || tile->tileState == TileState::B) {
 		return;
 	}
 	

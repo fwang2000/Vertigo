@@ -24,9 +24,11 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  // specify meshes of other assets here
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj"))
+		// specify meshes of other assets here
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::TREE, mesh_path("burnables/tree.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::GAUGE, mesh_path("gauge.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -69,6 +71,9 @@ class RenderSystem {
 			textures_path("menu/off_sound.png"),
 			textures_path("menu/off_tutorial.png"),
 			textures_path("menu/off_x.png"),
+			textures_path("wood.png"),
+			textures_path("marble.png"),
+			textures_path("dissolveTexture.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -81,7 +86,8 @@ class RenderSystem {
 		shader_path("fade"),
 		shader_path("object"),
 		shader_path("fire"),
-		shader_path("menu")
+		shader_path("menu"),
+		shader_path("burnable")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -115,7 +121,9 @@ public:
 
 	// Draw all entities
 	void draw();
-	void drawFire(Entity entity);
+	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
+	void drawObject(Entity entity, const mat4& projection3D, const mat4& view);
+	// void drawFire(Entity entity);
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
