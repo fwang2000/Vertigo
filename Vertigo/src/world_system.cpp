@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(7) {
+	: level(2) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -622,7 +622,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
 		UpTile* uptile = (UpTile*)tile;
-		if (direction == Direction::DOWN || uptile->dir != trueDirection)
+		if (direction != Direction::UP || uptile->dir != trueDirection)
 		{
 			return;
 		}
@@ -762,6 +762,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);	
 
 	if (tile->tileState == TileState::Z) {
+		rot.status = BOX_ANIMATION::STILL;
 		next_level();
 	}
 }
@@ -827,18 +828,16 @@ void WorldSystem::Interact(Tile* tile)
 
 	gameState = GameState::INTERACTING;
 
-	// change texture of switch tile to success switch tile
-	if (tile->tileState == TileState::W) {
-		Entity successTile = getCurrentTileEntity();
-		RenderRequest& switchRequest = registry.renderRequests.get(successTile);
-		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
-	}
+	Entity successTile = getCurrentTileEntity();
+
+	RenderRequest& switchRequest = registry.renderRequests.get(successTile);
 
 	if (s_tile->targetTile->tileState == TileState::I) {
 
 		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(tile);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 	else {
 
@@ -869,6 +868,8 @@ void WorldSystem::Interact(Tile* tile)
 		src_tile->tileState = TileState::E;
 
 		dest_request.used_texture = id;
+
+		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
 
 	s_tile->action();
