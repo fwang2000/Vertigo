@@ -227,10 +227,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		// Setting uniform values to the currently bound program
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
-		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
-		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
-		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");

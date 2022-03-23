@@ -28,6 +28,14 @@ struct Object
 	bool burning = false;
 };
 
+struct Burnable
+{
+	int counter_ms = 0;
+	int max_ms = 1000;
+	int num_intervals = 5;
+	bool activate = false;
+};
+
 struct Animated
 {
 	int counter_ms = 0;
