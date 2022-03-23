@@ -108,19 +108,32 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
-
-		glUniform3f(glGetUniformLocation(currProgram, "light.position"), 0.f, 0.f, 2.5f);
 		glUniform3f(glGetUniformLocation(currProgram, "viewPos"), 6.f, 3.f, 6.f);
 
 		// light properties
-		glUniform3f(glGetUniformLocation(currProgram, "light.ambient"), 0.2f, 0.2f, 0.2f);
-		glUniform3f(glGetUniformLocation(currProgram, "light.diffuse"), 0.5f, 0.5f, 0.5f);
-		glUniform3f(glGetUniformLocation(currProgram, "light.specular"), 1.0f, 1.0f, 1.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
 
 		// material properties
 		glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
 		glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
-        glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f); 
+        glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
+
+		std::string pointLightStr = "pointLights[0]";
+		for (int i = 0; i < registry.billboards.entities.size(); i++) {
+			Object& object = registry.objects.get(registry.billboards.entities[i]);
+			pointLightStr[12] = '0' + i;
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), object.model[3].x, object.model[3].y, object.model[3].z);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".ambient").c_str()), 0.05f, 0.05f, 0.05f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".diffuse").c_str()), 0.8f, 0.8f, 0.8f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".specular").c_str()), 1.0f, 1.0f, 1.0f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".constant").c_str()), 1.f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".linear").c_str()), 0.09f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".quadratic").c_str()), 0.032f);
+		}
+		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.billboards.entities.size());
 
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::PLAYER)
@@ -188,11 +201,34 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			sizeof(ColoredVertex), (void*)(6*sizeof(float)));
 		gl_has_errors();
 
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
-		gl_has_errors();
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+
+		glUniform3f(glGetUniformLocation(currProgram, "viewPos"), 6.f, 3.f, 6.f);
+
+		// light properties
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+
+		// material properties
+		glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
+		glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
+        glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
+
+		std::string pointLightStr = "pointLights[0]";
+		for (int i = 0; i < registry.billboards.entities.size(); i++) {
+			Object& object = registry.objects.get(registry.billboards.entities[i]);
+			pointLightStr[12] = '0' + i;
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), object.model[3].x, object.model[3].y, object.model[3].z);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".ambient").c_str()), 0.05f, 0.05f, 0.05f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".diffuse").c_str()), 0.8f, 0.8f, 0.8f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".specular").c_str()), 1.0f, 1.0f, 1.0f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".constant").c_str()), 1.f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".linear").c_str()), 0.09f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".quadratic").c_str()), 0.032f);
+		}
+		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.billboards.entities.size());
 
 		Object& object = registry.objects.get(entity);
 		model = object.model;

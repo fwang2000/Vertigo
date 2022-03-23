@@ -236,7 +236,28 @@ void createSun(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatri
 	Object& object = registry.objects.emplace(entity);
 	object.objectPos = pos;
 	object.model = translateMatrix * object.model;
-	object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 1.5f)) * object.model;
+	switch (pos.f) {
+		case 0:
+			object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 1.5f)) * object.model;
+			break;
+		case 1:
+			object.model = translate(glm::mat4(1.0f), vec3(-1.5f, 0.f, 0.f)) * object.model;
+			break;
+		case 2:
+			object.model = translate(glm::mat4(1.0f), vec3(1.5f, 0.f, 0.f)) * object.model;
+			break;
+		case 3:
+			object.model = translate(glm::mat4(1.0f), vec3(0.f, 1.5f, 0.f)) * object.model;
+			break;
+		case 4:
+			object.model = translate(glm::mat4(1.0f), vec3(0.f, -1.5f, 0.f)) * object.model;
+			break;
+		case 5:
+			object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -1.5f)) * object.model;
+			break;
+	}
+
+	registry.billboards.emplace(entity);
 
 	registry.renderRequests.insert(
 	 	entity,
