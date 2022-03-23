@@ -604,6 +604,13 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
+	
+	Player& player = registry.players.get(player_explorer);
+	Motion& motion = registry.motions.get(player_explorer);
+	if (motion.position != motion.destination){
+		return;
+	}
+
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
@@ -616,9 +623,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		tile->tileState == TileState::N || tile->tileState == TileState::B) {
 		return;
 	}
-	
-	Player& player = registry.players.get(player_explorer);
-	Motion& motion = registry.motions.get(player_explorer);
 
 	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
 		UpTile* uptile = (UpTile*)tile;
@@ -635,10 +639,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_component.active = true;
 		fire_object.model = player.model;
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
-	}
-
-	if (motion.position != motion.destination){
-		return;
 	}
 
 	gameState = GameState::MOVING;
