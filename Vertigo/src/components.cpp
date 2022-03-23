@@ -267,6 +267,46 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->coords = { i, y_coord, x_coord };
 					u_tile->currentPos = u_tile->coords;
 					u_tile->direction = static_cast<FACE_DIRECTION>(i);
+					u_tile->dir = Direction::DOWN;
+					break;
+				}
+				case TileState::R:
+				{
+					UpTile* u_tile = new UpTile();
+					u_tile->model = tileStartingMatrix(i, x, y, distance);
+					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(u_tile);
+					u_tile->coords = { i, y_coord, x_coord };
+					u_tile->currentPos = u_tile->coords;
+					u_tile->direction = static_cast<FACE_DIRECTION>(i);
+					u_tile->dir = Direction::RIGHT;
+					break;
+				}
+				case TileState::D:
+				{
+					UpTile* u_tile = new UpTile();
+					u_tile->model = tileStartingMatrix(i, x, y, distance);
+					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(u_tile);
+					u_tile->coords = { i, y_coord, x_coord };
+					u_tile->currentPos = u_tile->coords;
+					u_tile->direction = static_cast<FACE_DIRECTION>(i);
+					u_tile->dir = Direction::UP;
+					break;
+				}
+				case TileState::L:
+				{
+					UpTile* u_tile = new UpTile();
+					u_tile->model = tileStartingMatrix(i, x, y, distance);
+					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(u_tile);
+					u_tile->coords = { i, y_coord, x_coord };
+					u_tile->currentPos = u_tile->coords;
+					u_tile->direction = static_cast<FACE_DIRECTION>(i);
+					u_tile->dir = Direction::LEFT;
 					break;
 				}
 				case TileState::I:

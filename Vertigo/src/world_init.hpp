@@ -35,5 +35,5 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
 // the burnable
-void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 Entity createMenu(RenderSystem* renderer);

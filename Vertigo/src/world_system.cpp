@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(13) {
+	: level(7) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -22,7 +22,7 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 	// Destroy music components
 	if (background_music != nullptr)
-		Mix_FreeMusic(background_music);
+		// Mix_FreeMusic(background_music);
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -104,7 +104,7 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+	// Mix_PlayMusic(background_music, -1);
 
 	// Set all states to default
 	restart_game();
@@ -360,7 +360,10 @@ void WorldSystem::load_level() {
 
 				if (cube.faces[i][j][k]->tileState == TileState::B) {
 
-					createBurnable(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					BurnableTile* b_tile = (BurnableTile*)cube.faces[i][j][k];
+
+					b_tile->object = createBurnable(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::F) {
@@ -438,8 +441,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	Direction dir = currDirection;
 
 	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
-
-
 
 	if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
 		switch (key)
@@ -609,26 +610,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
 
-	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
-	/*if (tile->tileState == TileState::U) {
-		if (abs(static_cast<int>(direction) - static_cast<int>(trueDirection)) != 2)
-		{
-			return;
-		}
-	}*/
-	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
-		if (static_cast<int>(direction) != 0)
-		{
-			return;
-		}
-		else
-		{
-			tile->tileState = TileState::V;
-			Entity next_tile_entity = getTileFromRegistry(tile->coords);
-			RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
-			next_request.used_texture = TEXTURE_ASSET_ID::DIRECTION_TILE_SUCCESS;
-		}
-	}
+	printf("%d", direction);
 
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
 		tile->tileState == TileState::N || tile->tileState == TileState::B) {
@@ -637,6 +619,14 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
+
+	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
+		UpTile* uptile = (UpTile*)tile;
+		if (direction == Direction::DOWN || uptile->dir != trueDirection)
+		{
+			return;
+		}
+	}
 
 	if (tile->tileState == TileState::F){
 		Object& fire_object = registry.objects.get(fire);
@@ -916,12 +906,22 @@ void WorldSystem::UsePower(Direction direction, float power)
 	default:
 		motion.velocity = vec3(0, 0, 0);
 	}
+
+	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
+	
+	if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
+		tile->tileState == TileState::B) {
+		
+		BurnableTile* b_tile = (BurnableTile*)tile;
+		b_tile->tileState = TileState::V;
+		Burn(b_tile->object);
+	}
 }
 
 void WorldSystem::Burn(Entity entity) {
 	gameState = GameState::BURNING;
-	Animated& animated = registry.animated.get(entity);
-	animated.activate = true;
+	Object& burnable = registry.objects.get(entity);
+	burnable.burning = true;
 }
 
 void WorldSystem::SetSprite(Direction direction) {
@@ -1042,9 +1042,8 @@ Entity WorldSystem::getCurrentTileEntity() {
 
 Entity WorldSystem::getTileFromRegistry(Coordinates coordinates) {
 
-	int index = 9 * coordinates.f + 3 * coordinates.r + coordinates.c; 
+	int index = pow(cube.size, 2) * coordinates.f + cube.size * coordinates.r + coordinates.c;
 	Tile* tile = registry.tiles.components.at(index);
-	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
 	return registry.tiles.entities.at(index);
 }
 
