@@ -83,11 +83,11 @@ enum class TileState
 	C = 2,		// Controllable Tile
 	M = 12,		// Move Tile
 	T = 19,		// Teleporter
-	W = 22,		// Switch
-	U = 20,		// Up-Tile
+	W = 22,		// Switch,
 	R = 17,		// Right-Tile
 	D = 3,		// Left-Tile
 	L = 11,		// Down-Tile
+	U = 20,		// Up-Tile
 	E = 4,		// Empty
 	Z = 25,		// Finish
 };
@@ -118,7 +118,8 @@ struct ControlTile : public Tile {
 };
 
 struct UpTile : public Tile {
-	Direction dir = Direction::UP;
+	Direction dir;
+	int id;
 	virtual void action();
 };
 
@@ -144,6 +145,7 @@ struct ConstMovingTile : public Tile {
 
 struct BurnableTile : public Tile {
 	bool burned = false;
+	Entity object;
 	virtual void action();
 };
 

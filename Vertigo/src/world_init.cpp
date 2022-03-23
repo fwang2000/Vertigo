@@ -70,8 +70,6 @@ Entity createTile(Tile* tile)
 		break;
 	case TileState::B:
 		id = TEXTURE_ASSET_ID::TILE;
-		registry.burnables.emplace(entity);
-		gid = GEOMETRY_BUFFER_ID::ANIMATED;
 		break;
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
@@ -181,7 +179,7 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	);
 }
 
-void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 
 	auto entity = Entity();
 
@@ -198,6 +196,8 @@ void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translate
 			GEOMETRY_BUFFER_ID::TREE
 		}
 	);
+
+	return entity;
 }
 
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) {
@@ -237,19 +237,19 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, scaleVec.z / 2)) * object.model;
 		break;
 	case 1:
-		object.model = translate(glm::mat4(1.0f), vec3(-0.5f, 0.f, 0.f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(-scaleVec.z / 2, 0.f, 0.f)) * object.model;
 		break;
 	case 2:
-		object.model = translate(glm::mat4(1.0f), vec3(0.5f, 0.f, 0.f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(scaleVec.z / 2, 0.f, 0.f)) * object.model;
 		break;
 	case 3:
-		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.5f, 0.f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, scaleVec.z / 2, 0.f)) * object.model;
 		break;
 	case 4:
-		object.model = translate(glm::mat4(1.0f), vec3(0.f, -0.5f, 0.f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, -scaleVec.z / 2, 0.f)) * object.model;
 		break;
 	case 5:
-		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -0.5f)) * object.model;
+		object.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -scaleVec.z / 2)) * object.model;
 		break;
 	default:
 		break;
