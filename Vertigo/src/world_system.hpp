@@ -18,7 +18,8 @@ enum class GameState {
 	IDLE = 0,
 	MOVING = 1,
 	INTERACTING = 2,
-	BURNING = 3
+	BURNING = 3,
+	MENU = 4
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -57,7 +58,7 @@ private:
 	void tile_move(Direction direction, Tile* tile, ControlTile* ctile);
 	void player_move(vec3 movement, Direction direction);
 	void Interact(Tile* tile);
-	void Burn(Tile* tile);
+	void Burn(Entity entity);
 	void UsePower(Direction direction, float power);
 	// bool checkForTile(Direction direction);
 	float count = 0;
@@ -93,6 +94,7 @@ private:
 	Entity player_explorer;
 	Cube cube;
 	Rotate rot; // command to rotate all tiles and text and objects
+	Entity menu;
 	Entity fire;
 	Entity fire_gauge;
 	Entity fire_shadow;
@@ -103,10 +105,14 @@ private:
 
 	// Helper Functions
 	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
+	void changeMenu(int dir);
 	Coordinates searchForTile(Direction direction);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateAll(float elapsed_ms_since_last_update);
+
+	// Music references
+	Mix_Music* background_music;
 
 	// C++ random number generator
 	std::default_random_engine rng;

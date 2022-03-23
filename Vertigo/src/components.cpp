@@ -284,6 +284,10 @@ bool Cube::loadFromExcelFile(std::string filename) {
 				case TileState::C:
 				{
 					ControlTile* c_tile = new ControlTile();
+        }
+				case TileState::O:
+				{
+					ConstMovingTile* c_tile = new ConstMovingTile();
 					c_tile->model = tileStartingMatrix(i, x, y, distance);
 					c_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
@@ -415,7 +419,6 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				switch_tile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
 			}
 			else {
-
 				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
 				if (target->tileState == TileState::W) {
 					switch_tile->targetTile = (SwitchTile*)target;
@@ -425,6 +428,19 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				}
 				switch_tile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) } ;
 			}
+		}
+		else if (modifications.at(0) == "O"){
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			int t_f = std::stoi(modifications.at(4));
+			int t_r = std::stoi(modifications.at(5));
+			int t_c = std::stoi(modifications.at(6));
+
+			ConstMovingTile* cTile = (ConstMovingTile*)getTile(Coordinates{ f, r, c });
+			cTile->startCoords = Coordinates{ f, r, c };
+			cTile->endCoords = Coordinates{ t_f, t_r, t_c};
 		}
 
 		std::vector<std::string>().swap(modifications);
@@ -577,6 +593,14 @@ void UpTile::action() {
 	return;
 }
 
+void ConstMovingTile::action() {
+	// if up tile facing up {
+	// 	this->tileState = TileState::D;
+	// }
+
+	return;
+}
+
 void InvisibleTile::action() {
 
 	printf("Invisible\n");
@@ -625,6 +649,78 @@ void Tile::move(vec2 t, vec2 delta_coord) {
 
 	model = translate(glm::mat4(1.f), translation) * model;
 	currentPos = Coordinates{ currentPos.f, currentPos.r - (int)delta_coord.y , currentPos.c + (int)delta_coord.x };
+}
+
+
+// Screen states:
+// 0: on_x
+// 1: on_levels
+// 2: on_sound
+// 3: on_tutorial
+// 4: off_x
+// 5: off_levels
+// 6: off_sound
+// 7: off_tutorial
+
+// direction:
+// up: 0
+// down: 1
+// right: 2
+// left: 3
+// enter = 4
+void Menu::changeOption(int dir) {
+
+	if (sound == true) {
+		switch(dir) {
+		case 0:
+			if (option == 0) {
+				option = 3;
+			} else {
+				option = (option - 1) % 4;
+			}
+			break;
+		case 1:
+			option = (option + 1) % 4;
+			break;
+		case 2:
+			option = 0;
+			break;
+		case 3:
+			option = 0;
+			break;
+		case 4:
+			if (option == 2) {
+				toggleSound();
+				option = 6;
+			}
+			break;
+		default:
+			break;
+		}
+	} else {
+		switch(dir) {
+		case 0:
+			option = ((option - 1) % 4) + 4;
+			break;
+		case 1:
+			option = ((option + 1) % 4) + 4;
+			break;
+		case 2:
+			option = 4;
+			break;
+		case 3:
+			option = 4;
+			break;
+		case 4:
+			if (option == 6) {
+				toggleSound();
+				option = 2;
+			}
+			break;
+		default:
+			break;
+		}
+	}
 }
 
 #pragma endregion

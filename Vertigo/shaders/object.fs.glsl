@@ -5,14 +5,14 @@ in vec3 vcolor;
 in vec2 vpos; // Distance from local origin
 
 // Application data
-uniform sampler2D sampler0;
+uniform sampler2D mainTexture;
 uniform vec3 fcolor;
-uniform int light_up;
+uniform float alpha;
 
 // Output color
 layout(location = 0) out vec4 color;
 
 void main()
 {
-	color = vec4(fcolor * vcolor, 1.0);
+	color = vec4(fcolor * vcolor, alpha);
 }

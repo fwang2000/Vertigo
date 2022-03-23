@@ -10,7 +10,9 @@
 vec2 get_bounding_box(const Motion& motion)
 {
 	// abs is to avoid negative scale due to the facing direction.
-	return { abs(motion.scale.x), abs(motion.scale.y) };
+	// return { abs(motion.scale.x), abs(motion.scale.y) };
+	// TODO: Update or remove
+	return {0, 0};
 }
 
 // This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
@@ -36,9 +38,12 @@ void PhysicsSystem::oscillate()
 	for (uint i = 0; i < oscillate_registry.size(); i++)
 	{
 		Oscillate& oscillate = oscillate_registry.components[i];
+		Entity& e = oscillate_registry.entities[i];
+		Motion& motion = registry.motions.get(e);
 		oscillate.phase += 2 * PI / oscillate.steps;
 		oscillate.phase = fmod(oscillate.phase, 2 * PI);
-		oscillate.displacement = oscillate.amplitude * vec2(sin(oscillate.phase));
+		motion.position = oscillate.center + oscillate.amplitude * vec3(sin(oscillate.phase));
+		
 	}
 }
 
@@ -74,6 +79,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			motion.position = motion.position + motion.velocity * step_seconds;
 
 		}
+		
 	}
 
 	// Check for collisions between all moving entities

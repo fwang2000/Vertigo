@@ -24,15 +24,11 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  // specify meshes of other assets here
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bushSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flowerSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("treeSheet.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("bush0.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("flower0.png")),
-		//  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::SPRITE, mesh_path("tree0.png"))
-		std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj"))
-
+		// specify meshes of other assets here
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::COLUMN, mesh_path("column.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::TREE, mesh_path("burnables/tree.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::GAUGE, mesh_path("gauge.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -66,25 +62,38 @@ class RenderSystem {
 			textures_path("move_tile.png"),
 			textures_path("end_tile.png"),
 			textures_path("tileshadow.png"),
+			textures_path("moving_tile.png"),
+			textures_path("moving_tile_success.png"),
 			textures_path("empty_tile.png"),
-			textures_path("fire.png"),
+			textures_path("fire/firesheet.png"),
 			textures_path("fire_shadow.png"),
 			textures_path("fire_gauge.png"),
 			textures_path("Spritesheets/bushSheet.png"),
-			textures_path("Spritesheets/fire_spritesheet.png")
+			textures_path("menu/on_levels.png"),
+			textures_path("menu/on_sound.png"),
+			textures_path("menu/on_tutorial.png"),
+			textures_path("menu/on_x.png"),
+			textures_path("menu/off_levels.png"),
+			textures_path("menu/off_sound.png"),
+			textures_path("menu/off_tutorial.png"),
+			textures_path("menu/off_x.png"),
+			textures_path("wood.png"),
+			textures_path("marble.png"),
+			textures_path("dissolveTexture.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
 		shader_path("coloured"),
-		shader_path("textured"),
 		shader_path("tile"),
 		shader_path("text"),
 		shader_path("player"),
 		shader_path("fade"),
 		shader_path("object"),
-		shader_path("fire")
+		shader_path("fire"),
+		shader_path("menu"),
+		shader_path("burnable")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;
@@ -107,10 +116,6 @@ public:
 	Mesh& getMesh(GEOMETRY_BUFFER_ID id) { return meshes[(int)id]; };
 	// MeshBox& getMeshBox(GEOMETRY_BUFFER_ID id) { return meshboxs[(int)id]; };
 
-	void initializeSingleMeshes();
-	
-	void initializeFireMeshes();
-
 	void initializeGlGeometryBuffers();
 	// Initialize the screen texture used as intermediate render target
 	// The draw loop first renders to this texture, then it is used for the wind
@@ -122,6 +127,9 @@ public:
 
 	// Draw all entities
 	void draw();
+	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
+	void drawObject(Entity entity, const mat4& projection3D, const mat4& view);
+	// void drawFire(Entity entity);
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);

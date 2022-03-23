@@ -27,6 +27,13 @@ Entity createText(Text text);
 // the fire
 Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the fire's power gauge
-Entity createFireGauge(RenderSystem* renderer);
-// the object
-void createObject(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the column
+void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the constantly moving tile
+void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
+// general objects
+void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
+// the burnable
+void createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+Entity createMenu(RenderSystem* renderer);
