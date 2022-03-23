@@ -281,6 +281,10 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					i_tile->direction = static_cast<FACE_DIRECTION>(i);
 					break;
 				}
+				case TileState::C:
+				{
+					ControlTile* c_tile = new ControlTile();
+        }
 				case TileState::O:
 				{
 					ConstMovingTile* c_tile = new ConstMovingTile();
@@ -382,6 +386,20 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 		while (std::getline(ss, value, ','))
 		{
 			modifications.push_back(value);
+		}
+
+		if (modifications.at(0) == "C") {
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			ControlTile* control_tile = (ControlTile*)getTile(Coordinates{ f, r, c });
+
+			int t_f = std::stoi(modifications.at(5));
+			int t_r = std::stoi(modifications.at(6));
+			int t_c = std::stoi(modifications.at(7));
+
+			control_tile->targetTile = (Tile*)getTile(Coordinates{ t_f, t_r, t_c });
 		}
 
 		if (modifications.at(0) == "W") {

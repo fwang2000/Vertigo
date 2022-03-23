@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(13) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -439,26 +439,72 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
+
+
 	if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
 		switch (key)
 		{
 		case GLFW_KEY_W:
 			dir = Direction::UP;
+      		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					tile_move(dir, c_tile->targetTile, c_tile);
+					break;
+				}
+			}
 			player_move(vec3({0, 1, 0}), dir);
 			break;
 		case GLFW_KEY_S:
 			dir = Direction::DOWN;
+      		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					tile_move(dir, c_tile->targetTile, c_tile);
+					break;
+				}
+			}
 			player_move(vec3({0, -1, 0}), dir);
 			break;
 		case GLFW_KEY_A:
 			dir = Direction::LEFT;
+      		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					tile_move(dir, c_tile->targetTile, c_tile);
+					break;
+				}
+			}
 			player_move(vec3({-1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_D:
 			dir = Direction::RIGHT;
+      		if (tile->tileState == TileState::B) { break; }
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 1) {
+					tile_move(dir, c_tile->targetTile, c_tile);
+					break;
+				}
+			}
 			player_move(vec3({1, 0, 0}), dir);
 			break;
 		case GLFW_KEY_I:
+			if (tile->tileState == TileState::C) {
+				ControlTile* c_tile = (ControlTile*)tile;
+				if (c_tile->controled == 0) {
+					c_tile->controled = 1;
+				}
+				else
+				{
+					c_tile->controled = 0;
+				}
+				break;
+			}
+			if (tile->tileState == TileState::B) { break; }
 			Interact(tile);
 			break;
 		default:
@@ -529,6 +575,32 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
 
+void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile) {
+	int dir = static_cast<int>(faceDirection) * -1;
+	Direction trueDirection = mod(direction, dir);
+	Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+	Tile* ntile = cube.getTile(newCoords);
+	if (ntile->direction != tile->direction)
+	{
+		return;
+	}
+	if (ntile->tileState == TileState::E)
+	{
+		Entity next_tile_entity = getTileFromRegistry(newCoords);
+		RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
+		ntile->tileState = TileState::M;
+		next_request.used_texture = TEXTURE_ASSET_ID::MOVE_TILE;
+
+		Entity cur_tile_entity = getTileFromRegistry(tile->coords);
+		RenderRequest& cur_request = registry.renderRequests.get(cur_tile_entity);
+		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
+		tile->tileState = TileState::E;
+
+		ctile->targetTile = ntile;
+	}
+	return;
+}
+
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
 	int dir = static_cast<int>(faceDirection) * -1;
@@ -538,6 +610,25 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Tile* tile = cube.getTile(newCoords);
 
 	// printf("%d, %d, %d\n", tile->coords.f, tile->coords.r, tile->coords.c);
+	/*if (tile->tileState == TileState::U) {
+		if (abs(static_cast<int>(direction) - static_cast<int>(trueDirection)) != 2)
+		{
+			return;
+		}
+	}*/
+	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
+		if (static_cast<int>(direction) != 0)
+		{
+			return;
+		}
+		else
+		{
+			tile->tileState = TileState::V;
+			Entity next_tile_entity = getTileFromRegistry(tile->coords);
+			RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
+			next_request.used_texture = TEXTURE_ASSET_ID::DIRECTION_TILE_SUCCESS;
+		}
+	}
 
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
 		tile->tileState == TileState::N || tile->tileState == TileState::B) {
@@ -860,6 +951,47 @@ void WorldSystem::SetSprite(Direction direction) {
 	}
 
 	currDirection = direction;
+}
+
+Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coords) {
+
+	switch (direction)
+	{
+	case Direction::UP:
+		if (coords.r == 0) {
+			return cube.getTile(coords)->adjList[0].first;
+		}
+		else {
+			coords.r--;
+		}
+		break;
+	case Direction::RIGHT:
+		if (coords.c == cube.size - 1) {
+			return cube.getTile(coords)->adjList[1].first;
+		}
+		else {
+			coords.c++;
+		}
+		break;
+	case Direction::DOWN:
+		if (coords.r == cube.size - 1) {
+			return cube.getTile(coords)->adjList[2].first;
+		}
+		else {
+			coords.r++;
+		}
+		break;
+	case Direction::LEFT:
+		if (coords.c == 0) {
+			return cube.getTile(coords)->adjList[3].first;
+		}
+		else {
+			coords.c--;
+		}
+		break;
+	}
+
+	return coords;
 }
 
 Coordinates WorldSystem::searchForTile(Direction direction) {

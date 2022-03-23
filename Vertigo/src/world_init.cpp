@@ -50,8 +50,23 @@ Entity createTile(Tile* tile)
 	case TileState::W:
 		id = TEXTURE_ASSET_ID::SWITCH_TILE;
 		break;
+	case TileState::R:
+		id = TEXTURE_ASSET_ID::RIGHT_TILE;
+		break;
+	case TileState::L:
+		id = TEXTURE_ASSET_ID::LEFT_TILE;
+		break;
+	case TileState::D:
+		id = TEXTURE_ASSET_ID::DOWN_TILE;
+		break;
 	case TileState::U:
 		id = TEXTURE_ASSET_ID::UP_TILE;
+		break;
+	case TileState::C:
+		id = TEXTURE_ASSET_ID::CONTROL_TILE;
+		break;
+	case TileState::M:
+		id = TEXTURE_ASSET_ID::MOVE_TILE;
 		break;
 	case TileState::B:
 		id = TEXTURE_ASSET_ID::TILE;

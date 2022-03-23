@@ -72,10 +72,14 @@ enum class TileState
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
 	O = 14,		// Constantly-Moving Tile
-	C = 3,		// Controllable Tile
+	C = 2,		// Controllable Tile
+	M = 12,		// Move Tile
 	T = 19,		// Teleporter
 	W = 22,		// Switch
 	U = 20,		// Up-Tile
+	R = 17,		// Right-Tile
+	D = 3,		// Left-Tile
+	L = 11,		// Down-Tile
 	E = 4,		// Empty
 	Z = 25,		// Finish
 };
@@ -98,6 +102,11 @@ struct Tile
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
+};
+
+struct ControlTile : public Tile {
+	bool controled = 0; // 0 is not controlled, 1 is controlled
+	Tile* targetTile;
 };
 
 struct UpTile : public Tile {
@@ -289,9 +298,15 @@ enum class TEXTURE_ASSET_ID {
 	INVISIBLE_TILE = TILE + 1,
 	SWITCH_TILE = INVISIBLE_TILE + 1,
 	SWITCH_TILE_SUCCESS = SWITCH_TILE + 1,
-	UP_TILE = SWITCH_TILE_SUCCESS + 1,
+	RIGHT_TILE = SWITCH_TILE_SUCCESS + 1,
+	LEFT_TILE = RIGHT_TILE + 1,
+	DOWN_TILE = LEFT_TILE + 1,
+	UP_TILE = DOWN_TILE + 1,
 	UP_TILE_SUCCESS = UP_TILE + 1,
-	END_TILE = UP_TILE_SUCCESS + 1,
+	DIRECTION_TILE_SUCCESS = UP_TILE_SUCCESS + 1,
+	CONTROL_TILE = DIRECTION_TILE_SUCCESS + 1,
+	MOVE_TILE = CONTROL_TILE + 1,
+	END_TILE = MOVE_TILE + 1,
 	TILE_SHADOW = END_TILE + 1,
 	CONST_MOV_TILE = TILE_SHADOW + 1,
 	CONST_MOV_TILE_SUCCESS = CONST_MOV_TILE + 1,
