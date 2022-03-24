@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(7) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -22,7 +22,7 @@ WorldSystem::WorldSystem()
 WorldSystem::~WorldSystem() {
 	// Destroy music components
 	if (background_music != nullptr)
-		// Mix_FreeMusic(background_music);
+		Mix_FreeMusic(background_music);
 
 	// Destroy all created components
 	registry.clear_all_components();
@@ -104,7 +104,7 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	// Mix_PlayMusic(background_music, -1);
+	Mix_PlayMusic(background_music, -1);
 
 	// Set all states to default
 	restart_game();
@@ -456,136 +456,145 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		return;
 	}*/
 
-	Direction dir = currDirection;
-
-	Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
-
-	if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
-		switch (key)
-		{
-		case GLFW_KEY_W:
-			dir = Direction::UP;
-      		if (tile->tileState == TileState::B) { break; }
-			if (tile->tileState == TileState::C) {
-				ControlTile* c_tile = (ControlTile*)tile;
-				if (c_tile->controled == 1) {
-					tile_move(dir, c_tile->targetTile, c_tile);
-					break;
-				}
-			}
-			player_move(vec3({0, 1, 0}), dir);
-			break;
-		case GLFW_KEY_S:
-			dir = Direction::DOWN;
-      		if (tile->tileState == TileState::B) { break; }
-			if (tile->tileState == TileState::C) {
-				ControlTile* c_tile = (ControlTile*)tile;
-				if (c_tile->controled == 1) {
-					tile_move(dir, c_tile->targetTile, c_tile);
-					break;
-				}
-			}
-			player_move(vec3({0, -1, 0}), dir);
-			break;
-		case GLFW_KEY_A:
-			dir = Direction::LEFT;
-      		if (tile->tileState == TileState::B) { break; }
-			if (tile->tileState == TileState::C) {
-				ControlTile* c_tile = (ControlTile*)tile;
-				if (c_tile->controled == 1) {
-					tile_move(dir, c_tile->targetTile, c_tile);
-					break;
-				}
-			}
-			player_move(vec3({-1, 0, 0}), dir);
-			break;
-		case GLFW_KEY_D:
-			dir = Direction::RIGHT;
-      		if (tile->tileState == TileState::B) { break; }
-			if (tile->tileState == TileState::C) {
-				ControlTile* c_tile = (ControlTile*)tile;
-				if (c_tile->controled == 1) {
-					tile_move(dir, c_tile->targetTile, c_tile);
-					break;
-				}
-			}
-			player_move(vec3({1, 0, 0}), dir);
-			break;
-		case GLFW_KEY_I:
-			if (tile->tileState == TileState::C) {
-				ControlTile* c_tile = (ControlTile*)tile;
-				if (c_tile->controled == 0) {
-					c_tile->controled = 1;
-				}
-				else
-				{
-					c_tile->controled = 0;
-				}
-				break;
-			}
-			if (tile->tileState == TileState::B) { break; }
-			Interact(tile);
-			break;
-		default:
-			break;
-		}
-	}
-
-	// Fire release
-	if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
-		if (!registry.fire.has(fire)){
-			return;
-		}
-		Fire& fire_component = registry.fire.get(fire);
-		if (!(fire_component.inUse) && fire_component.active){
-			// If fire is picked up and has yet to be shot, add to holdTimer
-			Player& player = registry.players.get(player_explorer);
-			fire_gauge = createFireGauge(renderer, player.playerPos, player.model);
-		}
-	}
-
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
-		HoldTimer& holdTimer = registry.holdTimers.get(fire_gauge);
-		float power = holdTimer.counter_ms/holdTimer.max_ms;
-		registry.remove_all_components_of(fire_gauge);
-		UsePower(currDirection, power);
-	}
-
-	if (action == GLFW_PRESS && key == GLFW_KEY_R) {
-		cube.reset();
-		faceDirection = Direction::UP;
-		restart_game();
-	}
-
-	SetSprite(dir);
-
 	// Menu page esc
 	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
-		gameState = GameState::MENU;
-		menu = createMenu(renderer);
+		if (gameState != GameState::MENU) {
+			gameState = GameState::MENU;
+			menu = createMenu(renderer);
+		}
 	}
 
-	if (action == GLFW_RELEASE && gameState == GameState::MENU) {
-		switch (key)
-		{
-		case GLFW_KEY_UP:
-			changeMenu(0);
-			break;
-		case GLFW_KEY_DOWN:
-			changeMenu(1);
-			break;
-		case GLFW_KEY_RIGHT:
-			changeMenu(2);
-			break;
-		case GLFW_KEY_LEFT:
-			changeMenu(3);
-			break;
-		case GLFW_KEY_ENTER:
-			changeMenu(4);
-			break;
-		default:
-			break;
+	switch (gameState) {
+	case GameState::MENU:
+
+		if (action == GLFW_RELEASE && gameState == GameState::MENU) {
+			switch (key)
+			{
+			case GLFW_KEY_UP:
+				changeMenu(0);
+				break;
+			case GLFW_KEY_DOWN:
+				changeMenu(1);
+				break;
+			case GLFW_KEY_RIGHT:
+				changeMenu(2);
+				break;
+			case GLFW_KEY_LEFT:
+				changeMenu(3);
+				break;
+			case GLFW_KEY_ENTER:
+				changeMenu(4);
+				break;
+			default:
+				break;
+			}
 		}
+		break;
+	default:
+
+		Direction dir = currDirection;
+
+		Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
+
+		if (action == GLFW_RELEASE && rot.status == BOX_ANIMATION::STILL) {
+			switch (key)
+			{
+			case GLFW_KEY_W:
+				dir = Direction::UP;
+				if (tile->tileState == TileState::B) { break; }
+				if (tile->tileState == TileState::C) {
+					ControlTile* c_tile = (ControlTile*)tile;
+					if (c_tile->controled == 1) {
+						tile_move(dir, c_tile->targetTile, c_tile);
+						break;
+					}
+				}
+				player_move(vec3({ 0, 1, 0 }), dir);
+				break;
+			case GLFW_KEY_S:
+				dir = Direction::DOWN;
+				if (tile->tileState == TileState::B) { break; }
+				if (tile->tileState == TileState::C) {
+					ControlTile* c_tile = (ControlTile*)tile;
+					if (c_tile->controled == 1) {
+						tile_move(dir, c_tile->targetTile, c_tile);
+						break;
+					}
+				}
+				player_move(vec3({ 0, -1, 0 }), dir);
+				break;
+			case GLFW_KEY_A:
+				dir = Direction::LEFT;
+				if (tile->tileState == TileState::B) { break; }
+				if (tile->tileState == TileState::C) {
+					ControlTile* c_tile = (ControlTile*)tile;
+					if (c_tile->controled == 1) {
+						tile_move(dir, c_tile->targetTile, c_tile);
+						break;
+					}
+				}
+				player_move(vec3({ -1, 0, 0 }), dir);
+				break;
+			case GLFW_KEY_D:
+				dir = Direction::RIGHT;
+				if (tile->tileState == TileState::B) { break; }
+				if (tile->tileState == TileState::C) {
+					ControlTile* c_tile = (ControlTile*)tile;
+					if (c_tile->controled == 1) {
+						tile_move(dir, c_tile->targetTile, c_tile);
+						break;
+					}
+				}
+				player_move(vec3({ 1, 0, 0 }), dir);
+				break;
+			case GLFW_KEY_I:
+				if (tile->tileState == TileState::C) {
+					ControlTile* c_tile = (ControlTile*)tile;
+					if (c_tile->controled == 0) {
+						c_tile->controled = 1;
+					}
+					else
+					{
+						c_tile->controled = 0;
+					}
+					break;
+				}
+				if (tile->tileState == TileState::B) { break; }
+				Interact(tile);
+				break;
+			default:
+				break;
+			}
+		}
+
+		// Fire release
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+			if (!registry.fire.has(fire)) {
+				return;
+			}
+			Fire& fire_component = registry.fire.get(fire);
+			if (!(fire_component.inUse) && fire_component.active) {
+				// If fire is picked up and has yet to be shot, add to holdTimer
+				Player& player = registry.players.get(player_explorer);
+				fire_gauge = createFireGauge(renderer, player.playerPos, player.model);
+			}
+		}
+
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
+			HoldTimer& holdTimer = registry.holdTimers.get(fire_gauge);
+			float power = holdTimer.counter_ms / holdTimer.max_ms;
+			registry.remove_all_components_of(fire_gauge);
+			UsePower(currDirection, power);
+		}
+
+		if (action == GLFW_PRESS && key == GLFW_KEY_R) {
+			cube.reset();
+			faceDirection = Direction::UP;
+			restart_game();
+		}
+
+		SetSprite(dir);
+
 	}
 }
 
@@ -634,8 +643,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	Coordinates newCoords = searchForTile(trueDirection);
 	Tile* tile = cube.getTile(newCoords);
-
-	printf("%d", direction);
 
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
 		tile->tileState == TileState::N || tile->tileState == TileState::B) {

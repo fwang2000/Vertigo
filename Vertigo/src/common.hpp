@@ -36,8 +36,8 @@ inline std::string tile_path(const std::string& name) { return level_path() + "/
 inline std::string text_path(const std::string& name) { return level_path() + "/text/" + std::string(name); }
 inline std::string modifications_path(const std::string& name) { return level_path() + "/modifications/" + std::string(name); }
 
-const int window_width_px = 1200;
-const int window_height_px = 1200;
+const int window_width_px = 700;
+const int window_height_px = 1000;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
