@@ -7,8 +7,8 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
-	motion.position = vec3(0, 0, 0);
-	motion.destination = vec3(0, 0, 0);
+	motion.position = vec3(0, 0, 0.5f);
+	motion.destination = vec3(0, 0, 0.5f);
 	motion.velocity = { 0.f , 0.f , 0.f };
 
 	Player& explorer = registry.players.emplace(entity);
@@ -16,7 +16,7 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
 	explorer.model = translateMatrix * explorer.model;
-	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * explorer.model;
+	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.f)) * explorer.model;
 
 	registry.renderRequests.insert(
 		entity,
@@ -34,7 +34,7 @@ Entity createTile(Tile* tile)
 	Entity entity = Entity();
 
 	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::TILE;
-	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::SPRITE;
+	GEOMETRY_BUFFER_ID gid = GEOMETRY_BUFFER_ID::LIGHTING;
 	EFFECT_ASSET_ID eid = EFFECT_ASSET_ID::TILE;
 
 	switch (tile->tileState) {
@@ -271,4 +271,42 @@ Entity createMenu(RenderSystem* renderer) {
 	);
 
 	return entity;
+}
+
+void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	Billboard& billboard = registry.billboards.emplace(entity);
+	billboard.model = translateMatrix * billboard.model;
+	switch (pos.f) {
+		case 0:
+			billboard.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 1.5f)) * billboard.model;
+			break;
+		case 1:
+			billboard.model = translate(glm::mat4(1.0f), vec3(-1.5f, 0.f, 0.f)) * billboard.model;
+			break;
+		case 2:
+			billboard.model = translate(glm::mat4(1.0f), vec3(1.5f, 0.f, 0.f)) * billboard.model;
+			break;
+		case 3:
+			billboard.model = translate(glm::mat4(1.0f), vec3(0.f, 1.5f, 0.f)) * billboard.model;
+			break;
+		case 4:
+			billboard.model = translate(glm::mat4(1.0f), vec3(0.f, -1.5f, 0.f)) * billboard.model;
+			break;
+		case 5:
+			billboard.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, -1.5f)) * billboard.model;
+			break;
+	}
+
+	registry.lightSources.emplace(entity);
+
+	registry.renderRequests.insert(
+	 	entity,
+	 	{
+	 		TEXTURE_ASSET_ID::LIGHT,
+	 		EFFECT_ASSET_ID::BILLBOARD,
+	 		GEOMETRY_BUFFER_ID::SPRITE
+	 	}
+	 );
 }

@@ -6,29 +6,34 @@
 #include <math.h> 
 #define PI 3.14159265
 
-// Returns the local bounding coordinates scaled by the current size of the entity
-vec2 get_bounding_box(const Motion& motion)
-{
-	// abs is to avoid negative scale due to the facing direction.
-	// return { abs(motion.scale.x), abs(motion.scale.y) };
-	// TODO: Update or remove
-	return {0, 0};
+bool in_between(vec3 a, vec3 b1, vec3 b2){
+	float x0 = min(b1[0], b2[0]);
+	float x1 = max(b1[0], b2[0]);
+	float y0 = min(b1[1], b2[1]);
+	float y1 = max(b1[1], b2[1]);
+	float z0 = min(b1[2], b2[2]);
+	float z1 = max(b1[2], b2[2]);
+	if (a[0] > x0 && a[0] < x1 && a[1] > y0 && a[1] < y1 && a[2] > z0 && a[2] < z1){
+		return true;
+	}
+	return false;
 }
 
-// This is a SUPER APPROXIMATE check that puts a circle around the bounding boxes and sees
-// if the center point of either object is inside the other's bounding-box-circle. You can
-// surely implement a more accurate detection
-bool collides(const Motion& motion1, const Motion& motion2)
-{
-	vec2 dp = motion1.position - motion2.position;
-	float dist_squared = dot(dp, dp);
-	const vec2 other_bonding_box = get_bounding_box(motion1) / 2.f;
-	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
-	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
-	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
-	if (dist_squared < r_squared)
+// This is a SUPER APPROXIMATE check
+bool collides(mat4 model1, mat4 model2)
+{	
+	vec4 o1 = vec4(-0.5f, -0.5f, -0.5f, 1.f);
+	vec4 o2 = vec4(0.5f, 0.5f, 0.5f, 1.f);
+	vec4 coord0 = model1[3]; // model1 * o0;
+	vec4 coord1 = model2[3] - vec4(0.5f, 0.5f, 0.5f, 0);
+	vec4 coord2 = model2[3] + vec4(0.5f, 0.5f, 0.5f, 0);
+	printf("FIRE: \t  %.4f || %.4f || %.4f || %.4f\n", coord0[0], coord0[1], coord0[2], coord0[3]);
+	printf("CORNER1: \t %.4f || %.4f || %.4f || %.4f\n", coord1[0], coord1[1], coord1[2], coord1[3]);
+	printf("CORNER2: \t %.4f || %.4f || %.4f || %.4f\n", coord2[0], coord2[1], coord2[2], coord2[3]);
+	printf("\n");
+	if (in_between(coord0, coord1, coord2)){
 		return true;
+	}
 	return false;
 }
 
@@ -77,29 +82,46 @@ void PhysicsSystem::step(float elapsed_ms)
 		else{
 			motion.velocity = motion.velocity + motion.acceleration * step_seconds;
 			motion.position = motion.position + motion.velocity * step_seconds;
-
 		}
 		
 	}
 
-	// Check for collisions between all moving entities
+	// Check for collisions between only fire and animated tiles right now
 	ComponentContainer<Motion>& motion_container = registry.motions;
-	for (uint i = 0; i < motion_container.components.size(); i++)
+	for (uint i = 0; i < registry.fire.components.size(); i++)
 	{
-		Motion& motion_i = motion_container.components[i];
-		Entity entity_i = motion_container.entities[i];
+		Entity entity_i = registry.fire.entities[i];
+		Fire fire = registry.fire.components[i];
 
-		// note starting j at i+1 to compare all (i,j) pairs only once (and to not compare with itself)
-		for (uint j = i + 1; j < motion_container.components.size(); j++)
+		if (!fire.active || !fire.inUse){
+			continue;
+		}
+		Object object_i = registry.objects.get(entity_i);
+		Motion motion_i = motion_container.get(entity_i);
+		vec3 position = motion_i.position;
+
+		if (position.z < 0){
+			position = position - (position.z / motion_i.velocity.z * motion_i.velocity);
+		}
+
+		mat4 trans1 = translate(mat4(1.0f), position);
+		mat4 model1 = object_i.model;
+
+		mat4 model2;
+
+		for (uint j = 0; j < registry.objects.components.size(); j++)
 		{
-			Motion& motion_j = motion_container.components[j];
-			if (collides(motion_i, motion_j))
-			{
-				Entity entity_j = motion_container.entities[j];
+			Entity entity_j = registry.objects.entities[j];
+			Object object_j = registry.objects.components[j];
+			if (registry.fire.has(entity_j)){
+				continue;
+			}
+			model2 = object_j.model;
+
+			if (collides(trans1 * model1, model2)){
 				// Create a collisions event
-				// We are abusing the ECS system a bit in that we potentially insert muliple collisions for the same entity
+				// Will always be fire first
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
-				registry.collisions.emplace_with_duplicates(entity_j, entity_i);
 			}
 		}
 	}

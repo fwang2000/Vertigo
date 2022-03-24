@@ -241,11 +241,12 @@ struct HoldTimer
 	bool increasing = true;
 };
 
-// Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
+// Single Vertex Buffer element for non-textured objects (object.vs.glsl)
 struct ColoredVertex
 {
 	vec3 position;
 	vec3 color;
+	vec3 normal;
 };
 
 // Single Vertex Buffer element for textured sprites (textured.vs.glsl)
@@ -255,6 +256,13 @@ struct TexturedVertex
 	vec2 texcoord;
 };
 
+struct LightedVertex
+{
+	vec3 position;
+	vec2 texcoord;
+	vec3 normal;
+};
+
 // Mesh data structure for storing vertex and index buffers
 struct Mesh
 {
@@ -262,6 +270,16 @@ struct Mesh
 	vec2 original_size = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
+};
+
+struct Billboard
+{
+	glm::mat4 model = glm::mat4(1.f);
+};
+
+struct LightSource
+{
+
 };
 
 /**
@@ -336,7 +354,8 @@ enum class TEXTURE_ASSET_ID {
 	WOOD = OFF_X + 1,
 	MARBLE = WOOD + 1,
 	DISSOLVE = MARBLE + 1,
-	TEXTURE_COUNT = DISSOLVE + 1
+	LIGHT = DISSOLVE + 1,
+	TEXTURE_COUNT = LIGHT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -350,7 +369,8 @@ enum class EFFECT_ASSET_ID {
 	FIRE = OBJECT + 1,
 	MENU = FIRE + 1,
 	BURNABLE = MENU + 1,
-	EFFECT_COUNT = BURNABLE + 1
+	BILLBOARD = BURNABLE + 1,
+	EFFECT_COUNT = BILLBOARD + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
@@ -362,7 +382,8 @@ enum class GEOMETRY_BUFFER_ID {
 	FIRE = ANIMATED + 1,
 	TREE = FIRE + 1,
 	GAUGE = TREE + 1,
-	GEOMETRY_COUNT = GAUGE + 1
+	LIGHTING = GAUGE + 1,
+	GEOMETRY_COUNT = LIGHTING + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

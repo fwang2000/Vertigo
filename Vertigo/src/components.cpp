@@ -39,6 +39,7 @@ glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 		break;
 	case 5:
 		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = rotate(glm::mat4(1.0f), (float)radians(180.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(x, y, -distance)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(180.0f), vec3(0.0f, 0.0f, 1.0f)) * matrix;
 		break;
@@ -583,6 +584,20 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 			char stupidBuffer[1000];
 			fgets(stupidBuffer, 1000, file);
 		}
+	}
+	// For each vertex of each triangle
+	for( unsigned int i=0; i<out_vertex_indices.size(); i++ ){
+
+		// Get the indices of its attributes
+		unsigned int vertexIndex = out_vertex_indices[i];
+		unsigned int normalIndex = out_normal_indices[i];
+
+		// Get the attributes thanks to the index
+		glm::vec3 normal = out_normals[ normalIndex ];
+
+		// Put the attributes in buffers
+		out_vertices[vertexIndex].normal = normal;
+
 	}
 	fclose(file);
 

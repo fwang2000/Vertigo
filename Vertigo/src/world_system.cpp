@@ -141,7 +141,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Object& fire_object = registry.objects.get(fire);
 			Motion& fire_motion = motions_registry.get(fire);
 			Player& player = registry.players.get(player_explorer);
-			if (fire_motion.position.z < 0){
+			if (fire_motion.position.z <= 0){
 				fire_motion.acceleration = vec3({0, 0, 0});
 				fire_motion.velocity = vec3({0, 0, 0});
 				fire_component.inUse = false;
@@ -297,6 +297,23 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Billboard& billboard: registry.billboards.components) {
+		switch (rot.status) {
+		case BOX_ANIMATION::UP:
+			billboard.model = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::DOWN:
+			billboard.model = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::LEFT:
+			billboard.model = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			billboard.model = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * billboard.model;
+			break;
+		}
+	}
+
 	// TODO: rotate all objects that are rendered on screen
 	if (rot.remainingTime == 0.f)
 	{
@@ -356,6 +373,7 @@ void WorldSystem::load_level() {
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createLight(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::B) {
@@ -417,7 +435,7 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.fire.has(entity) && registry.animated.has(entity_other)){
+		if (registry.fire.has(entity) && registry.objects.has(entity_other)){
 			Burn(entity_other);
 		}
 	}
@@ -613,6 +631,13 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
+	
+	Player& player = registry.players.get(player_explorer);
+	Motion& motion = registry.motions.get(player_explorer);
+	if (motion.position != motion.destination){
+		return;
+	}
+
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
@@ -623,9 +648,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		tile->tileState == TileState::N || tile->tileState == TileState::B) {
 		return;
 	}
-	
-	Player& player = registry.players.get(player_explorer);
-	Motion& motion = registry.motions.get(player_explorer);
 
 	if (tile->tileState == TileState::R || tile->tileState == TileState::U || tile->tileState == TileState::L || tile->tileState == TileState::D) {
 		UpTile* uptile = (UpTile*)tile;
@@ -642,10 +664,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_component.active = true;
 		fire_object.model = player.model;
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
-	}
-
-	if (motion.position != motion.destination){
-		return;
 	}
 
 	gameState = GameState::MOVING;
@@ -917,13 +935,13 @@ void WorldSystem::UsePower(Direction direction, float power)
 
 	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
 	
-	if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
-		tile->tileState == TileState::B) {
+	// if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
+	// 	tile->tileState == TileState::B) {
 		
-		BurnableTile* b_tile = (BurnableTile*)tile;
-		b_tile->tileState = TileState::V;
-		Burn(b_tile->object);
-	}
+	// 	BurnableTile* b_tile = (BurnableTile*)tile;
+	// 	b_tile->tileState = TileState::V;
+	// 	Burn(b_tile->object);
+	// }
 }
 
 void WorldSystem::Burn(Entity entity) {
