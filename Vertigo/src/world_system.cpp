@@ -141,7 +141,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Object& fire_object = registry.objects.get(fire);
 			Motion& fire_motion = motions_registry.get(fire);
 			Player& player = registry.players.get(player_explorer);
-			if (fire_motion.position.z < 0){
+			if (fire_motion.position.z <= 0){
 				fire_motion.acceleration = vec3({0, 0, 0});
 				fire_motion.velocity = vec3({0, 0, 0});
 				fire_component.inUse = false;
@@ -435,7 +435,7 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
-		if (registry.fire.has(entity) && registry.animated.has(entity_other)){
+		if (registry.fire.has(entity) && registry.objects.has(entity_other)){
 			Burn(entity_other);
 		}
 	}
@@ -928,13 +928,13 @@ void WorldSystem::UsePower(Direction direction, float power)
 
 	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
 	
-	if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
-		tile->tileState == TileState::B) {
+	// if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
+	// 	tile->tileState == TileState::B) {
 		
-		BurnableTile* b_tile = (BurnableTile*)tile;
-		b_tile->tileState = TileState::V;
-		Burn(b_tile->object);
-	}
+	// 	BurnableTile* b_tile = (BurnableTile*)tile;
+	// 	b_tile->tileState = TileState::V;
+	// 	Burn(b_tile->object);
+	// }
 }
 
 void WorldSystem::Burn(Entity entity) {

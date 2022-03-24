@@ -7,8 +7,8 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
-	motion.position = vec3(0, 0, 0);
-	motion.destination = vec3(0, 0, 0);
+	motion.position = vec3(0, 0, 0.5f);
+	motion.destination = vec3(0, 0, 0.5f);
 	motion.velocity = { 0.f , 0.f , 0.f };
 
 	Player& explorer = registry.players.emplace(entity);
@@ -16,7 +16,7 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
 	explorer.model = translateMatrix * explorer.model;
-	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.5f)) * explorer.model;
+	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.f)) * explorer.model;
 
 	registry.renderRequests.insert(
 		entity,
