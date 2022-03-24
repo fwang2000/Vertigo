@@ -283,6 +283,18 @@ bool Cube::loadFromExcelFile(std::string filename) {
 					u_tile->dir = Direction::RIGHT;
 					break;
 				}
+				case TileState::T:
+				{
+					TeleportTile* t_tile = new TeleportTile();
+					t_tile->model = tileStartingMatrix(i, x, y, distance);
+					t_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+					row.push_back(t_tile);
+					t_tile->coords = { i, y_coord, x_coord };
+					t_tile->currentPos = t_tile->coords;
+					t_tile->direction = static_cast<FACE_DIRECTION>(i);
+					break;
+				}
 				case TileState::D:
 				{
 					UpTile* u_tile = new UpTile();
@@ -440,6 +452,21 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			int t_c = std::stoi(modifications.at(7));
 
 			control_tile->targetTile = (Tile*)getTile(Coordinates{ t_f, t_r, t_c });
+		}
+
+		if (modifications.at(0) == "T") {
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			TeleportTile* teleport_tile = (TeleportTile*)getTile(Coordinates{ f, r, c });
+
+			int t_f = std::stoi(modifications.at(5));
+			int t_r = std::stoi(modifications.at(6));
+			int t_c = std::stoi(modifications.at(7));
+
+			teleport_tile->targetTile = (Tile*)getTile(Coordinates{ t_f, t_r, t_c });
+			teleport_tile->targetCoords = Coordinates{ t_f, t_r, t_c };
 		}
 
 		if (modifications.at(0) == "W") {
@@ -658,6 +685,11 @@ void BurnableTile::action() {
 		burned = true;
 		this->tileState = TileState::V;
 	}
+}
+
+void TeleportTile::action() {
+
+	return;
 }
   
 void Tile::move(vec2 t, vec2 delta_coord) {

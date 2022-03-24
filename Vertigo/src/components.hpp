@@ -157,6 +157,12 @@ struct StartTile : public Tile {
 
 };
 
+struct TeleportTile : public Tile {
+	Tile* targetTile;
+	Coordinates targetCoords;
+	virtual void action();
+};
+
 struct Text 
 {
 	glm::mat4 model;
@@ -336,7 +342,8 @@ enum class TEXTURE_ASSET_ID {
 	WOOD = OFF_X + 1,
 	MARBLE = WOOD + 1,
 	DISSOLVE = MARBLE + 1,
-	TEXTURE_COUNT = DISSOLVE + 1
+	TELEPORT_TILE = DISSOLVE + 1,
+	TEXTURE_COUNT = TELEPORT_TILE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

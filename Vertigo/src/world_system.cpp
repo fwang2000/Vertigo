@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(8) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -639,6 +639,18 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_component.active = true;
 		fire_object.model = player.model;
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
+	}
+
+	// teleport
+	if (tile->tileState == TileState::T) {
+		TeleportTile* t_tile = (TeleportTile*)tile;
+		// player.playerPos = t_tile->targetTile->coords;
+
+		// dir = static_cast<int>(faceDirection) * -1;
+		// trueDirection = mod(direction, dir);
+
+		// newCoords = searchForTile(trueDirection);
+		// tile = cube.getTile(newCoords);
 	}
 
 	gameState = GameState::MOVING;

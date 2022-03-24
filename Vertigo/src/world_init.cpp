@@ -77,6 +77,9 @@ Entity createTile(Tile* tile)
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
 		break;
+	case TileState::T:
+		id = TEXTURE_ASSET_ID::TELEPORT_TILE;
+		break;
 	default:
 		id = TEXTURE_ASSET_ID::TILE;
 	}

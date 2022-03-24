@@ -79,7 +79,8 @@ class RenderSystem {
 			textures_path("menu/off_x.png"),
 			textures_path("wood.png"),
 			textures_path("marble.png"),
-			textures_path("dissolveTexture.png")
+			textures_path("dissolveTexture.png"),
+			textures_path("teleport_tile.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
