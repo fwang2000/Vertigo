@@ -624,11 +624,13 @@ void RenderSystem::draw()
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (registry.objects.has(entity)) {
+		RenderRequest& request = registry.renderRequests.get(entity);
+
+		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
 			continue;
 		}
 
-		if (registry.fire.has(entity)) {
+		if (request.used_effect == EFFECT_ASSET_ID::FIRE) {
 			continue;
 		}
 		// Note, its not very efficient to access elements indirectly via the entity
@@ -638,7 +640,12 @@ void RenderSystem::draw()
 
 	for (Entity entity : registry.objects.entities) {
 
-		drawObject(entity, projection_3D, view);
+		RenderRequest& request = registry.renderRequests.get(entity);
+
+		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
+
+			drawObject(entity, projection_3D, view);
+		}
 	}
 
 	if (registry.fire.entities.size() != 0) {

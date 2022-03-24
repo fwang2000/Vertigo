@@ -6,14 +6,14 @@
 
 // These are hard coded to the dimensions of the entity texture
 // TODO: Later, change / 3 to / dimension of cube
-const float TILE_BB_WIDTH = 1.0f * window_height_px / 14 * (sqrt(98) / 7) ;
-const float TILE_BB_HEIGHT = 1.0f * window_height_px / 7;
+const float TILE_BB_WIDTH = 1.0f * min(window_height_px, window_width_px) / 14 * (sqrt(98) / 7) ;
+const float TILE_BB_HEIGHT = 1.0f * min(window_height_px, window_width_px) / 7;
 const float EXPLORER_BB_WIDTH = 0.8f * TILE_BB_WIDTH;
 const float EXPLORER_BB_HEIGHT = 0.8f * TILE_BB_HEIGHT;
 const float FIRE_BB_WIDTH = 0.5f * EXPLORER_BB_WIDTH;
 const float FIRE_BB_HEIGHT = FIRE_BB_WIDTH;
-const float OBJECT_BB_WIDTH = 0.4 * window_height_px / 6;
-const float OBJECT_BB_HEIGHT = 0.4 * window_height_px / 4;
+const float OBJECT_BB_WIDTH = 0.4 * min(window_height_px, window_width_px) / 6;
+const float OBJECT_BB_HEIGHT = 0.4 * min(window_height_px, window_width_px) / 4;
 
 // the cube
 Entity createCube(RenderSystem* renderer);
