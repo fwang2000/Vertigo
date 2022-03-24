@@ -30,6 +30,8 @@ public:
 	ComponentContainer<Burnable> burnables;
 	ComponentContainer<Animated> animated;
 	ComponentContainer<Menu> menus;
+	ComponentContainer<Billboard> billboards;
+	ComponentContainer<LightSource> lightSources;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -52,6 +54,8 @@ public:
 		registry_list.push_back(&burnables);
 		registry_list.push_back(&animated);
 		registry_list.push_back(&menus);
+		registry_list.push_back(&billboards);
+		registry_list.push_back(&lightSources);
 	}
 
 	void clear_all_components() {

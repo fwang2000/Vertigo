@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level(7) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -297,6 +297,23 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Billboard& billboard: registry.billboards.components) {
+		switch (rot.status) {
+		case BOX_ANIMATION::UP:
+			billboard.model = rotate(glm::mat4(1.0f), -rads, vec3(1.0f, 0.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::DOWN:
+			billboard.model = rotate(glm::mat4(1.0f), rads, vec3(1.0f, 0.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::LEFT:
+			billboard.model = rotate(glm::mat4(1.0f), -rads, vec3(0.0f, 1.0f, 0.0f)) * billboard.model;
+			break;
+		case BOX_ANIMATION::RIGHT:
+			billboard.model = rotate(glm::mat4(1.0f), rads, vec3(0.0f, 1.0f, 0.0f)) * billboard.model;
+			break;
+		}
+	}
+
 	// TODO: rotate all objects that are rendered on screen
 	if (rot.remainingTime == 0.f)
 	{
@@ -356,6 +373,7 @@ void WorldSystem::load_level() {
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					createLight(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::B) {

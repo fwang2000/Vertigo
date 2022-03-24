@@ -79,7 +79,8 @@ class RenderSystem {
 			textures_path("menu/off_x.png"),
 			textures_path("wood.png"),
 			textures_path("marble.png"),
-			textures_path("dissolveTexture.png")
+			textures_path("dissolveTexture.png"),
+			textures_path("light.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -93,7 +94,8 @@ class RenderSystem {
 		shader_path("object"),
 		shader_path("fire"),
 		shader_path("menu"),
-		shader_path("burnable")
+		shader_path("burnable"),
+		shader_path("billboard")
 	};
 
 	std::array<GLuint, geometry_count> vertex_buffers;

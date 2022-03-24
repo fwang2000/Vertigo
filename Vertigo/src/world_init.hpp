@@ -37,3 +37,4 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 // the burnable
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 Entity createMenu(RenderSystem* renderer);
+void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);

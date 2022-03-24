@@ -36,20 +36,28 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
+		GLint in_normal_loc = glGetAttribLocation(program, "aNormal");
 		gl_has_errors();
 		assert(in_texcoord_loc >= 0);
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
+							  sizeof(LightedVertex), (void *)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
-		// remember to change this if tex0's type changes vec2/vec3
+
 		glVertexAttribPointer(
-			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(LightedVertex),
 			(void *)sizeof(
 				vec3)); // note the stride to skip the preceeding vertex position
+		gl_has_errors();
+
+		glEnableVertexAttribArray(in_normal_loc);
+		glVertexAttribPointer(
+			in_normal_loc, 3, GL_FLOAT, GL_FALSE, sizeof(LightedVertex),
+			(void *)(5 * sizeof(float))); // note the stride to skip the preceeding vertex position
+		gl_has_errors();
 
 		// Enabling and binding texture to slot 0
 		glActiveTexture(GL_TEXTURE0);
@@ -95,6 +103,31 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLint currProgram;
 		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 		// Setting uniform values to the currently bound program
+
+		// light properties
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+
+		// material properties
+		glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
+		glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
+        glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
+
+		std::string pointLightStr = "pointLights[0]";
+		for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+			Billboard& object = registry.billboards.get(registry.lightSources.entities[i]);
+			pointLightStr[12] = '0' + i;
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), object.model[3].x, object.model[3].y, object.model[3].z);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".ambient").c_str()), 0.05f, 0.05f, 0.05f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".diffuse").c_str()), 0.8f, 0.8f, 0.8f);
+			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".specular").c_str()), 1.0f, 1.0f, 1.0f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".constant").c_str()), 1.f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".linear").c_str()), 0.09f);
+			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".quadratic").c_str()), 0.032f);
+		}
+		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
@@ -282,10 +315,10 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::MENU)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::BILLBOARD)
 	{
-		GLint in_position_loc = glGetAttribLocation(program, "in_position");
-		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+		GLint in_position_loc = glGetAttribLocation(program, "aPos");
+		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
 		gl_has_errors();
 		assert(in_texcoord_loc >= 0);
 
@@ -295,6 +328,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
+		// remember to change this if tex0's type changes vec2/vec3
 		glVertexAttribPointer(
 			in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
 			(void*)sizeof(
@@ -308,14 +342,25 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
+		// use 2d
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
 
-		// Getting uniform locations for glUniform* calls
-		GLint color_uloc = glGetUniformLocation(program, "fcolor");
-		const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-		glUniform3fv(color_uloc, 1, (float*)&color);
-		gl_has_errors();
+		Billboard& obj = registry.billboards.get(entity);
+		model = obj.model;
+
+		// set the upper 3x3 matrix to identity matrix OR the transpose of the view matrix
+		model[0][0] = view[0][0];
+		model[0][1] = view[1][0];
+		model[0][2] = view[2][0];
+
+		model[1][0] = view[0][1];
+		model[1][1] = view[1][1]; // set equal to scale
+		model[1][2] = view[2][1];
+
+		model[2][0] = view[0][2];
+		model[2][1] = view[1][2];
+		model[2][2] = view[2][2];
 
 		// Get number of indices from index buffer, which has elements uint16_t
 		GLint size = 0;
@@ -324,6 +369,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		GLsizei num_indices = size / sizeof(uint16_t);
 		// GLsizei num_triangles = num_indices / 3;
+
+		GLint currProgram;
+		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+		// Setting uniform values to the currently bound program
+		GLuint model_loc = glGetUniformLocation(currProgram, "model");
+		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
+		GLuint view_loc = glGetUniformLocation(currProgram, "view");
+		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
+		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
+		glUniform1f(scale_loc, 0.5f);
+		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
+		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
@@ -428,7 +486,7 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 
 void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat4& view) 
 {
-	if (registry.fire.has(entity)) {
+	if (registry.fire.has(entity) || registry.lightSources.has(entity)) {
 		return;
 	}
 
@@ -455,6 +513,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	glm::mat4 model = glm::mat4(1.f);
 	GLint in_position_loc = glGetAttribLocation(program, "in_position");
 	GLint in_color_loc = glGetAttribLocation(program, "in_color");
+	GLint in_normal_loc = glGetAttribLocation(program, "in_normal");
 	gl_has_errors();
 
 	glEnableVertexAttribArray(in_position_loc);
@@ -467,10 +526,9 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 		sizeof(ColoredVertex), (void*)sizeof(vec3));
 	gl_has_errors();
 
-	// Getting uniform locations for glUniform* calls
-	GLint color_uloc = glGetUniformLocation(program, "fcolor");
-	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
-	glUniform3fv(color_uloc, 1, (float*)&color);
+	glEnableVertexAttribArray(in_normal_loc);
+	glVertexAttribPointer(in_normal_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(ColoredVertex), (void*)(6*sizeof(float)));
 	gl_has_errors();
 
 	// Get number of indices from index buffer, which has elements uint16_t
@@ -503,6 +561,32 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Setting uniform values to the currently bound program
+
+	// light properties
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
+
+	// material properties
+	glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
+	glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
+	glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
+
+	std::string pointLightStr = "pointLights[0]";
+	for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+		Billboard& billboard = registry.billboards.get(registry.lightSources.entities[i]);
+		pointLightStr[12] = '0' + i;
+		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), billboard.model[3].x, billboard.model[3].y, billboard.model[3].z);
+		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".ambient").c_str()), 0.05f, 0.05f, 0.05f);
+		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".diffuse").c_str()), 0.8f, 0.8f, 0.8f);
+		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".specular").c_str()), 1.0f, 1.0f, 1.0f);
+		glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".constant").c_str()), 1.f);
+		glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".linear").c_str()), 0.09f);
+		glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".quadratic").c_str()), 0.032f);
+	}
+	glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
+
 	GLuint alpha_loc = glGetUniformLocation(currProgram, "alpha");
 	glUniform1f(alpha_loc, object.alpha);
 	GLuint model_loc = glGetUniformLocation(currProgram, "model");
