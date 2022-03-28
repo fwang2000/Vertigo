@@ -556,6 +556,10 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 
 	if (object.alpha > 0.0f && object.burning) {
 		object.alpha -= 0.005f;
+		if (object.alpha <= 0.0f) {
+			object.alpha = 0;
+			object.burning = false;
+		}
 	}
 
 	GLint currProgram;

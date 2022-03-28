@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(4) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -75,8 +75,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -104,7 +106,7 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
+	// Mix_PlayMusic(background_music, -1);
 
 	// Set all states to default
 	restart_game();
@@ -201,6 +203,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			registry.animated.remove(entity);
 			Tile* tile = registry.tiles.get(entity);
 			tile->tileState = TileState::V;
+		}
+	}
+
+	if (gameState == GameState::BURNING) {
+		
+		if (currBurnable->alpha <= 0.f || !currBurnable->burning) {
+			gameState = GameState::IDLE;
+
+			Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
+			int dir = static_cast<int>(faceDirection) * -1;
+			Direction trueDirection = mod(currDirection, dir);
+			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+			Tile* btile = cube.getTile(newCoords);
+			btile->tileState = TileState::V;
 		}
 	}
 
@@ -338,7 +354,7 @@ void WorldSystem::restart_game() {
 	while (registry.text.entities.size() > 0)
 		registry.remove_all_components_of(registry.text.entities.back());
 
-	while (registry.renderRequests.entities.size() > 0)
+	while (registry.objects.entities.size() > 0)
 		registry.remove_all_components_of(registry.objects.entities.back());
 
 	while (registry.renderRequests.entities.size() > 0)
@@ -436,7 +452,11 @@ void WorldSystem::handle_collisions() {
 		Entity entity_other = collisionsRegistry.components[i].other;
 
 		if (registry.fire.has(entity) && registry.objects.has(entity_other)){
-			Burn(entity_other);
+			Object& object = registry.objects.get(entity_other);
+			if (object.burnable) {
+
+				Burn(entity_other);
+			}
 		}
 	}
 
@@ -452,9 +472,9 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	/*if (gameState != GameState::IDLE) {
+	if (gameState != GameState::IDLE && gameState != GameState::MOVING && gameState != GameState::TITLE_SCREEN) {
 		return;
-	}*/
+	}
 
 	// Menu page esc
 	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
@@ -467,19 +487,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	switch (gameState) {
 	case GameState::MENU:
 
-		if (action == GLFW_RELEASE && gameState == GameState::MENU) {
+		if (action == GLFW_RELEASE) {
 			switch (key)
 			{
-			case GLFW_KEY_UP:
+			case GLFW_KEY_W:
 				changeMenu(0);
 				break;
-			case GLFW_KEY_DOWN:
+			case GLFW_KEY_S:
 				changeMenu(1);
 				break;
-			case GLFW_KEY_RIGHT:
+			case GLFW_KEY_D:
 				changeMenu(2);
 				break;
-			case GLFW_KEY_LEFT:
+			case GLFW_KEY_A:
 				changeMenu(3);
 				break;
 			case GLFW_KEY_ENTER:
@@ -490,9 +510,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			}
 		}
 		break;
+
 	default:
 
 		Direction dir = currDirection;
+		
 
 		Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
@@ -592,15 +614,66 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			faceDirection = Direction::UP;
 			restart_game();
 		}
-
 		SetSprite(dir);
-
 	}
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
 {
+	if (gameState != GameState::TITLE_SCREEN) {
+		return;
+	}
+
+	Player& player = registry.players.get(player_explorer);
+	Entity& startText = registry.text.entities.at(1);
+	RenderRequest& request = registry.renderRequests.get(startText);
+
+	if (player.playerPos.f == 3) {
+
+		if (mouse_position.x > 682 || mouse_position.x < 408) {
+
+			request.used_texture = TEXTURE_ASSET_ID::TITLE;
+			return;
+		}
+
+		float z = ((682 - 408) * mouse_position.y - (526 - 436) * mouse_position.x)/(682 - 408);
+		if (z <= 350 && z >= 302) {
+			request.used_texture = TEXTURE_ASSET_ID::TITLE_START_MUSIC_SOUND;
+		}
+		else if (z <= 421 && z >= 374) {
+			request.used_texture = TEXTURE_ASSET_ID::TITLE_LEVELS_MUSIC_SOUND;
+		}
+		else if (z <= 492 && z >= 445) {
+			request.used_texture = TEXTURE_ASSET_ID::TITLE_SOUND_MUSIC;
+		}
+		else if (z < 563 && z >= 516) {
+			request.used_texture = TEXTURE_ASSET_ID::TITLE_MUSIC_SOUND;
+		}
+		else {
+			request.used_texture = TEXTURE_ASSET_ID::TITLE;
+		}
+	}
+
 	(vec2)mouse_position; // dummy to avoid compiler warning
+}
+
+void WorldSystem::on_mouse_click(int button, int action, int mods) {
+
+	if (gameState != GameState::TITLE_SCREEN) {
+		return;
+	}
+
+	Entity& startText = registry.text.entities.at(1);
+	RenderRequest& request = registry.renderRequests.get(startText);
+	int texID = (int)request.used_texture;
+
+	Player& player = registry.players.get(player_explorer);
+
+	if (action == GLFW_RELEASE && button == GLFW_MOUSE_BUTTON_LEFT && player.playerPos.f == 3) {
+		if (texID >= 48 && texID <= 51) {
+			next_level();
+		}
+	}
 }
 
 void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile) {
@@ -666,7 +739,10 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
 	}
 
-	gameState = GameState::MOVING;
+	if (gameState != GameState::TITLE_SCREEN) {
+
+		gameState = GameState::MOVING;
+	}
 	
 	if (player.playerPos.f != newCoords.f) {
 		// play cube rotation animation based on DIRECTION, not trueDirection
@@ -848,6 +924,7 @@ void WorldSystem::Interact(Tile* tile)
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
 	if (s_tile->toggled) {
+		gameState = GameState::IDLE;
 		return;
 	}
 
@@ -867,7 +944,8 @@ void WorldSystem::Interact(Tile* tile)
 	else {
 
 		if (s_tile->targetTile->tileState == TileState::E) {
-			
+
+			gameState = GameState::IDLE;
 			return;
 		}
 
@@ -898,6 +976,8 @@ void WorldSystem::Interact(Tile* tile)
 	}
 
 	s_tile->action();
+
+	gameState = GameState::IDLE;
 }
 
 void WorldSystem::UsePower(Direction direction, float power) 
@@ -934,27 +1014,15 @@ void WorldSystem::UsePower(Direction direction, float power)
 	}
 
 	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
-	
-	// if (tile->coords.f == registry.tiles.get(getCurrentTileEntity())->coords.f &&
-	// 	tile->tileState == TileState::B) {
-		
-	// 	BurnableTile* b_tile = (BurnableTile*)tile;
-	// 	b_tile->tileState = TileState::V;
-	// 	Burn(b_tile->object);
-	// }
 }
 
 void WorldSystem::Burn(Entity entity) {
 	gameState = GameState::BURNING;
-	Object& burnable = registry.objects.get(entity);
-	burnable.burning = true;
+	currBurnable = &registry.objects.get(entity);
+	currBurnable->burning = true;
 }
 
 void WorldSystem::SetSprite(Direction direction) {
-
-	//if (direction == currDirection) {
-	//	return;
-	//}
 
 	RenderRequest& request = registry.renderRequests.get(player_explorer);
 
@@ -1080,5 +1148,6 @@ void WorldSystem::next_level() {
 		cube.reset();
 		level++;
 		faceDirection = Direction::UP;
+		gameState = GameState::IDLE;
 		restart_game();
 }

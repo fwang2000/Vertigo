@@ -27,10 +27,6 @@ bool collides(mat4 model1, mat4 model2)
 	vec4 coord0 = model1[3]; // model1 * o0;
 	vec4 coord1 = model2[3] - vec4(0.5f, 0.5f, 0.5f, 0);
 	vec4 coord2 = model2[3] + vec4(0.5f, 0.5f, 0.5f, 0);
-	printf("FIRE: \t  %.4f || %.4f || %.4f || %.4f\n", coord0[0], coord0[1], coord0[2], coord0[3]);
-	printf("CORNER1: \t %.4f || %.4f || %.4f || %.4f\n", coord1[0], coord1[1], coord1[2], coord1[3]);
-	printf("CORNER2: \t %.4f || %.4f || %.4f || %.4f\n", coord2[0], coord2[1], coord2[2], coord2[3]);
-	printf("\n");
 	if (in_between(coord0, coord1, coord2)){
 		return true;
 	}

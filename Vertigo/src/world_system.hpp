@@ -19,7 +19,8 @@ enum class GameState {
 	MOVING = 1,
 	INTERACTING = 2,
 	BURNING = 3,
-	MENU = 4
+	MENU = 4,
+	TITLE_SCREEN = 5
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -53,6 +54,7 @@ private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void on_mouse_click(int button, int action, int mod);
 
 	// Movement Functions
 	void tile_move(Direction direction, Tile* tile, ControlTile* ctile);
@@ -93,13 +95,14 @@ private:
 	RenderSystem* renderer;
 	Entity player_explorer;
 	Cube cube;
+	Object* currBurnable;
 	Rotate rot; // command to rotate all tiles and text and objects
 	Entity menu;
 	Entity fire;
 	Entity fire_gauge;
 	Entity fire_shadow;
 	Entity currentObject;
-	GameState gameState = GameState::IDLE;
+	GameState gameState = GameState::TITLE_SCREEN;
 
 	Direction currDirection = Direction::RIGHT;
 
