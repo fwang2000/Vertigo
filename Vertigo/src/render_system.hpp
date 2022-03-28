@@ -80,7 +80,25 @@ class RenderSystem {
 			textures_path("wood.png"),
 			textures_path("marble.png"),
 			textures_path("dissolveTexture.png"),
-			textures_path("light.png")
+			textures_path("light.png"),
+			textures_path("title_page/title_start.png"),
+			textures_path("title_page/title_start_music.png"),
+			textures_path("title_page/title_start_music_sound.png"),
+			textures_path("title_page/title_start_sound.png"),
+			textures_path("title_page/title_levels.png"),
+			textures_path("title_page/title_levels_music.png"),
+			textures_path("title_page/title_levels_music_sound.png"),
+			textures_path("title_page/title_levels_sound.png"),
+			textures_path("title_page/title_sound_off.png"),
+			textures_path("title_page/title_sound_music.png"),
+			textures_path("title_page/title_sound_no_music.png"),
+			textures_path("title_page/title_sound_off_music.png"),
+			textures_path("title_page/title_music_off.png"),
+			textures_path("title_page/title_music_off_sound.png"),
+			textures_path("title_page/title_music_sound.png"),
+			textures_path("title_page/title_music_no_sound.png"),
+			textures_path("title_page/title.png"),
+			textures_path("title_page/move_controls.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;

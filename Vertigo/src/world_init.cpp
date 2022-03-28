@@ -185,6 +185,9 @@ Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 
 	createObject(entity, pos, translateMatrix, false, vec3(1.5), 1);
 
+	Object& burnable = registry.objects.get(entity);
+	burnable.burnable = true;
+
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::TREE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
