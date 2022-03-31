@@ -657,7 +657,6 @@ void RenderSystem::drawToScreen()
 	glUniform1f(time_uloc, (float)(glfwGetTime() * 10.0f));
 	ScreenState& screen = registry.screenStates.get(screen_state_entity);
 	glUniform1f(dead_timer_uloc, screen.darken_screen_factor);
-	printf("%f", screen.darken_screen_factor);
 	gl_has_errors();
 	// Set the vertex position and vertex texture coordinates (both stored in the
 	// same VBO)
@@ -688,7 +687,7 @@ void RenderSystem::draw()
 	glfwGetFramebufferSize(window, &w, &h); // Note, this will be 2x the resolution given to glfwCreateWindow on retina displays
 
 	// First render to the custom framebuffer
-	glBindFramebuffer(GL_FRAMEBUFFER, 0); // have to set this variable to 0 instead of frame_buffer in order for it to render
+	glBindFramebuffer(GL_FRAMEBUFFER, frame_buffer); // have to set this variable to 0 instead of frame_buffer in order for it to render
 	gl_has_errors();
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
@@ -742,7 +741,7 @@ void RenderSystem::draw()
 	}
 
 	// Truely render to the screen
-	// drawToScreen();
+	drawToScreen();
 
 	// flicker-free display with a double buffer
 	glfwSwapBuffers(window);
