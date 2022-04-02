@@ -475,13 +475,18 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			int r = std::stoi(modifications.at(2));
 			int c = std::stoi(modifications.at(3));
 
-			int t_f = std::stoi(modifications.at(4));
-			int t_r = std::stoi(modifications.at(5));
-			int t_c = std::stoi(modifications.at(6));
+			int e_f = std::stoi(modifications.at(4));
+			int e_r = std::stoi(modifications.at(5));
+			int e_c = std::stoi(modifications.at(6));
+
+			int t_f = std::stoi(modifications.at(7));
+			int t_r = std::stoi(modifications.at(8));
+			int t_c = std::stoi(modifications.at(9));
 
 			ConstMovingTile* cTile = (ConstMovingTile*)getTile(Coordinates{ f, r, c });
 			cTile->startCoords = Coordinates{ f, r, c };
-			cTile->endCoords = Coordinates{ t_f, t_r, t_c};
+			cTile->endCoords = Coordinates{ e_f, e_r, e_c};
+			cTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
 		}
 
 		std::vector<std::string>().swap(modifications);
@@ -649,10 +654,15 @@ void UpTile::action() {
 }
 
 void ConstMovingTile::action() {
-	// if up tile facing up {
-	// 	this->tileState = TileState::D;
-	// }
+	if (toggled) {
+		return;
+	}
 
+	if (targetTile->tileState == TileState::I) {
+		targetTile->tileState = TileState::V;
+		targetTile->action();
+	}
+	toggled = true;
 	return;
 }
 

@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(11) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -454,8 +454,13 @@ void WorldSystem::handle_collisions() {
 		if (registry.fire.has(entity) && registry.objects.has(entity_other)){
 			Object& object = registry.objects.get(entity_other);
 			if (object.burnable) {
-
 				Burn(entity_other);
+			}
+		}
+		else if (registry.fire.has(entity) && registry.tiles.has(entity_other)){			
+			Tile* tile = registry.tiles.get(entity_other);
+			if (tile->tileState == TileState::O){
+				Interact(tile);
 			}
 		}
 	}
@@ -917,7 +922,7 @@ void WorldSystem::changeMenu(int dir){
 
 void WorldSystem::Interact(Tile* tile) 
 {
-	if (tile->tileState != TileState::W) {
+	if (tile->tileState != TileState::W && tile->tileState != TileState::O) {
 		return;
 	}
 

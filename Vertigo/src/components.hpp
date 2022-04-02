@@ -140,6 +140,7 @@ struct InvisibleTile : public Tile {
 struct ConstMovingTile : public Tile {
 	Coordinates startCoords;
 	Coordinates endCoords;
+	Tile* targetTile;
 	bool toggled = false;
 	virtual void action();
 };
