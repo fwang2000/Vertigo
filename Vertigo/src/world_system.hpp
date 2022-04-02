@@ -102,7 +102,7 @@ private:
 	Entity fire_gauge;
 	Entity fire_shadow;
 	Entity currentObject;
-	GameState gameState = GameState::TITLE_SCREEN;
+	GameState gameState = GameState::IDLE;
 
 	Direction currDirection = Direction::RIGHT;
 
