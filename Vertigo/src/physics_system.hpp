@@ -11,7 +11,7 @@ class PhysicsSystem
 public:
 	void step(float elapsed_ms);
 
-	void oscillate();
+	void oscillate(float elapsed_ms);
 
 	PhysicsSystem()
 	{

@@ -426,7 +426,25 @@ void WorldSystem::load_level() {
 		if (registry.tiles.has(e)){
 			Tile* tile = registry.tiles.get(e);
 			ConstMovingTile* t = (ConstMovingTile*) cube.getTile(tile->coords);
-			o.center = (vec3({t->endCoords.c, t->endCoords.r, 0}) - vec3({t->startCoords.c, t->startCoords.r, 0})) / vec3(2.0f);
+			if (t->endCoords.f == 0){
+				o.center = (vec3({t->endCoords.c, t->endCoords.r, 0}) - vec3({t->startCoords.c, t->startCoords.r, 0})) / vec3(2.0f);
+			}
+			else if (t->endCoords.f == 1){
+				o.center = (vec3({0, -t->endCoords.r, t->endCoords.c}) - vec3({0, -t->startCoords.r, t->startCoords.c})) / vec3(2.0f);
+			}
+			else if (t->endCoords.f == 2){
+				o.center = (vec3({0, -t->endCoords.r, -t->endCoords.c}) - vec3({0, -t->startCoords.r, -t->startCoords.c})) / vec3(2.0f);
+			}
+			else if (t->endCoords.f == 3){
+				o.center = (vec3({t->endCoords.c, 0, t->endCoords.r}) - vec3({t->startCoords.c, 0, t->startCoords.r})) / vec3(2.0f);
+			}
+			else if (t->endCoords.f == 4){
+				o.center = (vec3({t->endCoords.c, 0, -t->endCoords.r}) - vec3({t->startCoords.c, 0, -t->startCoords.r})) / vec3(2.0f);
+			}
+			else if (t->endCoords.f == 5){
+				o.center = (vec3({-t->endCoords.c, -t->endCoords.r, 0}) - vec3({-t->startCoords.c, -t->startCoords.r, 0})) / vec3(2.0f);
+			}
+
 			o.amplitude = o.center;
 		}
 	}
@@ -723,7 +741,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Tile* tile = cube.getTile(newCoords);
 
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
-		tile->tileState == TileState::N || tile->tileState == TileState::B) {
+		tile->tileState == TileState::N || tile->tileState == TileState::B	|| tile->tileState == TileState::O) {
 		return;
 	}
 
@@ -922,10 +940,10 @@ void WorldSystem::changeMenu(int dir){
 
 void WorldSystem::Interact(Tile* tile) 
 {
+
 	if (tile->tileState != TileState::W && tile->tileState != TileState::O) {
 		return;
 	}
-
 	SwitchTile* s_tile = (SwitchTile*)tile;
 
 	if (s_tile->toggled) {
@@ -935,7 +953,7 @@ void WorldSystem::Interact(Tile* tile)
 
 	gameState = GameState::INTERACTING;
 
-	Entity successTile = getCurrentTileEntity();
+	Entity successTile = getTileFromRegistry(tile->coords);
 
 	RenderRequest& switchRequest = registry.renderRequests.get(successTile);
 

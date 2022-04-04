@@ -33,7 +33,7 @@ bool collides(mat4 model1, mat4 model2)
 	return false;
 }
 
-void PhysicsSystem::oscillate()
+void PhysicsSystem::oscillate(float elapsed_ms)
 {
 	auto& oscillate_registry = registry.oscillations;
 	for (uint i = 0; i < oscillate_registry.size(); i++)
@@ -41,7 +41,7 @@ void PhysicsSystem::oscillate()
 		Oscillate& oscillate = oscillate_registry.components[i];
 		Entity& e = oscillate_registry.entities[i];
 		Motion& motion = registry.motions.get(e);
-		oscillate.phase += 2 * PI / oscillate.steps;
+		oscillate.phase += 2 * PI  * elapsed_ms / oscillate.period;
 		oscillate.phase = fmod(oscillate.phase, 2 * PI);
 		motion.position = oscillate.center + oscillate.amplitude * vec3(sin(oscillate.phase));
 		
@@ -51,7 +51,7 @@ void PhysicsSystem::oscillate()
 void PhysicsSystem::step(float elapsed_ms)
 {
 	// Used for oscillation
-	PhysicsSystem::oscillate();
+	PhysicsSystem::oscillate(elapsed_ms);
 
 	// Move bug based on how much time has passed, this is to (partially) avoid
 	// having entities move at different speed based on the machine.
@@ -117,6 +117,21 @@ void PhysicsSystem::step(float elapsed_ms)
 			if (collides(trans1 * model1, model2)){
 				// Create a collisions event
 				// Will always be fire first
+				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
+			}
+		}
+
+		for (uint j = 0; j < registry.tiles.components.size(); j++)
+		{
+			Entity entity_j = registry.tiles.entities[j];
+			Tile* tile_j = registry.tiles.components[j];
+			model2 = tile_j->model;
+			if (registry.motions.has(entity_j)){
+				Motion motion_j = registry.motions.get(entity_j);
+				mat4 trans2 = translate(mat4(1.0f), motion_j.position);
+				model2 = trans2 * model2;
+			}
+			if (collides(trans1 * model1, model2)){
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 			}
 		}

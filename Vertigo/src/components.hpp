@@ -137,11 +137,9 @@ struct InvisibleTile : public Tile {
 	virtual void action();
 };
 
-struct ConstMovingTile : public Tile {
+struct ConstMovingTile : public SwitchTile {
 	Coordinates startCoords;
 	Coordinates endCoords;
-	Tile* targetTile;
-	bool toggled = false;
 	virtual void action();
 };
 
@@ -188,7 +186,7 @@ struct Oscillate {
 	vec3 center = vec3({0, 0, 0});
 	vec3 amplitude = vec3({0, 0, 0});
 	double phase = 0;
-	int steps = 100;
+	int period = 3000;
 };
 
 struct Motion
