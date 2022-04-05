@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(11) {
+	: level(0) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -114,14 +114,6 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 
 // Update our game world
 bool WorldSystem::step(float elapsed_ms_since_last_update) {
-	
-	/*
-	// Updating window title with points
-	std::stringstream title_ss;
-	title_ss << "Points: " << points;
-	glfwSetWindowTitle(window, title_ss.str().c_str());
-	*/
-
 	// TODO Update checking of out of screen
 	// Removing out of screen entities
 	auto& motions_registry = registry.motions;
@@ -130,10 +122,29 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	assert(registry.screenStates.components.size() <= 1);
 	ScreenState& screen = registry.screenStates.components[0];
 
-	Motion& player_motion = motions_registry.get(player_explorer);
+	float min_counter_ms = restart_time;
+	for (Entity& e : registry.restartTimer.entities) {
+		RestartTimer& counter = registry.restartTimer.get(e);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+		if(counter.counter_ms < min_counter_ms){
+		    min_counter_ms = counter.counter_ms;
+		}
+		// restart the game once the death timer expired
+		if (counter.counter_ms < 0) {
+			registry.restartTimer.remove(e);
+			screen.darken_screen_factor = 0;
+            cube.reset();
+			faceDirection = Direction::UP;
+			rot.status = BOX_ANIMATION::STILL;
+			restart_game();
+			return true;
+		}
+	}
+	screen.darken_screen_factor = 1 - min_counter_ms / restart_time;
 
 	rotateAll(elapsed_ms_since_last_update);
 
+	Motion& player_motion = motions_registry.get(player_explorer);
 	// Update fire position
 
 	if (registry.fire.has(fire)){
@@ -633,9 +644,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_R) {
-			cube.reset();
-			faceDirection = Direction::UP;
-			restart_game();
+			if (!registry.restartTimer.has(player_explorer))
+				registry.restartTimer.emplace(player_explorer);
 		}
 		SetSprite(dir);
 	}

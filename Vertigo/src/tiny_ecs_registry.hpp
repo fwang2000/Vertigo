@@ -32,6 +32,7 @@ public:
 	ComponentContainer<Menu> menus;
 	ComponentContainer<Billboard> billboards;
 	ComponentContainer<LightSource> lightSources;
+	ComponentContainer<RestartTimer> restartTimer;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -56,6 +57,7 @@ public:
 		registry_list.push_back(&menus);
 		registry_list.push_back(&billboards);
 		registry_list.push_back(&lightSources);
+		registry_list.push_back(&restartTimer);
 	}
 
 	void clear_all_components() {
