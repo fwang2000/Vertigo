@@ -80,7 +80,6 @@ class RenderSystem {
 			textures_path("wood.png"),
 			textures_path("marble.png"),
 			textures_path("dissolveTexture.png"),
-			textures_path("light.png"),
 			textures_path("title_page/title_start.png"),
 			textures_path("title_page/title_start_music.png"),
 			textures_path("title_page/title_start_music_sound.png"),
@@ -149,7 +148,7 @@ public:
 	void draw();
 	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
 	void drawObject(Entity entity, const mat4& projection3D, const mat4& view);
-	// void drawFire(Entity entity);
+	void drawMenu(Entity entity);
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);

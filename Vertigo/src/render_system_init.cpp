@@ -184,6 +184,32 @@ void RenderSystem::initializeGlGeometryBuffers()
 
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::LIGHTING, lighting_vertices, textured_indices);
 
+	////////////////////////
+	// Initialize point light
+	std::vector<ColoredVertex> egg_vertices;
+	std::vector<uint16_t> egg_indices;
+	constexpr float z = -0.1f;
+	constexpr int NUM_TRIANGLES = 62;
+
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		const float t = float(i) * M_PI * 2.f / float(NUM_TRIANGLES - 1);
+		egg_vertices.push_back({});
+		egg_vertices.back().position = { 0.5 * cos(t), 0.5 * sin(t), z };
+		egg_vertices.back().color = { 1.0, 1.0, 1.0 };
+	}
+	egg_vertices.push_back({});
+	egg_vertices.back().position = { 0, 0, 0 };
+	egg_vertices.back().color = { 1, 1, 1 };
+	for (int i = 0; i < NUM_TRIANGLES; i++) {
+		egg_indices.push_back((uint16_t)i);
+		egg_indices.push_back((uint16_t)((i + 1) % NUM_TRIANGLES));
+		egg_indices.push_back((uint16_t)NUM_TRIANGLES);
+	}
+	int geom_index = (int)GEOMETRY_BUFFER_ID::POINT_LIGHT;
+	meshes[geom_index].vertices = egg_vertices;
+	meshes[geom_index].vertex_indices = egg_indices;
+	bindVBOandIBO(GEOMETRY_BUFFER_ID::POINT_LIGHT, meshes[geom_index].vertices, meshes[geom_index].vertex_indices);
+
 	///////////////////////////////////////////////////////
 	// Initialize screen triangle (yes, triangle, not quad; its more efficient).
 	std::vector<vec3> screen_vertices(3);

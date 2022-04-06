@@ -14,9 +14,9 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(8) {
+	: level(1) {
 	// Seeding rng with random device
-	rng = std::default_random_engine(std::random_device()());
+	// rng = std::default_random_engine(std::random_device()());
 }
 
 WorldSystem::~WorldSystem() {
@@ -228,6 +228,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
 			Tile* btile = cube.getTile(newCoords);
 			btile->tileState = TileState::V;
+		}
+	}
+
+	// check that we have reached the end after all animations are done
+	if (player_motion.destination == player_motion.position) {
+		Player player = registry.players.get(player_explorer);
+
+		Tile* tile = cube.getTile(player.playerPos);
+		if (tile->tileState == TileState::Z) {
+			rot.status = BOX_ANIMATION::STILL;
+			next_level();
 		}
 	}
 
@@ -890,12 +901,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);	
-
-	if (tile->tileState == TileState::Z) {
-		rot.status = BOX_ANIMATION::STILL;
-		next_level();
-	}
 }
 
 void WorldSystem::changeMenu(int dir){
