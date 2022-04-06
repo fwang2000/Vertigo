@@ -6,8 +6,7 @@
 #include "world_system.hpp"
 #include <SDL_opengl.h>
 
-void RenderSystem::drawTexturedMesh(Entity entity,
-	const mat4& projection3D, const mat3& projection2D, const mat4& view)
+void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, const mat4& view)
 {
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -80,16 +79,15 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		{
 			model = boxRotate->model;
 		}
-		mat4 trans;
-		mat4 sca;
+		mat4 trans = mat4(1.f);
+		mat4 sca = mat4(1.f);
 		if (registry.motions.has(entity)){
 			Motion& motion = registry.motions.get(entity);
 			trans = translate(mat4(1.f), motion.position);
 			sca = scale(mat4(1.0f), motion.scale);
 		}
-		else{
-			trans = mat4(1.f);
-			sca = mat4(1.f);
+		if (boxRotate->highlighted) {
+			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.5f)) * trans;
 		}
 
 		// Get number of indices from index buffer, which has elements uint16_t
@@ -128,6 +126,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			glUniform1f(glGetUniformLocation(currProgram, (pointLightStr + ".quadratic").c_str()), 0.032f);
 		}
 		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
+		glUniform1i(glGetUniformLocation(currProgram, "highlighted"), boxRotate->highlighted);
 		GLuint model_loc = glGetUniformLocation(currProgram, "model");
 		glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float *)&model);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
@@ -137,6 +136,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint view_loc = glGetUniformLocation(currProgram, "view");
 		glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float *)&view);
 		GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
+		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
+		gl_has_errors();
 		
 		if (registry.animated.has(entity)){
 			Animated& animated = registry.animated.get(entity);
@@ -151,9 +152,6 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			GLuint animated_loc = glGetUniformLocation(currProgram, "animated");
 			glUniform1i(animated_loc, false);
 		}
-
-		glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float *)&projection3D);
-		gl_has_errors();
 		// Drawing of num_indices/3 triangles specified in the index buffer
 		glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
 		gl_has_errors();
@@ -705,7 +703,6 @@ void RenderSystem::draw()
 
 	
 	mat4 projection_3D = create3DProjectionMatrix(w, h);
-	mat3 projection_2D = create2DProjectionMatrix();
 	mat4 view = createViewMatrix();
 
 	// Draw all textured meshes that have a position and size component
@@ -722,7 +719,7 @@ void RenderSystem::draw()
 		}
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_3D, projection_2D, view);
+		drawTexturedMesh(entity, projection_3D, view);
 	}
 
 	for (Entity entity : registry.objects.entities) {
@@ -766,23 +763,6 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
-}
-
-mat3 RenderSystem::create2DProjectionMatrix()
-{
-	// Fake projection matrix, scales with respect to window coordinates
-	float left = 0.f;
-	float top = 0.f;
-
-	gl_has_errors();
-	float right = (float) window_width_px;
-	float bottom = (float) window_height_px;
-
-	float sx = 2.f / (right - left);
-	float sy = 2.f / (top - bottom);
-	float tx = -(right + left) / (right - left);
-	float ty = -(top + bottom) / (top - bottom);
-	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
 }
 
 void RenderSystem::setCube(Cube cube) {

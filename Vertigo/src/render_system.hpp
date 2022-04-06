@@ -153,12 +153,11 @@ public:
 
 	mat4 createViewMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
-	mat3 create2DProjectionMatrix();
 	void setCube(Cube cube);
 
 private:
 	// Internal drawing functions for each entity type
-	void drawTexturedMesh(Entity entity, const mat4& projection3D, const mat3& projection2D, const mat4 &view);
+	void drawTexturedMesh(Entity entity, const mat4& projection3D, const mat4 &view);
 	void drawToScreen();
 
 	// Window handle

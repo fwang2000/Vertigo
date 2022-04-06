@@ -108,6 +108,7 @@ struct Tile
 	Coordinates currentPos;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
+	bool highlighted = false;
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);

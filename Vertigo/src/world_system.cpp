@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(8) {
 	// Seeding rng with random device
 	rng = std::default_random_engine(std::random_device()());
 }
@@ -606,13 +606,8 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_I:
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
-					if (c_tile->controled == 0) {
-						c_tile->controled = 1;
-					}
-					else
-					{
-						c_tile->controled = 0;
-					}
+					c_tile->controled = !c_tile->controled;
+					c_tile->targetTile->highlighted = !c_tile->targetTile->highlighted;
 					break;
 				}
 				if (tile->tileState == TileState::B) { break; }
@@ -723,12 +718,14 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 		Entity next_tile_entity = getTileFromRegistry(newCoords);
 		RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
 		ntile->tileState = TileState::M;
+		ntile->highlighted = true;
 		next_request.used_texture = TEXTURE_ASSET_ID::MOVE_TILE;
 
 		Entity cur_tile_entity = getTileFromRegistry(tile->coords);
 		RenderRequest& cur_request = registry.renderRequests.get(cur_tile_entity);
 		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
 		tile->tileState = TileState::E;
+		tile->highlighted = false;
 
 		ctile->targetTile = ntile;
 	}
