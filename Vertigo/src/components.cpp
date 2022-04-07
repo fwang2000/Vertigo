@@ -13,32 +13,32 @@ glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	// rotate then translate
 	switch (face) {
 	case 0:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(x, -y, distance)) * matrix;
 		break;
 	case 1:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(-distance, -x, -y)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		break;
 	case 2:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(distance, -y, -x)) * matrix;
 		break;
 	case 3:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(x, distance, y)) * matrix;
 		break;
 	case 4:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(x, -distance, -y)) * matrix;
 		break;
 	case 5:
-		matrix = scale(glm::mat4(1.0f), vec3(0.85)) * matrix;
+		matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(180.0f), vec3(1.0f, 0.0f, 0.0f)) * matrix;
 		matrix = translate(glm::mat4(1.0f), vec3(x, y, -distance)) * matrix;
 		matrix = rotate(glm::mat4(1.0f), (float)radians(180.0f), vec3(0.0f, 0.0f, 1.0f)) * matrix;
@@ -246,110 +246,118 @@ bool Cube::loadFromExcelFile(std::string filename) {
 				int y_coord = static_cast<int>(floor(y)) + ceil(size / 3.f);
 
 				switch (static_cast<TileState>(value[0] - 'A')) {
-				case TileState::W:
-				{
-					SwitchTile* s_tile = new SwitchTile();
-					s_tile->model = tileStartingMatrix(i, x, y, distance);
-					s_tile->tileState = static_cast<TileState>(value[0] - 'A');
+					case TileState::W:
+					{
+						SwitchTile* s_tile = new SwitchTile();
+						s_tile->model = tileStartingMatrix(i, x, y, distance);
+						s_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(s_tile);
-					s_tile->coords = { i, y_coord, x_coord };
-					s_tile->currentPos = s_tile->coords;
-					s_tile->direction = static_cast<FACE_DIRECTION>(i);
-					break;
-				}
-				case TileState::U:
-				{
-					UpTile* u_tile = new UpTile();
-					u_tile->model = tileStartingMatrix(i, x, y, distance);
-					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(s_tile);
+						s_tile->coords = { i, y_coord, x_coord };
+						s_tile->currentPos = s_tile->coords;
+						s_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
+					case TileState::U:
+					{
+						UpTile* u_tile = new UpTile();
+						u_tile->model = tileStartingMatrix(i, x, y, distance);
+						u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(u_tile);
-					u_tile->coords = { i, y_coord, x_coord };
-					u_tile->currentPos = u_tile->coords;
-					u_tile->direction = static_cast<FACE_DIRECTION>(i);
-					u_tile->dir = Direction::DOWN;
-					break;
-				}
-				case TileState::R:
-				{
-					UpTile* u_tile = new UpTile();
-					u_tile->model = tileStartingMatrix(i, x, y, distance);
-					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(u_tile);
+						u_tile->coords = { i, y_coord, x_coord };
+						u_tile->currentPos = u_tile->coords;
+						u_tile->direction = static_cast<FACE_DIRECTION>(i);
+						u_tile->dir = Direction::DOWN;
+						break;
+					}
+					case TileState::R:
+					{
+						UpTile* u_tile = new UpTile();
+						u_tile->model = tileStartingMatrix(i, x, y, distance);
+						u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(u_tile);
-					u_tile->coords = { i, y_coord, x_coord };
-					u_tile->currentPos = u_tile->coords;
-					u_tile->direction = static_cast<FACE_DIRECTION>(i);
-					u_tile->dir = Direction::RIGHT;
-					break;
-				}
-				case TileState::D:
-				{
-					UpTile* u_tile = new UpTile();
-					u_tile->model = tileStartingMatrix(i, x, y, distance);
-					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(u_tile);
+						u_tile->coords = { i, y_coord, x_coord };
+						u_tile->currentPos = u_tile->coords;
+						u_tile->direction = static_cast<FACE_DIRECTION>(i);
+						u_tile->dir = Direction::RIGHT;
+						break;
+					}
+					case TileState::D:
+					{
+						UpTile* u_tile = new UpTile();
+						u_tile->model = tileStartingMatrix(i, x, y, distance);
+						u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(u_tile);
-					u_tile->coords = { i, y_coord, x_coord };
-					u_tile->currentPos = u_tile->coords;
-					u_tile->direction = static_cast<FACE_DIRECTION>(i);
-					u_tile->dir = Direction::UP;
-					break;
-				}
-				case TileState::L:
-				{
-					UpTile* u_tile = new UpTile();
-					u_tile->model = tileStartingMatrix(i, x, y, distance);
-					u_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(u_tile);
+						u_tile->coords = { i, y_coord, x_coord };
+						u_tile->currentPos = u_tile->coords;
+						u_tile->direction = static_cast<FACE_DIRECTION>(i);
+						u_tile->dir = Direction::UP;
+						break;
+					}
+					case TileState::L:
+					{
+						UpTile* u_tile = new UpTile();
+						u_tile->model = tileStartingMatrix(i, x, y, distance);
+						u_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(u_tile);
-					u_tile->coords = { i, y_coord, x_coord };
-					u_tile->currentPos = u_tile->coords;
-					u_tile->direction = static_cast<FACE_DIRECTION>(i);
-					u_tile->dir = Direction::LEFT;
-					break;
-				}
-				case TileState::I:
-				{
-					InvisibleTile* i_tile = new InvisibleTile();
-					i_tile->model = tileStartingMatrix(i, x, y, distance);
-					i_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(u_tile);
+						u_tile->coords = { i, y_coord, x_coord };
+						u_tile->currentPos = u_tile->coords;
+						u_tile->direction = static_cast<FACE_DIRECTION>(i);
+						u_tile->dir = Direction::LEFT;
+						break;
+					}
+					case TileState::I:
+					{
+						InvisibleTile* i_tile = new InvisibleTile();
+						i_tile->model = tileStartingMatrix(i, x, y, distance);
+						i_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(i_tile);
-					i_tile->coords = { i, y_coord, x_coord };
-					i_tile->currentPos = i_tile->coords;
-					i_tile->direction = static_cast<FACE_DIRECTION>(i);
-					break;
-				}
-				case TileState::C:
-				{
-					ControlTile* c_tile = new ControlTile();
-        }
-				case TileState::O:
-				{
-					ConstMovingTile* c_tile = new ConstMovingTile();
-					c_tile->model = tileStartingMatrix(i, x, y, distance);
-					c_tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(i_tile);
+						i_tile->coords = { i, y_coord, x_coord };
+						i_tile->currentPos = i_tile->coords;
+						i_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
+					case TileState::C:
+					{
+						ControlTile* c_tile = new ControlTile();
+						c_tile->model = tileStartingMatrix(i, x, y, distance);
+						c_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(c_tile);
-					c_tile->coords = { i, y_coord, x_coord };
-					c_tile->currentPos = c_tile->coords;
-					c_tile->direction = static_cast<FACE_DIRECTION>(i);
-					break;
-				}
-				default:
-				{
-					Tile* tile = new Tile();
-					tile->model = tileStartingMatrix(i, x, y, distance);
-					tile->tileState = static_cast<TileState>(value[0] - 'A');
+						row.push_back(c_tile);
+						c_tile->coords = { i, y_coord, x_coord };
+						c_tile->currentPos = c_tile->coords;
+						c_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
+					case TileState::O:
+					{
+						ConstMovingTile* c_tile = new ConstMovingTile();
+						c_tile->model = tileStartingMatrix(i, x, y, distance);
+						c_tile->tileState = static_cast<TileState>(value[0] - 'A');
 
-					row.push_back(tile);
-					tile->coords = { i, y_coord, x_coord };
-					tile->currentPos = tile->coords;
-					tile->direction = static_cast<FACE_DIRECTION>(i);
-					break;
-				}
+						row.push_back(c_tile);
+						c_tile->coords = { i, y_coord, x_coord };
+						c_tile->currentPos = c_tile->coords;
+						c_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
+					default:
+					{
+						Tile* tile = new Tile();
+						tile->model = tileStartingMatrix(i, x, y, distance);
+						tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+						row.push_back(tile);
+						tile->coords = { i, y_coord, x_coord };
+						tile->currentPos = tile->coords;
+						tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
 				}
 
 				x += 1.f;

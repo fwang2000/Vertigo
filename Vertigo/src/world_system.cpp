@@ -16,7 +16,7 @@
 WorldSystem::WorldSystem()
 	: level(1) {
 	// Seeding rng with random device
-	rng = std::default_random_engine(std::random_device()());
+	// rng = std::default_random_engine(std::random_device()());
 }
 
 WorldSystem::~WorldSystem() {
@@ -256,6 +256,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
 			Tile* btile = cube.getTile(newCoords);
 			btile->tileState = TileState::V;
+		}
+	}
+
+	// check that we have reached the end after all animations are done
+	if (player_motion.destination == player_motion.position) {
+		Player player = registry.players.get(player_explorer);
+
+		Tile* tile = cube.getTile(player.playerPos);
+		if (tile->tileState == TileState::Z) {
+			rot.status = BOX_ANIMATION::STILL;
+			next_level();
 		}
 	}
 
@@ -643,14 +654,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_I:
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
-					if (c_tile->controled == 0) {
-						c_tile->controled = 1;
-					}
-					else
-					{
-						c_tile->controled = 0;
-					}
 					Mix_PlayChannel(-1, switch_sound, 0);
+					c_tile->controled = !c_tile->controled;
+					c_tile->targetTile->highlighted = !c_tile->targetTile->highlighted;
 					break;
 				}
 				if (tile->tileState == TileState::B) { break; }
@@ -765,12 +771,14 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 		Entity next_tile_entity = getTileFromRegistry(newCoords);
 		RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
 		ntile->tileState = TileState::M;
+		ntile->highlighted = true;
 		next_request.used_texture = TEXTURE_ASSET_ID::MOVE_TILE;
 
 		Entity cur_tile_entity = getTileFromRegistry(tile->coords);
 		RenderRequest& cur_request = registry.renderRequests.get(cur_tile_entity);
 		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
 		tile->tileState = TileState::E;
+		tile->highlighted = false;
 
 		ctile->targetTile = ntile;
 	}

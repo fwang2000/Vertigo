@@ -5,7 +5,7 @@
 
 // stlib
 #include <vector>
-#include <random>
+// #include <random>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -125,6 +125,6 @@ private:
 	Mix_Chunk* restart_sound;
 
 	// C++ random number generator
-	std::default_random_engine rng;
-	std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+	// std::default_random_engine rng;
+	// std::uniform_real_distribution<float> uniform_dist; // number between 0..1
 };

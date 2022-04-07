@@ -307,9 +307,9 @@ void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMat
 	registry.renderRequests.insert(
 	 	entity,
 	 	{
-	 		TEXTURE_ASSET_ID::LIGHT,
+	 		TEXTURE_ASSET_ID::TEXTURE_COUNT,
 	 		EFFECT_ASSET_ID::BILLBOARD,
-	 		GEOMETRY_BUFFER_ID::SPRITE
+	 		GEOMETRY_BUFFER_ID::POINT_LIGHT
 	 	}
 	 );
 }

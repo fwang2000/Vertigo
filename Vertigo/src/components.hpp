@@ -108,6 +108,7 @@ struct Tile
 	Coordinates currentPos;
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
+	bool highlighted = false;
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
@@ -359,8 +360,7 @@ enum class TEXTURE_ASSET_ID {
 	WOOD = OFF_X + 1,
 	MARBLE = WOOD + 1,
 	DISSOLVE = MARBLE + 1,
-	LIGHT = DISSOLVE + 1,
-	TITLE_START = LIGHT + 1,
+	TITLE_START = DISSOLVE + 1,
 	TITLE_START_MUSIC = TITLE_START + 1,
 	TITLE_START_MUSIC_SOUND = TITLE_START_MUSIC + 1,
 	TITLE_START_SOUND = TITLE_START_MUSIC_SOUND + 1,
@@ -406,7 +406,8 @@ enum class GEOMETRY_BUFFER_ID {
 	TREE = FIRE + 1,
 	GAUGE = TREE + 1,
 	LIGHTING = GAUGE + 1,
-	GEOMETRY_COUNT = LIGHTING + 1
+	POINT_LIGHT = LIGHTING + 1,
+	GEOMETRY_COUNT = POINT_LIGHT + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 
