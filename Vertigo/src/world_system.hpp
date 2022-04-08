@@ -116,6 +116,13 @@ private:
 
 	// Music references
 	Mix_Music* background_music;
+	Mix_Chunk* burn_sound;
+	Mix_Chunk* finish_sound;
+	Mix_Chunk* fire_sound;
+	Mix_Chunk* switch_sound;
+	Mix_Chunk* move_fail_sound;
+	Mix_Chunk* move_success_sound;
+	Mix_Chunk* restart_sound;
 
 	// C++ random number generator
 	// std::default_random_engine rng;
