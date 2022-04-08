@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(1) {
+	: level(25) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -225,20 +225,38 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 			int dir = static_cast<int>(faceDirection) * -1;
 			Direction trueDirection = mod(currDirection, dir);
-			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+			Coordinates newCoords = searchForTile(trueDirection, tile->coords);
 			Tile* btile = cube.getTile(newCoords);
 			btile->tileState = TileState::V;
 		}
 	}
 
-	// check that we have reached the end after all animations are done
-	if (player_motion.destination == player_motion.position) {
-		Player player = registry.players.get(player_explorer);
+	// check that we have finished the moving animation
+	if (gameState == GameState::MOVING) {
+		if (player_motion.destination == player_motion.position) {
+			// check that we reached the goal
+			Player player = registry.players.get(player_explorer);
 
-		Tile* tile = cube.getTile(player.playerPos);
-		if (tile->tileState == TileState::Z) {
-			rot.status = BOX_ANIMATION::STILL;
-			next_level();
+			Tile* tile = cube.getTile(player.playerPos);
+			if (tile->tileState == TileState::Z) next_level();
+
+			// check if enemies need to move
+			if (registry.enemies.entities.size() > 0) {
+				gameState = GameState::ENEMY_MOVE;
+			} else {
+				gameState = GameState::IDLE;
+			}
+		}
+	}
+	
+	// check if enemy has finished moving
+	if (gameState == GameState::ENEMY_MOVE) {
+		Enemy& enemy = registry.enemies.components[0];
+		if (enemy.elapsed >= 500.f) {
+			enemy.moving = false;
+			enemy.elapsed = 0.f;
+			gameState = GameState::IDLE;
+			
 		}
 	}
 
@@ -431,6 +449,10 @@ void WorldSystem::load_level() {
 					// Create constantly moving tile
 					createConstMovingTile(tile, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::A) {
+					createEnemy(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
 			}
 		}
 	}
@@ -517,7 +539,7 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE && gameState != GameState::MOVING && gameState != GameState::TITLE_SCREEN) {
+	if (gameState != GameState::IDLE && gameState != GameState::TITLE_SCREEN) {
 		return;
 	}
 
@@ -718,7 +740,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile) {
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
-	Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+	Coordinates newCoords = searchForTile(trueDirection, tile->coords);
 	Tile* ntile = cube.getTile(newCoords);
 	if (ntile->direction != tile->direction)
 	{
@@ -755,11 +777,11 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
-	Coordinates newCoords = searchForTile(trueDirection);
+	Coordinates newCoords = searchForTile(trueDirection, player.playerPos);
 	Tile* tile = cube.getTile(newCoords);
 
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
-		tile->tileState == TileState::N || tile->tileState == TileState::B	|| tile->tileState == TileState::O) {
+		tile->tileState == TileState::N || tile->tileState == TileState::O) {
 		return;
 	}
 
@@ -1047,8 +1069,6 @@ void WorldSystem::UsePower(Direction direction, float power)
 	default:
 		motion.velocity = vec3(0, 0, 0);
 	}
-
-	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
 }
 
 void WorldSystem::Burn(Entity entity) {
@@ -1082,7 +1102,7 @@ void WorldSystem::SetSprite(Direction direction) {
 	currDirection = direction;
 }
 
-Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coords) {
+Coordinates WorldSystem::searchForTile(Direction direction, Coordinates coords) {
 
 	switch (direction)
 	{
@@ -1115,46 +1135,6 @@ Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coor
 			return cube.getTile(coords)->adjList[3].first;
 		}
 		else {
-			coords.c--;
-		}
-		break;
-	}
-
-	return coords;
-}
-
-Coordinates WorldSystem::searchForTile(Direction direction) {
-
-	Player& player = registry.players.get(player_explorer);
-	Coordinates coords = player.playerPos;
-
-	switch (direction)
-	{
-	case Direction::UP:
-		if (coords.r == 0) {
-			return cube.getTile(coords)->adjList[0].first;
-		} else {
-			coords.r--;
-		}
-		break;
-	case Direction::RIGHT:
-		if (coords.c == cube.size - 1) {
-			return cube.getTile(coords)->adjList[1].first;
-		} else {
-			coords.c++;
-		}
-		break;
-	case Direction::DOWN:
-		if (coords.r == cube.size - 1) {
-			return cube.getTile(coords)->adjList[2].first;
-		} else {
-			coords.r++;
-		}
-		break;
-	case Direction::LEFT:
-		if (coords.c == 0) {
-			return cube.getTile(coords)->adjList[3].first;
-		} else {
 			coords.c--;
 		}
 		break;
@@ -1184,5 +1164,6 @@ void WorldSystem::next_level() {
 		level++;
 		faceDirection = Direction::UP;
 		gameState = GameState::IDLE;
+		rot.status = BOX_ANIMATION::STILL;
 		restart_game();
 }

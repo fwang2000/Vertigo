@@ -137,6 +137,28 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 	}
 
+	// compute interpolation for enemy movement
+	for (Entity& entity : registry.enemies.entities) {
+		Enemy& enemy = registry.enemies.get(entity);
+		Object& object = registry.objects.get(entity);
+		if (enemy.moving) { // change to if enemy is moving
+			if (enemy.elapsed + elapsed_ms > 500.f) {
+				elapsed_ms = 500.f - enemy.elapsed;
+			}
+			enemy.elapsed += elapsed_ms;
+			mat4 model = object.model;
+			if (enemy.changingFaces) {
+				model[3] = vec4(0.f, 0.f, 0.f, 1.0f);
+				float rotation = elapsed_ms*(M_PI/1000.f);
+				model = rotate(mat4(1.f), rotation, enemy.axis) * model;
+			}
+			model[3].x = enemy.startingPos.x + enemy.translateX(enemy.elapsed);
+			model[3].y = enemy.startingPos.y + enemy.translateY(enemy.elapsed);
+			model[3].z = enemy.startingPos.z + enemy.translateZ(enemy.elapsed);
+			object.model = model;
+		}
+	}
+
 	// you may need the following quantities to compute wall positions
 	(float)window_width_px; (float)window_height_px;
 }

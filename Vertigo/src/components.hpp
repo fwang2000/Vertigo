@@ -8,6 +8,7 @@
 
 struct Coordinates
 {
+	bool equal(Coordinates a);
 	int f; // face
 	int r; // row
 	int c; // col
@@ -90,6 +91,7 @@ enum class TileState
 	L = 11,		// Down-Tile
 	U = 20,		// Up-Tile
 	E = 4,		// Empty
+	A = 0,		// Enemy AI
 	Z = 25,		// Finish
 };
 
@@ -105,7 +107,7 @@ struct Tile
 	FACE_DIRECTION direction;
 	glm::mat4 model;
 	Coordinates coords;
-	Coordinates currentPos;
+	Coordinates currentPos; // TODO: do we need this?
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
@@ -273,6 +275,38 @@ struct Mesh
 	std::vector<uint16_t> vertex_indices;
 };
 
+float defaultTranslate(float elapsed);
+
+float oneDimension(float elapsed);
+
+float oneDimensionNegative(float elapsed);
+
+float cosine(float elapsed);
+
+float flipCosine(float elapsed);
+
+float sine(float elapsed);
+
+float flipSine(float elapsed);
+
+struct Enemy
+{
+	Enemy()
+	{
+		translateX = &defaultTranslate;
+		translateY = &defaultTranslate;
+		translateZ = &defaultTranslate;
+	}
+	TransFuncPtr translateX;
+	TransFuncPtr translateY;
+	TransFuncPtr translateZ;
+	vec3 axis;
+	vec3 startingPos; // used for animation logic
+	bool changingFaces = false;
+	bool moving = false; // in the process of moving
+	float elapsed = 0.f;
+};
+
 struct Billboard
 {
 	glm::mat4 model = glm::mat4(1.f);
@@ -405,7 +439,8 @@ enum class GEOMETRY_BUFFER_ID {
 	FIRE = ANIMATED + 1,
 	TREE = FIRE + 1,
 	GAUGE = TREE + 1,
-	LIGHTING = GAUGE + 1,
+	ENEMY = GAUGE + 1,
+	LIGHTING = ENEMY + 1,
 	POINT_LIGHT = LIGHTING + 1,
 	GEOMETRY_COUNT = POINT_LIGHT + 1
 };
