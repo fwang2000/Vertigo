@@ -11,7 +11,7 @@ class ECSRegistry
 
 public:
 	// Manually created list of all components this game has
-	ComponentContainer<ShootTimer> shootTimers;
+	// TODO: A1 add a LightUp component
 	ComponentContainer<HoldTimer> holdTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Oscillate> oscillations;
@@ -38,7 +38,6 @@ public:
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		registry_list.push_back(&shootTimers);
 		registry_list.push_back(&holdTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&oscillations);

@@ -230,10 +230,7 @@ struct Menu
 	void toggleSound() {sound = !sound;}
 };
 
-// A timer that will be associated to shot fire
-struct ShootTimer
 {
-	float counter_ms = 10000;
 };
 
 struct HoldTimer
