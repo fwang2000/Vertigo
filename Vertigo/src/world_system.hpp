@@ -21,7 +21,8 @@ enum class GameState {
 	BURNING = 3,
 	MENU = 4,
 	ENEMY_MOVE = 5,
-	TITLE_SCREEN = 6
+	RESTARTING = 6,
+	TITLE_SCREEN = 7
 };
 
 // Container for all our entities and game logic. Individual rendering / update is

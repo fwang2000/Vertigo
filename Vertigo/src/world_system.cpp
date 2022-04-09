@@ -260,6 +260,20 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	// check if enemy has captured
+	if (gameState == GameState::IDLE && registry.enemies.entities.size() > 0) {
+		Entity e = registry.enemies.entities[0];
+		Object object = registry.objects.get(e);
+		Player& player = registry.players.get(player_explorer);
+		if (object.objectPos.equal(player.playerPos)) {
+			// restart
+			if (!registry.restartTimer.has(player_explorer)) {
+				gameState = GameState::RESTARTING;
+				registry.restartTimer.emplace(player_explorer);
+			}
+		}
+	}
+
 	return true;
 }
 
@@ -502,6 +516,7 @@ void WorldSystem::load_level() {
 	obtainedFire = false;
 	faceDirection = Direction::UP;
 	SetSprite(currDirection = Direction::RIGHT);
+	gameState = GameState::IDLE;
 }
 
 // Compute collisions between entities
@@ -672,8 +687,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_R) {
-			if (!registry.restartTimer.has(player_explorer))
+			if (!registry.restartTimer.has(player_explorer)) {
+				gameState = GameState::RESTARTING;
 				registry.restartTimer.emplace(player_explorer);
+			}
 		}
 		SetSprite(dir);
 	}
@@ -932,6 +949,7 @@ void WorldSystem::changeMenu(int dir){
 		gameState = GameState::IDLE;
 		cube.reset();
 		faceDirection = Direction::UP;
+		rot.status = BOX_ANIMATION::STILL;
 		restart_game();
 		return;
 	}
