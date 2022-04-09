@@ -313,3 +313,26 @@ void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMat
 	 	}
 	 );
 }
+
+void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, false, vec3(0.75f, 0.75f, 1.2f), 1);
+
+	Object& enemy = registry.objects.get(entity);
+	enemy.alpha = 1.0;
+
+	registry.enemies.emplace(entity);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::ENEMY
+		}
+	);
+}

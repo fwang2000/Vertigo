@@ -39,7 +39,7 @@ void PhysicsSystem::oscillate(float elapsed_ms)
 	for (uint i = 0; i < oscillate_registry.size(); i++)
 	{
 		Oscillate& oscillate = oscillate_registry.components[i];
-		Entity& e = oscillate_registry.entities[i];
+		Entity e = oscillate_registry.entities[i];
 		Motion& motion = registry.motions.get(e);
 		oscillate.phase += 2 * PI  * elapsed_ms / oscillate.period;
 		oscillate.phase = fmod(oscillate.phase, 2 * PI);
@@ -70,7 +70,7 @@ void PhysicsSystem::step(float elapsed_ms)
 			else{
 				motion.position = motion.position + (motion.destination - motion.position) * (elapsed_ms / motion.remaining_time);
 				if (motion.move_z) {
-					motion.position.z = 2*sin((PI*motion.remaining_time)/500.f);
+					motion.position.z = 2.f*sin((M_PI*motion.remaining_time)/500.f);
 				}
 				motion.remaining_time -= elapsed_ms;
 			}
@@ -134,6 +134,28 @@ void PhysicsSystem::step(float elapsed_ms)
 			if (collides(trans1 * model1, model2)){
 				registry.collisions.emplace_with_duplicates(entity_i, entity_j);
 			}
+		}
+	}
+
+	// compute interpolation for enemy movement
+	for (Entity entity : registry.enemies.entities) {
+		Enemy& enemy = registry.enemies.get(entity);
+		Object& object = registry.objects.get(entity);
+		if (enemy.moving) { // change to if enemy is moving
+			if (enemy.elapsed + elapsed_ms > 500.f) {
+				elapsed_ms = 500.f - enemy.elapsed;
+			}
+			enemy.elapsed += elapsed_ms;
+			mat4 model = object.model;
+			if (enemy.changingFaces) {
+				model[3] = vec4(0.f, 0.f, 0.f, 1.0f);
+				float rotation = elapsed_ms*(M_PI/1000.f);
+				model = rotate(mat4(1.f), rotation, enemy.axis) * model;
+			}
+			model[3].x = enemy.startingPos.x + enemy.translateX(enemy.elapsed);
+			model[3].y = enemy.startingPos.y + enemy.translateY(enemy.elapsed);
+			model[3].z = enemy.startingPos.z + enemy.translateZ(enemy.elapsed);
+			object.model = model;
 		}
 	}
 

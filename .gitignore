@@ -351,3 +351,4 @@ MigrationBackup/
 
 .vscode/
 build/
+ext/project_path.hpp

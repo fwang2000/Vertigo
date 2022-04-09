@@ -20,7 +20,7 @@ int main()
 	WorldSystem world;
 	RenderSystem renderer;
 	PhysicsSystem physics;
-	AISystem ai;
+	AISystem ai(world);
 
 	// Initializing window
 	GLFWwindow* window = world.create_window();
@@ -48,7 +48,7 @@ int main()
 		t = now;
 
 		world.step(elapsed_ms);
-		ai.step(elapsed_ms);
+		ai.step();
 		physics.step(elapsed_ms);
 		world.handle_collisions();
 

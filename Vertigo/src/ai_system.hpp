@@ -1,12 +1,18 @@
 #pragma once
 
 #include <vector>
+#include <queue>
 
 #include "tiny_ecs_registry.hpp"
 #include "common.hpp"
+#include "world_system.hpp"
 
 class AISystem
 {
 public:
-	void step(float elapsed_ms);
+	AISystem(WorldSystem& wrldSystem): worldSystem(wrldSystem) {};
+
+	void step();
+private:
+	WorldSystem& worldSystem;
 };

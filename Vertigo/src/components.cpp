@@ -8,6 +8,10 @@
 #include <iostream>
 #include <sstream>
 
+bool Coordinates::equal(Coordinates a) {
+	return a.f == this->f && a.c == this->c && a.r == this->r;
+}
+
 glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	glm::mat4 matrix = glm::mat4(1.0f);
 	// rotate then translate
@@ -794,6 +798,34 @@ void Menu::changeOption(int dir) {
 			break;
 		}
 	}
+}
+
+float defaultTranslate(float elapsed) {
+	return 0.f;
+}
+
+float oneDimension(float elapsed) {
+	return elapsed/500.f;
+}
+
+float oneDimensionNegative(float elapsed) {
+	return -elapsed/500.f;
+}
+
+float cosine(float elapsed) {
+	return -cos((3.f*M_PI*elapsed)/1000.f) + 1.f;
+}
+
+float flipCosine(float elapsed) {
+	return cos((3.f*M_PI*elapsed)/1000.f) - 1.f;
+}
+
+float sine(float elapsed) {
+	return sin((3.f*M_PI*elapsed)/1000.f);
+}
+
+float flipSine(float elapsed) {
+	return -sin((3.f*M_PI*elapsed)/1000.f);
 }
 
 #pragma endregion
