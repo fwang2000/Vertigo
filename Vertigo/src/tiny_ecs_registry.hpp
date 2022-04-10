@@ -12,7 +12,6 @@ class ECSRegistry
 public:
 	// Manually created list of all components this game has
 	// TODO: A1 add a LightUp component
-	ComponentContainer<ShootTimer> shootTimers;
 	ComponentContainer<HoldTimer> holdTimers;
 	ComponentContainer<Motion> motions;
 	ComponentContainer<Oscillate> oscillations;
@@ -30,15 +29,16 @@ public:
 	ComponentContainer<Burnable> burnables;
 	ComponentContainer<Animated> animated;
 	ComponentContainer<Menu> menus;
+	ComponentContainer<Button> buttons;
 	ComponentContainer<Billboard> billboards;
 	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<RestartTimer> restartTimer;
+	ComponentContainer<Enemy> enemies;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
 	ECSRegistry()
 	{
-		registry_list.push_back(&shootTimers);
 		registry_list.push_back(&holdTimers);
 		registry_list.push_back(&motions);
 		registry_list.push_back(&oscillations);
@@ -55,9 +55,11 @@ public:
 		registry_list.push_back(&burnables);
 		registry_list.push_back(&animated);
 		registry_list.push_back(&menus);
+		registry_list.push_back(&buttons);
 		registry_list.push_back(&billboards);
 		registry_list.push_back(&lightSources);
 		registry_list.push_back(&restartTimer);
+		registry_list.push_back(&enemies);
 	}
 
 	void clear_all_components() {

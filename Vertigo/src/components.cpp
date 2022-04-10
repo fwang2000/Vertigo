@@ -8,6 +8,10 @@
 #include <iostream>
 #include <sstream>
 
+bool Coordinates::equal(Coordinates a) {
+	return a.f == this->f && a.c == this->c && a.r == this->r;
+}
+
 glm::mat4 tileStartingMatrix(int face, float x, float y, float distance) {
 	glm::mat4 matrix = glm::mat4(1.0f);
 	// rotate then translate
@@ -346,6 +350,18 @@ bool Cube::loadFromExcelFile(std::string filename) {
 						c_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
+					case TileState::G:
+					{
+						ButtonTile* c_tile = new ButtonTile();
+						c_tile->model = tileStartingMatrix(i, x, y, distance);
+						c_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+						row.push_back(c_tile);
+						c_tile->coords = { i, y_coord, x_coord };
+						c_tile->currentPos = c_tile->coords;
+						c_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
 					default:
 					{
 						Tile* tile = new Tile();
@@ -522,6 +538,17 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				throwTile->targetTile = target;
 				throwTile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) };
 			}
+		}
+		else if (modifications.at(0) == "G"){
+
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			
+			int id =  std::stoi(modifications.at(4));
+			ButtonTile* bTile = (ButtonTile*)getTile(Coordinates{ f, r, c });
+			bTile->button_id = id;
 		}
 
 		std::vector<std::string>().swap(modifications);
@@ -701,7 +728,7 @@ void ConstMovingTile::action() {
 	return;
 }
 
-void ThrowTile::action() {
+	void ThrowTile::action() {
 	if (toggled) {
 		return;
 	}
@@ -711,6 +738,10 @@ void ThrowTile::action() {
 		targetTile->action();
 	}
 	toggled = true;
+}
+
+void ButtonTile::action(){
+
 	return;
 }
 
@@ -732,7 +763,7 @@ void BurnableTile::action() {
 		this->tileState = TileState::V;
 	}
 }
-  
+
 void Tile::move(vec2 t, vec2 delta_coord) {
 
 	vec3 translation = vec3(0);
@@ -834,6 +865,34 @@ void Menu::changeOption(int dir) {
 			break;
 		}
 	}
+}
+
+float defaultTranslate(float elapsed) {
+	return 0.f;
+}
+
+float oneDimension(float elapsed) {
+	return elapsed/500.f;
+}
+
+float oneDimensionNegative(float elapsed) {
+	return -elapsed/500.f;
+}
+
+float cosine(float elapsed) {
+	return -cos((3.f*M_PI*elapsed)/1000.f) + 1.f;
+}
+
+float flipCosine(float elapsed) {
+	return cos((3.f*M_PI*elapsed)/1000.f) - 1.f;
+}
+
+float sine(float elapsed) {
+	return sin((3.f*M_PI*elapsed)/1000.f);
+}
+
+float flipSine(float elapsed) {
+	return -sin((3.f*M_PI*elapsed)/1000.f);
 }
 
 #pragma endregion

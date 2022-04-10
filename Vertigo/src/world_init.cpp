@@ -4,6 +4,8 @@
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
+	printf("created\n");
+
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
@@ -229,6 +231,18 @@ void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) 
 	motion.scale = { 1.0f, 1.0f, 1.0f };
 }
 
+void createButtonTile(Entity entity){
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(1, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = {3.0f, -1.0f, 1.0f};
+
+	registry.buttons.emplace(entity);
+}
+
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
   
 	if (hasMotion){
@@ -325,4 +339,27 @@ void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMat
 	 		GEOMETRY_BUFFER_ID::POINT_LIGHT
 	 	}
 	 );
+}
+
+void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, false, vec3(0.75f, 0.75f, 1.2f), 1);
+
+	Object& enemy = registry.objects.get(entity);
+	enemy.alpha = 1.0;
+
+	registry.enemies.emplace(entity);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::ENEMY);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TEXTURE_COUNT,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::ENEMY
+		}
+	);
 }

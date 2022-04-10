@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(15) {
+	: level(0) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -116,7 +116,7 @@ GLFWwindow* WorldSystem::create_window() {
 	restart_sound = Mix_LoadWAV(audio_path("restart.wav").c_str());
 
 	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || move_fail_sound == nullptr || move_success_sound == nullptr || restart_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("time-9307.wav").c_str(),
 			audio_path("burn.wav").c_str(),
 			audio_path("finish.wav").c_str(),
@@ -151,7 +151,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	ScreenState& screen = registry.screenStates.components[0];
 
 	float min_counter_ms = restart_time;
-	for (Entity& e : registry.restartTimer.entities) {
+	for (Entity e : registry.restartTimer.entities) {
 		RestartTimer& counter = registry.restartTimer.get(e);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 		if(counter.counter_ms < min_counter_ms){
@@ -253,20 +253,56 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 			int dir = static_cast<int>(faceDirection) * -1;
 			Direction trueDirection = mod(currDirection, dir);
-			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+			Coordinates newCoords = searchForTile(trueDirection, tile->coords);
 			Tile* btile = cube.getTile(newCoords);
 			btile->tileState = TileState::V;
 		}
 	}
 
-	// check that we have reached the end after all animations are done
-	if (player_motion.destination == player_motion.position) {
-		Player player = registry.players.get(player_explorer);
+	// check that we have finished the moving animation
+	if (gameState == GameState::MOVING) {
+		if (player_motion.destination == player_motion.position) {
+			// check that we reached the goal
+			Player player = registry.players.get(player_explorer);
 
-		Tile* tile = cube.getTile(player.playerPos);
-		if (tile->tileState == TileState::Z) {
-			rot.status = BOX_ANIMATION::STILL;
-			next_level();
+			Tile* tile = cube.getTile(player.playerPos);
+			if (tile->tileState == TileState::Z) {
+				Mix_PlayChannel(-1, finish_sound, 0);
+				next_level();
+			}
+
+			// check if enemies need to move
+			if (registry.enemies.entities.size() > 0) {
+				gameState = GameState::ENEMY_MOVE;
+			} else {
+				gameState = GameState::IDLE;
+			}
+		}
+	}
+	
+	// check if enemy has finished moving
+	if (gameState == GameState::ENEMY_MOVE) {
+		Enemy& enemy = registry.enemies.components[0];
+		if (enemy.elapsed >= 500.f) {
+			enemy.moving = false;
+			enemy.elapsed = 0.f;
+			gameState = GameState::IDLE;
+			
+		}
+	}
+
+	// check if enemy has captured
+	if (gameState == GameState::IDLE && registry.enemies.entities.size() > 0) {
+		Entity e = registry.enemies.entities[0];
+		Object object = registry.objects.get(e);
+		Player& player = registry.players.get(player_explorer);
+		if (object.objectPos.equal(player.playerPos)) {
+			// restart
+			if (!registry.restartTimer.has(player_explorer)) {
+				gameState = GameState::RESTARTING;
+				Mix_PlayChannel(-1, restart_sound, 0);
+				registry.restartTimer.emplace(player_explorer);
+			}
 		}
 	}
 
@@ -418,7 +454,7 @@ void WorldSystem::restart_game() {
 
 void WorldSystem::load_level() {
 
-	Coordinates startingpos = {0, 0, 0};
+	Coordinates startingpos = { 0, 0, 0 };
 	glm::mat4 translateMatrix = glm::mat4(1.f);
 	// Load a level
 	cube.loadFromExcelFile(tile_path("level" + std::to_string(level) + ".csv"));
@@ -435,7 +471,7 @@ void WorldSystem::load_level() {
 					startingpos.c = k;
 					translateMatrix = cube.faces[i][j][k]->model;
 				}
-				
+
 				if (cube.faces[i][j][k]->tileState == TileState::N) {
 
 					createColumn(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
@@ -464,6 +500,14 @@ void WorldSystem::load_level() {
 					// Create throw tile
 					createThrowTile(tile, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::A) {
+					createEnemy(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::G) {
+					createButtonTile(tile);
+				}
 			}
 		}
 	}
@@ -475,44 +519,62 @@ void WorldSystem::load_level() {
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
-	for (uint i = 0; i < registry.oscillations.size(); i++){
+	// Update button tiles
+
+	for (uint i = 0; i < registry.buttons.size(); i++) {
+		Entity e = registry.buttons.entities[i];
+		Tile* tile = registry.tiles.get(e);
+		ButtonTile* b = (ButtonTile*)cube.getTile(tile->coords);
+		RenderRequest& r = registry.renderRequests.get(e);
+
+		if (b->button_id == (int)BUTTON::SOUND) {
+			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_SOUND_OFF + sound_on);
+		}
+		else {
+			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
+		}
+	}
+
+	// Update constantly moving tiles
+	for (uint i = 0; i < registry.oscillations.size(); i++) {
 		Entity e = registry.oscillations.entities[i];
 		Oscillate& o = registry.oscillations.components[i];
-		if (registry.tiles.has(e)){
+		if (registry.tiles.has(e)) {
 			Tile* tile = registry.tiles.get(e);
-			ConstMovingTile* t = (ConstMovingTile*) cube.getTile(tile->coords);
-			if (t->endCoords.f == 0){
-				o.center = (vec3({t->endCoords.c, t->endCoords.r, 0}) - vec3({t->startCoords.c, t->startCoords.r, 0})) / vec3(2.0f);
+			ConstMovingTile* t = (ConstMovingTile*)cube.getTile(tile->coords);
+			if (t->endCoords.f == 0) {
+				o.center = (vec3({ t->endCoords.c, t->endCoords.r, 0 }) - vec3({ t->startCoords.c, t->startCoords.r, 0 })) / vec3(2.0f);
 			}
-			else if (t->endCoords.f == 1){
-				o.center = (vec3({0, -t->endCoords.r, t->endCoords.c}) - vec3({0, -t->startCoords.r, t->startCoords.c})) / vec3(2.0f);
+			else if (t->endCoords.f == 1) {
+				o.center = (vec3({ 0, -t->endCoords.r, t->endCoords.c }) - vec3({ 0, -t->startCoords.r, t->startCoords.c })) / vec3(2.0f);
 			}
-			else if (t->endCoords.f == 2){
-				o.center = (vec3({0, -t->endCoords.r, -t->endCoords.c}) - vec3({0, -t->startCoords.r, -t->startCoords.c})) / vec3(2.0f);
+			else if (t->endCoords.f == 2) {
+				o.center = (vec3({ 0, -t->endCoords.r, -t->endCoords.c }) - vec3({ 0, -t->startCoords.r, -t->startCoords.c })) / vec3(2.0f);
 			}
-			else if (t->endCoords.f == 3){
-				o.center = (vec3({t->endCoords.c, 0, t->endCoords.r}) - vec3({t->startCoords.c, 0, t->startCoords.r})) / vec3(2.0f);
+			else if (t->endCoords.f == 3) {
+				o.center = (vec3({ t->endCoords.c, 0, t->endCoords.r }) - vec3({ t->startCoords.c, 0, t->startCoords.r })) / vec3(2.0f);
 			}
-			else if (t->endCoords.f == 4){
-				o.center = (vec3({t->endCoords.c, 0, -t->endCoords.r}) - vec3({t->startCoords.c, 0, -t->startCoords.r})) / vec3(2.0f);
+			else if (t->endCoords.f == 4) {
+				o.center = (vec3({ t->endCoords.c, 0, -t->endCoords.r }) - vec3({ t->startCoords.c, 0, -t->startCoords.r })) / vec3(2.0f);
 			}
-			else if (t->endCoords.f == 5){
-				o.center = (vec3({-t->endCoords.c, -t->endCoords.r, 0}) - vec3({-t->startCoords.c, -t->startCoords.r, 0})) / vec3(2.0f);
+			else if (t->endCoords.f == 5) {
+				o.center = (vec3({ -t->endCoords.c, -t->endCoords.r, 0 }) - vec3({ -t->startCoords.c, -t->startCoords.r, 0 })) / vec3(2.0f);
 			}
 
 			o.amplitude = o.center;
 		}
 	}
-
+	
 	renderer->setCube(cube);
 
 	// Create a new explorer
 	player_explorer = createExplorer(renderer, startingpos, translateMatrix);
-	registry.colors.insert(player_explorer, {1, 1, 1});
+	registry.colors.insert(player_explorer, { 1, 1, 1 });
 
 	obtainedFire = false;
 	faceDirection = Direction::UP;
 	SetSprite(currDirection = Direction::RIGHT);
+	gameState = GameState::IDLE;
 }
 
 // Compute collisions between entities
@@ -550,7 +612,7 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE && gameState != GameState::MOVING && gameState != GameState::TITLE_SCREEN) {
+	if (gameState != GameState::IDLE && gameState != GameState::TITLE_SCREEN) {
 		return;
 	}
 
@@ -592,7 +654,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	default:
 
 		Direction dir = currDirection;
-		
 
 		Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
@@ -673,6 +734,11 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			}
 		}
 
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
+			ButtonTile* bTile = (ButtonTile*) tile;
+			button_select(bTile);
+		}
+
 		// Fire release
 		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
 			if (!registry.fire.has(fire)) {
@@ -696,6 +762,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		if (action == GLFW_PRESS && key == GLFW_KEY_R) {
 			if (!registry.restartTimer.has(player_explorer)) {
+				gameState = GameState::RESTARTING;
 				registry.restartTimer.emplace(player_explorer);
 				//Mix_PlayChannel(-1, restart_sound, 0);
 			}				
@@ -765,7 +832,7 @@ void WorldSystem::on_mouse_click(int button, int action, int mods) {
 void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile) {
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
-	Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+	Coordinates newCoords = searchForTile(trueDirection, tile->coords);
 	Tile* ntile = cube.getTile(newCoords);
 	if (ntile->direction != tile->direction)
 	{
@@ -792,7 +859,6 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
-	
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
 	if (motion.position != motion.destination){
@@ -803,12 +869,13 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	int dir = static_cast<int>(faceDirection) * -1;
 	Direction trueDirection = mod(direction, dir);
 
-	Coordinates newCoords = searchForTile(trueDirection);
+	Coordinates newCoords = searchForTile(trueDirection, player.playerPos);
 	Tile* tile = cube.getTile(newCoords);
 
+	// No movement
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
 		tile->tileState == TileState::N || tile->tileState == TileState::O) {
-		//Mix_PlayChannel(-1, move_fail_sound, 0);
+		Mix_PlayChannel(-1, move_fail_sound, 0);
 		return;
 	}
 
@@ -820,7 +887,20 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 			return;
 		}
 	}
+	
+	// Move off current tile
+	// Do any updates of previous tile here
+	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);
+	if (currtile->tileState == TileState::G){
+		currtile->highlighted = false;
+	}
 
+	// Updates based on new tile
+	// Button
+	if (tile->tileState == TileState::G){
+		tile->highlighted = true;
+	}
+	// Fire
 	if (tile->tileState == TileState::F){
 		Object& fire_object = registry.objects.get(fire);
 		Motion& fire_motion = registry.motions.get(fire);
@@ -829,6 +909,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_object.model = player.model;
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
 	}
+
 
 	if (gameState != GameState::TITLE_SCREEN) {
 
@@ -951,7 +1032,6 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);	
 
 	if (tile->tileState == TileState::Z) {
 		rot.status = BOX_ANIMATION::STILL;
@@ -964,6 +1044,37 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 }
 
+void WorldSystem::button_select(ButtonTile* b) {
+
+	Entity e = getTileFromRegistry(b->coords);
+	RenderRequest& r = registry.renderRequests.get(e);
+
+	switch(b->button_id)
+	{
+		case static_cast<int>(BUTTON::START):
+			next_level();
+			break;
+		case static_cast<int>(BUTTON::LEVELS):
+			// TODO
+			break;
+		case static_cast<int>(BUTTON::SOUND):
+			sound_on = !sound_on;
+			if (sound_on){
+				Mix_Volume(-1, 128);
+				Mix_VolumeMusic(128);
+				r.used_texture = TEXTURE_ASSET_ID::BUTTON_SOUND_ON;
+			}
+			else{
+				Mix_Volume(-1, 0);
+				Mix_VolumeMusic(0);
+				r.used_texture = TEXTURE_ASSET_ID::BUTTON_SOUND_OFF;
+			}
+			break;
+		default:
+			break;
+	}
+}
+
 void WorldSystem::changeMenu(int dir){
 	Menu& curr = registry.menus.get(menu);
 	
@@ -971,6 +1082,7 @@ void WorldSystem::changeMenu(int dir){
 		gameState = GameState::IDLE;
 		cube.reset();
 		faceDirection = Direction::UP;
+		rot.status = BOX_ANIMATION::STILL;
 		restart_game();
 		return;
 	}
@@ -1036,8 +1148,8 @@ void WorldSystem::Interact(Tile* tile)
 
 	if (s_tile->targetTile->tileState == TileState::I) {
 
-		Entity tile = getTileFromRegistry(s_tile->targetTile->coords);
-		RenderRequest& request = registry.renderRequests.get(tile);
+		Entity t = getTileFromRegistry(s_tile->targetTile->coords);
+		RenderRequest& request = registry.renderRequests.get(t);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
 		switchRequest.used_texture = TEXTURE_ASSET_ID::SWITCH_TILE_SUCCESS;
 	}
@@ -1112,8 +1224,6 @@ void WorldSystem::UsePower(Direction direction, float power)
 	default:
 		motion.velocity = vec3(0, 0, 0);
 	}
-
-	Tile* tile = registry.tiles.get(getTileFromRegistry(searchForTile(currDirection)));
 }
 
 void WorldSystem::Burn(Entity entity) {
@@ -1151,7 +1261,7 @@ void WorldSystem::SetSprite(Direction direction) {
 	currDirection = direction;
 }
 
-Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coords) {
+Coordinates WorldSystem::searchForTile(Direction direction, Coordinates coords) {
 
 	switch (direction)
 	{
@@ -1184,46 +1294,6 @@ Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coor
 			return cube.getTile(coords)->adjList[3].first;
 		}
 		else {
-			coords.c--;
-		}
-		break;
-	}
-
-	return coords;
-}
-
-Coordinates WorldSystem::searchForTile(Direction direction) {
-
-	Player& player = registry.players.get(player_explorer);
-	Coordinates coords = player.playerPos;
-
-	switch (direction)
-	{
-	case Direction::UP:
-		if (coords.r == 0) {
-			return cube.getTile(coords)->adjList[0].first;
-		} else {
-			coords.r--;
-		}
-		break;
-	case Direction::RIGHT:
-		if (coords.c == cube.size - 1) {
-			return cube.getTile(coords)->adjList[1].first;
-		} else {
-			coords.c++;
-		}
-		break;
-	case Direction::DOWN:
-		if (coords.r == cube.size - 1) {
-			return cube.getTile(coords)->adjList[2].first;
-		} else {
-			coords.r++;
-		}
-		break;
-	case Direction::LEFT:
-		if (coords.c == 0) {
-			return cube.getTile(coords)->adjList[3].first;
-		} else {
 			coords.c--;
 		}
 		break;
@@ -1253,5 +1323,11 @@ void WorldSystem::next_level() {
 		level++;
 		faceDirection = Direction::UP;
 		gameState = GameState::IDLE;
-		restart_game();
+		rot.status = BOX_ANIMATION::STILL;
+		
+		if (!registry.restartTimer.has(player_explorer)) {
+			gameState = GameState::RESTARTING;
+			Mix_PlayChannel(-1, restart_sound, 0);
+			registry.restartTimer.emplace(player_explorer);
+		}
 }

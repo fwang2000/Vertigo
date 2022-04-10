@@ -8,6 +8,7 @@
 
 struct Coordinates
 {
+	bool equal(Coordinates a);
 	int f; // face
 	int r; // row
 	int c; // col
@@ -81,6 +82,7 @@ enum class TileState
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
 	O = 14,		// Constantly-Moving Tile
+	G = 6,		// Button Tile
 	C = 2,		// Controllable Tile
 	M = 12,		// Move Tile
 	T = 19,		// Throw Tile
@@ -90,7 +92,17 @@ enum class TileState
 	L = 11,		// Down-Tile
 	U = 20,		// Up-Tile
 	E = 4,		// Empty
+	A = 0,		// Enemy AI
 	Z = 25,		// Finish
+};
+
+enum class BUTTON
+{
+	START = 0,
+	LEVELS = 1,
+	SOUND = 2,
+	MUSIC = 3,
+	SFX = 4,
 };
 
 struct Rotate
@@ -105,7 +117,7 @@ struct Tile
 	FACE_DIRECTION direction;
 	glm::mat4 model;
 	Coordinates coords;
-	Coordinates currentPos;
+	Coordinates currentPos; // TODO: do we need this?
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
@@ -141,6 +153,11 @@ struct InvisibleTile : public Tile {
 struct ConstMovingTile : public SwitchTile {
 	Coordinates startCoords;
 	Coordinates endCoords;
+	virtual void action();
+};
+
+struct ButtonTile : public Tile {
+	int button_id = 0;
 	virtual void action();
 };
 
@@ -224,10 +241,8 @@ struct Menu
 	void toggleSound() {sound = !sound;}
 };
 
-// A timer that will be associated to shot fire
-struct ShootTimer
+struct Button
 {
-	float counter_ms = 10000;
 };
 
 struct HoldTimer
@@ -267,6 +282,38 @@ struct Mesh
 	vec2 original_size = { 1,1 };
 	std::vector<ColoredVertex> vertices;
 	std::vector<uint16_t> vertex_indices;
+};
+
+float defaultTranslate(float elapsed);
+
+float oneDimension(float elapsed);
+
+float oneDimensionNegative(float elapsed);
+
+float cosine(float elapsed);
+
+float flipCosine(float elapsed);
+
+float sine(float elapsed);
+
+float flipSine(float elapsed);
+
+struct Enemy
+{
+	Enemy()
+	{
+		translateX = &defaultTranslate;
+		translateY = &defaultTranslate;
+		translateZ = &defaultTranslate;
+	}
+	TransFuncPtr translateX;
+	TransFuncPtr translateY;
+	TransFuncPtr translateZ;
+	vec3 axis;
+	vec3 startingPos; // used for animation logic
+	bool changingFaces = false;
+	bool moving = false; // in the process of moving
+	float elapsed = 0.f;
 };
 
 struct Billboard
@@ -400,7 +447,11 @@ enum class TEXTURE_ASSET_ID {
 	TITLE_MUSIC_NO_SOUND = TITLE_MUSIC_SOUND + 1,
 	TITLE = TITLE_MUSIC_NO_SOUND + 1,
 	MOVE_CONTROLS = TITLE + 1,
-	TEXTURE_COUNT = MOVE_CONTROLS + 1
+	BUTTON_START = MOVE_CONTROLS + 1,
+	BUTTON_LEVELS = BUTTON_START + 1,
+	BUTTON_SOUND_OFF = BUTTON_LEVELS + 1,
+	BUTTON_SOUND_ON = BUTTON_SOUND_OFF + 1,
+	TEXTURE_COUNT = BUTTON_SOUND_ON + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -427,7 +478,8 @@ enum class GEOMETRY_BUFFER_ID {
 	FIRE = ANIMATED + 1,
 	TREE = FIRE + 1,
 	GAUGE = TREE + 1,
-	LIGHTING = GAUGE + 1,
+	ENEMY = GAUGE + 1,
+	LIGHTING = ENEMY + 1,
 	POINT_LIGHT = LIGHTING + 1,
 	GEOMETRY_COUNT = POINT_LIGHT + 1
 };

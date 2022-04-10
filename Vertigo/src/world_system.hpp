@@ -20,7 +20,9 @@ enum class GameState {
 	INTERACTING = 2,
 	BURNING = 3,
 	MENU = 4,
-	TITLE_SCREEN = 5
+	ENEMY_MOVE = 5,
+	RESTARTING = 6,
+	TITLE_SCREEN = 7
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -62,7 +64,6 @@ private:
 	void Interact(Tile* tile);
 	void Burn(Entity entity);
 	void UsePower(Direction direction, float power);
-	// bool checkForTile(Direction direction);
 	float count = 0;
 
 	// Fire Attributes
@@ -103,13 +104,15 @@ private:
 	Entity fire_shadow;
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
+	bool sound_on = true;
 
 	Direction currDirection = Direction::RIGHT;
 
 	// Helper Functions
 	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
+	void button_select(ButtonTile* b);
 	void changeMenu(int dir);
-	Coordinates searchForTile(Direction direction);
+	Coordinates searchForTile(Direction direction, Coordinates coords);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateAll(float elapsed_ms_since_last_update);
@@ -127,4 +130,6 @@ private:
 	// C++ random number generator
 	// std::default_random_engine rng;
 	// std::uniform_real_distribution<float> uniform_dist; // number between 0..1
+
+	friend class AISystem;
 };

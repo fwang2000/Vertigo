@@ -79,3 +79,5 @@ enum class Direction
 };
 
 Direction mod(Direction a, int b);
+
+typedef float (*TransFuncPtr)(float);

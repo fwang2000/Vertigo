@@ -351,3 +351,4 @@ MigrationBackup/
 
 .vscode/
 build/
+Vertigo/ext/project_path.hpp

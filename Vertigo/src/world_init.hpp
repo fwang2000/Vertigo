@@ -6,14 +6,14 @@
 
 // These are hard coded to the dimensions of the entity texture
 // TODO: Later, change / 3 to / dimension of cube
-const float TILE_BB_WIDTH = 1.0f * min(window_height_px, window_width_px) / 14 * (sqrt(98) / 7) ;
+const float TILE_BB_WIDTH = 1.0f * min(window_height_px, window_width_px) / 14.f * (sqrt(98.f) / 7.f) ;
 const float TILE_BB_HEIGHT = 1.0f * min(window_height_px, window_width_px) / 7;
 const float EXPLORER_BB_WIDTH = 0.8f * TILE_BB_WIDTH;
 const float EXPLORER_BB_HEIGHT = 0.8f * TILE_BB_HEIGHT;
 const float FIRE_BB_WIDTH = 0.5f * EXPLORER_BB_WIDTH;
 const float FIRE_BB_HEIGHT = FIRE_BB_WIDTH;
-const float OBJECT_BB_WIDTH = 0.4 * min(window_height_px, window_width_px) / 6;
-const float OBJECT_BB_HEIGHT = 0.4 * min(window_height_px, window_width_px) / 4;
+const float OBJECT_BB_WIDTH = 0.4f * min(window_height_px, window_width_px) / 6.f;
+const float OBJECT_BB_HEIGHT = 0.4f * min(window_height_px, window_width_px) / 4.f;
 
 // the cube
 Entity createCube(RenderSystem* renderer);
@@ -34,9 +34,12 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // the throw tile
 void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
+// the button tile
+void createButtonTile(Entity entity);
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
 // the burnable
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 Entity createMenu(RenderSystem* renderer);
 void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
