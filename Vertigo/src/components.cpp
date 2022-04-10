@@ -721,7 +721,7 @@ void BurnableTile::action() {
 		this->tileState = TileState::V;
 	}
 }
-  
+
 void Tile::move(vec2 t, vec2 delta_coord) {
 
 	vec3 translation = vec3(0);

@@ -644,7 +644,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	default:
 
 		Direction dir = currDirection;
-		
 
 		Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 
@@ -723,6 +722,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			default:
 				break;
 			}
+		}
+
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
+			ButtonTile* bTile = (ButtonTile*) tile;
+			switch (bTile->button_id)
+			{
+				case 0:
+					next_level();
+					break;
+				default:
+					break;
+			}
+
 		}
 
 		// Fire release
