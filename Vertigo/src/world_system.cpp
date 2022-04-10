@@ -1296,5 +1296,10 @@ void WorldSystem::next_level() {
 		faceDirection = Direction::UP;
 		gameState = GameState::IDLE;
 		rot.status = BOX_ANIMATION::STILL;
-		restart_game();
+		
+		if (!registry.restartTimer.has(player_explorer)) {
+			gameState = GameState::RESTARTING;
+			Mix_PlayChannel(-1, restart_sound, 0);
+			registry.restartTimer.emplace(player_explorer);
+		}
 }
