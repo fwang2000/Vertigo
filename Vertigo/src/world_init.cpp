@@ -74,6 +74,9 @@ Entity createTile(Tile* tile)
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
 		break;
+	case TileState::T:
+		id = TEXTURE_ASSET_ID::SWITCH_TILE;
+		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
 		break;
@@ -214,6 +217,16 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 	motion.scale = {1.0f, 1.0f, 1.0f};
 	
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
+}
+
+void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) {
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = { 1.0f, 1.0f, 1.0f };
 }
 
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
