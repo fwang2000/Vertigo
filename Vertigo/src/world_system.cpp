@@ -521,7 +521,12 @@ void WorldSystem::load_level() {
 		ButtonTile* b = (ButtonTile*) cube.getTile(tile->coords);
 		RenderRequest& r = registry.renderRequests.get(e);
 
-		r.used_texture = (TEXTURE_ASSET_ID)((int) TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
+		if (b->button_id == (int) BUTTON::SOUND){
+			r.used_texture = (TEXTURE_ASSET_ID)((int) TEXTURE_ASSET_ID::BUTTON_SOUND_OFF + sound_on);
+		}
+		else{
+			r.used_texture = (TEXTURE_ASSET_ID)((int) TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
+		}
 		printf("%d\n", (int) r.used_texture);
 	}
 
@@ -724,16 +729,9 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			}
 		}
 
-		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
 			ButtonTile* bTile = (ButtonTile*) tile;
-			switch (bTile->button_id)
-			{
-				case 0:
-					next_level();
-					break;
-				default:
-					break;
-			}
+			button_select(bTile);
 		}
 
 		// Fire release
@@ -1042,12 +1040,33 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 }
 
 void WorldSystem::button_select(ButtonTile* b) {
+
+	Entity e = getTileFromRegistry(b->coords);
+	RenderRequest& r = registry.renderRequests.get(e);
+
 	switch(b->button_id)
 	{
 		case BUTTON::START:
 			next_level();
+			break;
+		case BUTTON::LEVELS:
+			// TODO
+			break;
+		case BUTTON::SOUND:
+			sound_on = !sound_on;
+			if (sound_on){
+				Mix_Volume(-1, 128);
+				Mix_VolumeMusic(128);
+				r.used_texture = TEXTURE_ASSET_ID::BUTTON_SOUND_ON;
+			}
+			else{
+				Mix_Volume(-1, 0);
+				Mix_VolumeMusic(0);
+				r.used_texture = TEXTURE_ASSET_ID::BUTTON_SOUND_OFF;
+			}
+			break;
 		default:
-			return;
+			break;
 	}
 }
 

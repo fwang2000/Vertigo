@@ -104,6 +104,7 @@ private:
 	Entity fire_shadow;
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
+	bool sound_on = true;
 
 	Direction currDirection = Direction::RIGHT;
 

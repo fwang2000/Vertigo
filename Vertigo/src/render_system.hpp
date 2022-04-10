@@ -101,7 +101,8 @@ class RenderSystem {
 			textures_path("title_page/move_controls.png"),
 			textures_path("buttons/button_start.png"),
 			textures_path("buttons/button_levels.png"),
-			textures_path("buttons/button_sound.png"),
+			textures_path("buttons/button_sound_off.png"),
+			textures_path("buttons/button_sound_on.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
