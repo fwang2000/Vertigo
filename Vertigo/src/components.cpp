@@ -512,7 +512,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			cTile->endCoords = Coordinates{ e_f, e_r, e_c};
 			cTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
 		}
-		else if (modifications.at(0) == "A"){
+		else if (modifications.at(0) == "G"){
 			int f = std::stoi(modifications.at(1));
 			int r = std::stoi(modifications.at(2));
 			int c = std::stoi(modifications.at(3));

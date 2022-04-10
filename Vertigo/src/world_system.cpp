@@ -734,7 +734,6 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				default:
 					break;
 			}
-
 		}
 
 		// Fire release
