@@ -85,7 +85,7 @@ enum class TileState
 	G = 6,		// Button Tile
 	C = 2,		// Controllable Tile
 	M = 12,		// Move Tile
-	T = 19,		// Teleporter
+	T = 19,		// Throw Tile
 	W = 22,		// Switch,
 	R = 17,		// Right-Tile
 	D = 3,		// Left-Tile
@@ -167,12 +167,8 @@ struct BurnableTile : public Tile {
 	virtual void action();
 };
 
-struct FinishTile : public Tile {
-
-};
-
-struct StartTile : public Tile {
-
+struct ThrowTile : public SwitchTile {
+	virtual void action();
 };
 
 struct Text 
@@ -361,15 +357,41 @@ struct RestartTimer
 
 enum class TEXTURE_ASSET_ID {
 	VERTIGO = 0,
-	START = VERTIGO + 1,
-	LEVEL = START + 1,
+	LEVEL = VERTIGO + 1,
 	ONE = LEVEL + 1,
-	TWO = ONE + 1,
+	WELCOME = ONE + 1,
+	ESCAPE = WELCOME + 1,
+	TIME = ESCAPE + 1,
+	LUCK = TIME + 1,
+	TWO = LUCK + 1,
 	THREE = TWO + 1,
-	FOUR = THREE + 1,
-	BUSH = FOUR + 1,
-	BURN = BUSH + 1,
-	INVISIBLE = BURN + 1,
+	EMPTY_PATH = THREE + 1,
+	OTHER = EMPTY_PATH + 1,
+	DEVICE = OTHER + 1,
+	ACTIVATE = DEVICE + 1,
+	NEW = ACTIVATE + 1,
+	FOUR = NEW + 1,
+	POSITION = FOUR + 1,
+	FUNCTION = POSITION + 1,
+	FIRE_ITEM = FUNCTION + 1,
+	THROW = FIRE_ITEM + 1,
+	FIVE = THROW + 1,
+	BUSH = FIVE + 1,
+	SIX = BUSH + 1,
+	SEVEN = SIX + 1,
+	EIGHT = SEVEN + 1,
+	NINE = EIGHT + 1,
+	UP = NINE + 1,
+	TEN = UP + 1,
+	ELEVEN = TEN + 1,
+	TWELVE = ELEVEN + 1,
+	DIFFERENT = TWELVE + 1,
+	RELEASE = DIFFERENT + 1,
+	THIRTEEN = RELEASE + 1,
+	FOURTEEN = THIRTEEN + 1,
+	FIFTEEN = FOURTEEN + 1,
+	SIXTEEN = FIFTEEN + 1,
+	INVISIBLE = SIXTEEN + 1,
 	SWITCH = INVISIBLE + 1,
 	EXPLORER_DOWN = SWITCH + 1,
 	EXPLORER_UP = EXPLORER_DOWN + 1,

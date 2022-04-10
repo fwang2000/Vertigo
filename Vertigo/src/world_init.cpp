@@ -4,6 +4,8 @@
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
+	printf("created\n");
+
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
@@ -73,6 +75,9 @@ Entity createTile(Tile* tile)
 		break;
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
+		break;
+	case TileState::T:
+		id = TEXTURE_ASSET_ID::SWITCH_TILE;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
@@ -214,6 +219,16 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 	motion.scale = {1.0f, 1.0f, 1.0f};
 	
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
+}
+
+void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) {
+
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(0, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = { 1.0f, 1.0f, 1.0f };
 }
 
 void createButtonTile(Entity entity){

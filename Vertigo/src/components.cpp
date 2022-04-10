@@ -495,6 +495,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			}
 		}
 		else if (modifications.at(0) == "O"){
+
 			int f = std::stoi(modifications.at(1));
 			int r = std::stoi(modifications.at(2));
 			int c = std::stoi(modifications.at(3));
@@ -509,14 +510,42 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 
 			ConstMovingTile* cTile = (ConstMovingTile*)getTile(Coordinates{ f, r, c });
 			cTile->startCoords = Coordinates{ f, r, c };
-			cTile->endCoords = Coordinates{ e_f, e_r, e_c};
+			cTile->endCoords = Coordinates{ e_f, e_r, e_c };
 			cTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
 		}
-		else if (modifications.at(0) == "G"){
+		else if (modifications.at(0) == "T") {
+
 			int f = std::stoi(modifications.at(1));
 			int r = std::stoi(modifications.at(2));
 			int c = std::stoi(modifications.at(3));
 
+			ThrowTile* throwTile = (ThrowTile*)getTile(Coordinates{ f, r, c });
+
+			throwTile->toggled = false;
+
+			int t_f = std::stoi(modifications.at(5));
+			int t_r = std::stoi(modifications.at(6));
+			int t_c = std::stoi(modifications.at(7));
+
+			if (modifications.at(4) == "I") {
+
+				throwTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+			}
+			else
+			{
+
+				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
+				throwTile->targetTile = target;
+				throwTile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) };
+			}
+		}
+		else if (modifications.at(0) == "G"){
+
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			
 			int id =  std::stoi(modifications.at(4));
 			ButtonTile* bTile = (ButtonTile*)getTile(Coordinates{ f, r, c });
 			bTile->button_id = id;
@@ -699,7 +728,20 @@ void ConstMovingTile::action() {
 	return;
 }
 
+	void ThrowTile::action() {
+	if (toggled) {
+		return;
+	}
+
+	if (targetTile->tileState == TileState::I) {
+		targetTile->tileState = TileState::V;
+		targetTile->action();
+	}
+	toggled = true;
+}
+
 void ButtonTile::action(){
+
 	return;
 }
 
