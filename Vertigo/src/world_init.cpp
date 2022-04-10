@@ -4,8 +4,6 @@
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	printf("created\n");
-
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
@@ -180,6 +178,27 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 			TEXTURE_ASSET_ID::MARBLE,
 			EFFECT_ASSET_ID::OBJECT,
 			GEOMETRY_BUFFER_ID::COLUMN
+		}
+	);
+}
+
+void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, false, vec3(0.3f), 1);
+
+	Object& device = registry.objects.get(entity);
+	device.alpha = 1.0;
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEVICE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::MARBLE,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::DEVICE
 		}
 	);
 }

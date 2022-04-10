@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(0) {
+	: level(2) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -507,6 +507,10 @@ void WorldSystem::load_level() {
 
 				if (cube.faces[i][j][k]->tileState == TileState::G) {
 					createButtonTile(tile);
+				}
+
+				if (cube.faces[i][j][k]->tileState == TileState::W) {
+					createDevice(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 			}
 		}

@@ -30,6 +30,10 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the column
 void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the pedestal
+void createPedestal(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the device
+void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the constantly moving tile
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // the throw tile
