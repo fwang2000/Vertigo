@@ -108,6 +108,8 @@ private:
 	Direction currDirection = Direction::RIGHT;
 
 	// Helper Functions
+	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
+	void button_select(ButtonTile* b);
 	void changeMenu(int dir);
 	Coordinates searchForTile(Direction direction, Coordinates coords);
 	Entity getCurrentTileEntity();

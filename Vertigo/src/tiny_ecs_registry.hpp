@@ -29,6 +29,7 @@ public:
 	ComponentContainer<Burnable> burnables;
 	ComponentContainer<Animated> animated;
 	ComponentContainer<Menu> menus;
+	ComponentContainer<Button> buttons;
 	ComponentContainer<Billboard> billboards;
 	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<RestartTimer> restartTimer;
@@ -54,6 +55,7 @@ public:
 		registry_list.push_back(&burnables);
 		registry_list.push_back(&animated);
 		registry_list.push_back(&menus);
+		registry_list.push_back(&buttons);
 		registry_list.push_back(&billboards);
 		registry_list.push_back(&lightSources);
 		registry_list.push_back(&restartTimer);

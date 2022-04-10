@@ -32,6 +32,7 @@ Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 transl
 void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the constantly moving tile
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
+void createButtonTile(Entity entity);
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
 // the burnable

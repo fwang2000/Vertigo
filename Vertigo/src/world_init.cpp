@@ -216,6 +216,18 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 	Oscillate& oscillate = registry.oscillations.emplace(entity);
 }
 
+void createButtonTile(Entity entity){
+	// Setting initial motion values
+	Motion& motion = registry.motions.emplace(entity);
+	motion.interpolate = false;
+	motion.position = vec3(1, 0, 0);
+	motion.destination = vec3(0, 0, 0);
+	motion.velocity = { 0.f , 0.f , 0.f };
+	motion.scale = {3.0f, -1.0f, 1.0f};
+
+	registry.buttons.emplace(entity);
+}
+
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
   
 	if (hasMotion){

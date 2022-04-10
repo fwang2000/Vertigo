@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(2) {
+	: level() {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -499,6 +499,9 @@ void WorldSystem::load_level() {
 				if (cube.faces[i][j][k]->tileState == TileState::A) {
 					createEnemy(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
+				if (cube.faces[i][j][k]->tileState == TileState::G) {
+					createButtonTile(tile);
+				}
 			}
 		}
 	}
@@ -510,6 +513,19 @@ void WorldSystem::load_level() {
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
+	// Update button tiles
+
+	for (uint i = 0; i < registry.buttons.size(); i++){
+		Entity e = registry.buttons.entities[i];
+		Tile* tile = registry.tiles.get(e);
+		ButtonTile* b = (ButtonTile*) cube.getTile(tile->coords);
+		RenderRequest& r = registry.renderRequests.get(e);
+
+		r.used_texture = (TEXTURE_ASSET_ID)((int) TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
+		printf("%d\n", (int) r.used_texture);
+	}
+
+	// Update constantly moving tiles
 	for (uint i = 0; i < registry.oscillations.size(); i++){
 		Entity e = registry.oscillations.entities[i];
 		Oscillate& o = registry.oscillations.components[i];
@@ -829,7 +845,6 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 
 void WorldSystem::player_move(vec3 movement, Direction direction) 
 {
-	
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
 	if (motion.position != motion.destination){
@@ -843,6 +858,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Coordinates newCoords = searchForTile(trueDirection, player.playerPos);
 	Tile* tile = cube.getTile(newCoords);
 
+	// No movement
 	if (tile->tileState == TileState::B || tile->tileState == TileState::E	|| tile->tileState == TileState::I || 
 		tile->tileState == TileState::N || tile->tileState == TileState::O) {
 		Mix_PlayChannel(-1, move_fail_sound, 0);
@@ -857,7 +873,20 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 			return;
 		}
 	}
+	
+	// Move off current tile
+	// Do any updates of previous tile here
+	Tile* currtile = cube.getTile(registry.players.get(player_explorer).playerPos);
+	if (currtile->tileState == TileState::G){
+		currtile->highlighted = false;
+	}
 
+	// Updates based on new tile
+	// Button
+	if (tile->tileState == TileState::G){
+		tile->highlighted = true;
+	}
+	// Fire
 	if (tile->tileState == TileState::F){
 		Object& fire_object = registry.objects.get(fire);
 		Motion& fire_motion = registry.motions.get(fire);
@@ -866,6 +895,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		fire_object.model = player.model;
 		fire_motion.scale = {0.4f, 0.4f, 0.4f};
 	}
+
 
 	if (gameState != GameState::TITLE_SCREEN) {
 
@@ -988,7 +1018,26 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	}
 
 	player.playerPos = newCoords; // same as UpdatePlayerCoordinates
-	Mix_PlayChannel(-1, move_success_sound, 0);
+
+	if (tile->tileState == TileState::Z) {
+		rot.status = BOX_ANIMATION::STILL;
+		Mix_PlayChannel(-1, finish_sound, 0);
+		next_level();
+	}
+	else
+	{
+		Mix_PlayChannel(-1, move_success_sound, 0);
+	}
+}
+
+void WorldSystem::button_select(ButtonTile* b) {
+	switch(b->button_id)
+	{
+		case BUTTON::START:
+			next_level();
+		default:
+			return;
+	}
 }
 
 void WorldSystem::changeMenu(int dir){

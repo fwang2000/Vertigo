@@ -350,6 +350,18 @@ bool Cube::loadFromExcelFile(std::string filename) {
 						c_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
+					case TileState::G:
+					{
+						ButtonTile* c_tile = new ButtonTile();
+						c_tile->model = tileStartingMatrix(i, x, y, distance);
+						c_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+						row.push_back(c_tile);
+						c_tile->coords = { i, y_coord, x_coord };
+						c_tile->currentPos = c_tile->coords;
+						c_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
 					default:
 					{
 						Tile* tile = new Tile();
@@ -499,6 +511,15 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			cTile->startCoords = Coordinates{ f, r, c };
 			cTile->endCoords = Coordinates{ e_f, e_r, e_c};
 			cTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+		}
+		else if (modifications.at(0) == "A"){
+			int f = std::stoi(modifications.at(1));
+			int r = std::stoi(modifications.at(2));
+			int c = std::stoi(modifications.at(3));
+
+			int id =  std::stoi(modifications.at(4));
+			ButtonTile* bTile = (ButtonTile*)getTile(Coordinates{ f, r, c });
+			bTile->button_id = id;
 		}
 
 		std::vector<std::string>().swap(modifications);
@@ -675,6 +696,10 @@ void ConstMovingTile::action() {
 		targetTile->action();
 	}
 	toggled = true;
+	return;
+}
+
+void ButtonTile::action(){
 	return;
 }
 

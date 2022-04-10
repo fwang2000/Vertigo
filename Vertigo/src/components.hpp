@@ -82,6 +82,7 @@ enum class TileState
 	I = 8,		// Invisible
 	N = 13,		// Non-interactible
 	O = 14,		// Constantly-Moving Tile
+	G = 6,		// Button Tile
 	C = 2,		// Controllable Tile
 	M = 12,		// Move Tile
 	T = 19,		// Teleporter
@@ -93,6 +94,15 @@ enum class TileState
 	E = 4,		// Empty
 	A = 0,		// Enemy AI
 	Z = 25,		// Finish
+};
+
+enum class BUTTON
+{
+	START = 0,
+	LEVELS = 1,
+	SOUND = 2,
+	MUSIC = 3,
+	SFX = 4,
 };
 
 struct Rotate
@@ -143,6 +153,11 @@ struct InvisibleTile : public Tile {
 struct ConstMovingTile : public SwitchTile {
 	Coordinates startCoords;
 	Coordinates endCoords;
+	virtual void action();
+};
+
+struct ButtonTile : public Tile {
+	int button_id = 0;
 	virtual void action();
 };
 
@@ -230,6 +245,7 @@ struct Menu
 	void toggleSound() {sound = !sound;}
 };
 
+struct Button
 {
 };
 
@@ -409,7 +425,10 @@ enum class TEXTURE_ASSET_ID {
 	TITLE_MUSIC_NO_SOUND = TITLE_MUSIC_SOUND + 1,
 	TITLE = TITLE_MUSIC_NO_SOUND + 1,
 	MOVE_CONTROLS = TITLE + 1,
-	TEXTURE_COUNT = MOVE_CONTROLS + 1
+	BUTTON_START = MOVE_CONTROLS + 1,
+	BUTTON_LEVELS = BUTTON_START + 1,
+	BUTTON_SOUND = BUTTON_LEVELS + 1,
+	TEXTURE_COUNT = BUTTON_SOUND + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
