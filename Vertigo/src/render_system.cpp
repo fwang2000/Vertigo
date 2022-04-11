@@ -500,6 +500,85 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	gl_has_errors();
 }
 
+void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
+{
+	assert(registry.renderRequests.has(entity));
+	const RenderRequest& render_request = registry.renderRequests.get(entity);
+
+	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
+	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
+	const GLuint program = (GLuint)effects[used_effect_enum];
+
+	// Setting shaders
+	glUseProgram(program);
+	gl_has_errors();
+
+	assert(render_request.used_geometry != GEOMETRY_BUFFER_ID::GEOMETRY_COUNT);
+	const GLuint vbo = vertex_buffers[(GLuint)render_request.used_geometry];
+	const GLuint ibo = index_buffers[(GLuint)render_request.used_geometry];
+
+	// Setting vertex and index buffers
+	glBindBuffer(GL_ARRAY_BUFFER, vbo);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+	gl_has_errors();
+
+	GLint in_position_loc = glGetAttribLocation(program, "in_position");
+	GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
+	gl_has_errors();
+	assert(in_texcoord_loc >= 0);
+
+	glEnableVertexAttribArray(in_position_loc);
+	glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
+		sizeof(TexturedVertex), (void*)0);
+	gl_has_errors();
+
+	glEnableVertexAttribArray(in_texcoord_loc);
+	glVertexAttribPointer(
+		in_texcoord_loc, 2, GL_FLOAT, GL_FALSE, sizeof(TexturedVertex),
+		(void*)sizeof(
+			vec3)); // note the stride to skip the preceeding vertex position
+
+	// Enabling and binding texture to slot 0
+	glActiveTexture(GL_TEXTURE0);
+	gl_has_errors();
+
+	assert(registry.renderRequests.has(entity));
+	GLuint texture_id =
+		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+	glBindTexture(GL_TEXTURE_2D, texture_id);
+	gl_has_errors();
+
+	// Getting uniform locations for glUniform* calls
+	GLint color_uloc = glGetUniformLocation(program, "fcolor");
+	const vec3 color = registry.colors.has(entity) ? registry.colors.get(entity) : vec3(1);
+	glUniform3fv(color_uloc, 1, (float*)&color);
+	gl_has_errors();
+
+	// Get number of indices from index buffer, which has elements uint16_t
+	GLint size = 0;
+	glGetBufferParameteriv(GL_ELEMENT_ARRAY_BUFFER, GL_BUFFER_SIZE, &size);
+	gl_has_errors();
+
+	GLsizei num_indices = size / sizeof(uint16_t);
+
+	Transform transform;
+
+	if (registry.motions.has(entity)) {
+		Motion& motion = registry.motions.get(entity);
+		transform.translate(vec2(0.75,0.9));
+		transform.scale(vec2(motion.scale.x, motion.scale.y));
+	}
+
+	GLuint transform_loc = glGetUniformLocation(program, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	gl_has_errors();
+
+	// Drawing of num_indices/3 triangles specified in the index buffer
+	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
+	gl_has_errors();
+}
+
 void RenderSystem::drawToScreen()
 {
 	glUseProgram(effects[(GLuint)EFFECT_ASSET_ID::FADE]);
@@ -586,7 +665,7 @@ void RenderSystem::draw()
 	mat4 view = createViewMatrix();
 	mat3 projection = createProjectionMatrix();
 
-	if (registry.menus.entities.size() == 0){
+	if (registry.menuButtons.entities.size() == 0){
 		// Draw all textured meshes that have a position and size component
 		for (Entity entity : registry.renderRequests.entities)
 		{
@@ -620,13 +699,21 @@ void RenderSystem::draw()
 		if (registry.fire.entities.size() != 0) {
 			drawFire(registry.fire.entities.at(0), projection_3D, view);
 		}
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
+		}
 	}
 	else{
-		for (Entity entity : registry.menus.entities)
+		for (Entity entity : registry.menuButtons.entities)
 		{
 			drawTexturedMesh(entity, projection_3D, lookAt(vec3(0.0f, 0.0f, 6.0f),
 													vec3(0.0f, 0.0f, 0.0f),
 													vec3(0.0f, 1.0f, 0.0f)));
+		}
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
 		}
 	}
 

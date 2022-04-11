@@ -116,6 +116,8 @@ void createRestartText(RenderSystem* renderer, vec2 position) {
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
+	Menu& menu = registry.menus.emplace(entity);
+
 	// Initialize the motion
 	Motion& motion = registry.motions.emplace(entity);
 	motion.position = vec3(0.5, 0.5, 1);

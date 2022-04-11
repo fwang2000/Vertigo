@@ -245,6 +245,10 @@ struct Menu
 	void toggleSound() {sound = !sound;}
 };
 
+struct MenuButtons
+{
+};
+
 struct Button
 {
 };

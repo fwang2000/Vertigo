@@ -466,6 +466,9 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
+	while (registry.menuButtons.entities.size() > 0)
+		registry.remove_all_components_of(registry.menuButtons.entities.back());
+
 	while (registry.menus.entities.size() > 0)
 		registry.remove_all_components_of(registry.menus.entities.back());
 
@@ -1347,7 +1350,7 @@ void WorldSystem::load_level_menu(){
 
 				Entity entity = levels[j * menu_size + k];
 				registry.tiles.insert(entity, b_tile);
-				registry.menus.emplace(entity);
+				registry.menuButtons.emplace(entity);
 
 				if (j * menu_size + k == 0){
 					b_tile->highlighted = true;
@@ -1358,7 +1361,7 @@ void WorldSystem::load_level_menu(){
 					registry.renderRequests.insert(
 						entity,
 						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_1 + j * menu_size + k),
-						EFFECT_ASSET_ID::MENU,
+						EFFECT_ASSET_ID::TILE,
 						GEOMETRY_BUFFER_ID::LIGHTING }
 					);
 				}
@@ -1367,7 +1370,7 @@ void WorldSystem::load_level_menu(){
 					registry.renderRequests.insert(
 						entity,
 						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_LOCK),
-						EFFECT_ASSET_ID::MENU,
+						EFFECT_ASSET_ID::TILE,
 						GEOMETRY_BUFFER_ID::LIGHTING }
 					);
 				}
@@ -1377,8 +1380,8 @@ void WorldSystem::load_level_menu(){
 }
 
 void WorldSystem::close_level_menu(){
-	while (registry.menus.entities.size() > 0)
-		registry.remove_all_components_of(registry.menus.entities.back());
+	while (registry.menuButtons.entities.size() > 0)
+		registry.remove_all_components_of(registry.menuButtons.entities.back());
 }
 
 void WorldSystem::change_level_menu(int key){
