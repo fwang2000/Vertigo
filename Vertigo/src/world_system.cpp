@@ -467,7 +467,7 @@ void WorldSystem::restart_game() {
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
 	while (registry.menus.entities.size() > 0)
-		registry.remove_all_components_of(registry.renderRequests.entities.back());
+		registry.remove_all_components_of(registry.menus.entities.back());
 
 	load_level();
 
@@ -1043,54 +1043,6 @@ void WorldSystem::button_select(ButtonTile* b) {
 		default:
 			break;
 	}
-}
-
-void WorldSystem::changeMenu(int dir){
-	Menu& curr = registry.menus.get(menu);
-	
-	if ((dir == 4) && (curr.option == 0 || curr.option == 4)) {
-		gameState = GameState::IDLE;
-		cube.reset();
-		faceDirection = Direction::UP;
-		rot.status = BOX_ANIMATION::STILL;
-		restart_game();
-		return;
-	}
-	curr.changeOption(dir);
-
-	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::ON_LEVELS;
-
-	switch (curr.option) {
-	case 0:
-		id = TEXTURE_ASSET_ID::ON_X;
-		break;
-	case 1:
-		id = TEXTURE_ASSET_ID::ON_LEVELS;
-		break;
-	case 2:
-		id = TEXTURE_ASSET_ID::ON_SOUND;
-		break;
-	case 3:
-		id = TEXTURE_ASSET_ID::ON_TUTORIAL;
-		break;
-	case 4:
-		id = TEXTURE_ASSET_ID::OFF_X;
-		break;
-	case 5:
-		id = TEXTURE_ASSET_ID::OFF_LEVELS;
-		break;
-	case 6:
-		id = TEXTURE_ASSET_ID::OFF_SOUND;
-		break;
-	case 7:
-		id = TEXTURE_ASSET_ID::OFF_TUTORIAL;
-		break;
-	default:
-		id = TEXTURE_ASSET_ID::ON_X;
-	}
-	
-	RenderRequest& menuRequest = registry.renderRequests.get(menu);
-	menuRequest.used_texture = id;
 }
 
 void WorldSystem::Interact(Tile* tile) 

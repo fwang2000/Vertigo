@@ -99,7 +99,6 @@ private:
 	Cube cube;
 	Object* currBurnable;
 	Rotate rot; // command to rotate all tiles and text and objects
-	Entity menu;
 	Entity fire;
 	Entity fire_gauge;
 	Entity fire_shadow;
@@ -115,7 +114,6 @@ private:
 	// Helper Functions
 	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
 	void button_select(ButtonTile* b);
-	void changeMenu(int dir);
 	Coordinates searchForTile(Direction direction, Coordinates coords);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
