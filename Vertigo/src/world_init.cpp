@@ -276,7 +276,7 @@ void createButtonTile(Entity entity, float length){
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = false;
-	motion.position = vec3(1, 0, 0);
+	motion.position = vec3(0, 0, 0);
 	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
 	motion.scale = {length, -1.0f, 1.0f};

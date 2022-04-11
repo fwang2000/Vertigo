@@ -530,6 +530,7 @@ void WorldSystem::load_level() {
 
 				if (cube.faces[i][j][k]->tileState == TileState::G) {
 					createButtonTile(tile, 3.0f);
+					cube.faces[i][j][k]->model = translate(glm::mat4(1.0f), vec3(1.0f, 0.f, 0.f)) * cube.faces[i][j][k]->model;
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::W || cube.faces[i][j][k]->tileState == TileState::T) {
