@@ -106,6 +106,7 @@ private:
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
 	bool sound_on = true;
+	Entity levels[16];
 
 	int currLevel = 0;
 	int maxLevel = 0;
@@ -120,6 +121,10 @@ private:
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateAll(float elapsed_ms_since_last_update);
+
+	// Menu
+	void WorldSystem::load_level_menu();
+	void WorldSystem::close_level_menu();
 
 	// Music references
 	Mix_Music* background_music;

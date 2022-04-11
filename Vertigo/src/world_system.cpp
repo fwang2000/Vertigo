@@ -629,32 +629,6 @@ void WorldSystem::load_level() {
 	gameState = GameState::IDLE;
 }
 
-void WorldSystem::load_level_menu(){
-	for (int i = 0; i < 1; i++){
-		for (int j = 0; j < 4; j++) {
-			for (int k = 0; k < 4; k++) {
-				ButtonTile* b_tile = new ButtonTile();
-				Entity tile = createTile((Tile*)b_tile);
-				createButtonTile(tile, 3.0f);
-			}
-		}
-	}
-
-	for (int i = 0; i < registry.buttons.size(); i++) {
-		Entity e = registry.buttons.entities[i];
-		Tile* tile = registry.tiles.get(e);
-		ButtonTile* b = (ButtonTile*)cube.getTile(tile->coords);
-		RenderRequest& r = registry.renderRequests.get(e);
-
-		if (b->button_id == (int)BUTTON::SOUND) {
-			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_SOUND_OFF + sound_on);
-		}
-		else {
-			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
-		}
-	}
-}
-
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
@@ -1418,4 +1392,50 @@ void WorldSystem::next_level() {
 			Mix_PlayChannel(-1, restart_sound, 0);
 			registry.restartTimer.emplace(player_explorer);
 		}
+}
+
+
+void WorldSystem::load_level_menu(){
+	int menu_size = 4;
+
+	for (int i = 0; i < 1; i++){
+		for (int j = 0; j < menu_size; j++) {
+			for (int k = 0; k < menu_size; k++) {
+				ButtonTile* b_tile = new ButtonTile();
+
+				glm::mat4 matrix = glm::mat4(1.0f);
+				matrix = scale(glm::mat4(1.0f), vec3(0.85f)) * matrix;
+				matrix = translate(glm::mat4(1.0f), vec3(j, -k, menu_size / 2.f)) * matrix;
+				b_tile->model = matrix;
+
+				Entity entity = levels[j * 4 + k];
+				registry.tiles.insert(entity, b_tile);
+
+				if (j * 4 + k < currLevel){
+					b_tile->activated = true;
+					registry.renderRequests.insert(
+						entity,
+						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_1 + j * 4 + k),
+						EFFECT_ASSET_ID::TILE,
+						GEOMETRY_BUFFER_ID::LIGHTING }
+					);
+				}
+				else{
+					b_tile->activated = false;
+					registry.renderRequests.insert(
+						entity,
+						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_LOCK),
+						EFFECT_ASSET_ID::TILE,
+						GEOMETRY_BUFFER_ID::LIGHTING }
+					);
+				}
+			}
+		}
+	}
+}
+
+void WorldSystem::close_level_menu(){
+	for (uint i = 0; i < 16; i++){
+		registry.remove_all_components_of(levels[i]);
+	}
 }
