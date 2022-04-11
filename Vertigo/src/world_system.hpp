@@ -106,7 +106,6 @@ private:
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
 	bool sound_on = true;
-	Entity levels[16];
 
 	int currLevel = 0;
 	int maxLevel = 0;
@@ -123,8 +122,12 @@ private:
 	void rotateAll(float elapsed_ms_since_last_update);
 
 	// Menu
+	Entity levels[25];
+	int menu_size = 5;
 	void WorldSystem::load_level_menu();
 	void WorldSystem::close_level_menu();
+	void WorldSystem::change_level_menu(int key);
+	int selected_level = 0;
 
 	// Music references
 	Mix_Music* background_music;

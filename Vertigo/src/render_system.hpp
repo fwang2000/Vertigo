@@ -161,7 +161,7 @@ class RenderSystem {
 		shader_path("fade"),
 		shader_path("object"),
 		shader_path("fire"),
-		shader_path("menu"),
+		shader_path("tile"), //shader_path("menu"),
 		shader_path("burnable"),
 		shader_path("billboard")
 	};
@@ -199,7 +199,6 @@ public:
 	void draw();
 	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
 	void drawObject(Entity entity, const mat4& projection3D, const mat4& view);
-	void drawMenu(Entity entity, const mat3& projection);
 
 	mat4 createViewMatrix();
 	mat3 RenderSystem::createProjectionMatrix();
