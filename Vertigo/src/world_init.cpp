@@ -272,14 +272,14 @@ void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix) 
 	motion.scale = { 1.0f, 1.0f, 1.0f };
 }
 
-void createButtonTile(Entity entity){
+void createButtonTile(Entity entity, float length){
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = false;
 	motion.position = vec3(1, 0, 0);
 	motion.destination = vec3(0, 0, 0);
 	motion.velocity = { 0.f , 0.f , 0.f };
-	motion.scale = {3.0f, -1.0f, 1.0f};
+	motion.scale = {length, -1.0f, 1.0f};
 
 	registry.buttons.emplace(entity);
 }

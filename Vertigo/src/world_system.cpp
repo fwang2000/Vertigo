@@ -529,7 +529,7 @@ void WorldSystem::load_level() {
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::G) {
-					createButtonTile(tile);
+					createButtonTile(tile, 3.0f);
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::W || cube.faces[i][j][k]->tileState == TileState::T) {

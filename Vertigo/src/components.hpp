@@ -161,6 +161,7 @@ struct ConstMovingTile : public SwitchTile {
 
 struct ButtonTile : public Tile {
 	int button_id = 0;
+	bool activated = true;
 	virtual void action();
 };
 
