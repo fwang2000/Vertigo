@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(1) {
+	: level(12) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -465,6 +465,9 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
+	while (registry.menus.entities.size() > 0)
+		registry.remove_all_components_of(registry.renderRequests.entities.back());
+
 	load_level();
 
 	// Debugging for memory/component leaks
@@ -540,7 +543,7 @@ void WorldSystem::load_level() {
 		createText(cube.text[i]);
 	}
 
-	// if (level > 0) { createRestartText(renderer, vec2(window_width_px - 100, 0)); }
+	if (level > 0) { createRestartText(renderer, vec2(0.8, 0.1)); }
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
@@ -1367,7 +1370,7 @@ void WorldSystem::next_level() {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 		cube.reset();
-		level++;
+		level = (level + 1) % maxLevel;
 		faceDirection = Direction::UP;
 		gameState = GameState::IDLE;
 		rot.status = BOX_ANIMATION::STILL;

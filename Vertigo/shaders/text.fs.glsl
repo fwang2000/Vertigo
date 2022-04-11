@@ -12,5 +12,10 @@ uniform sampler2D tex0;
 
 void main()
 {
+	vec4 texColor = texture(tex0, texCoord);
+	if (texColor.a < 0.1) {
+		discard;
+	}
+
 	FragColor = texture(tex0, texCoord);
 }

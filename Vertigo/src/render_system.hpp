@@ -182,9 +182,10 @@ public:
 	void draw();
 	void drawFire(Entity entity, const mat4& projection3D, const mat4& view);
 	void drawObject(Entity entity, const mat4& projection3D, const mat4& view);
-	void drawMenu(Entity entity);
+	void drawMenu(Entity entity, const mat3& projection);
 
 	mat4 createViewMatrix();
+	mat3 RenderSystem::createProjectionMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
 	void setCube(Cube cube);
 

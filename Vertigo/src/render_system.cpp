@@ -500,7 +500,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	gl_has_errors();
 }
 
-void RenderSystem::drawMenu(Entity entity)
+void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 {
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
@@ -561,6 +561,18 @@ void RenderSystem::drawMenu(Entity entity)
 	gl_has_errors();
 
 	GLsizei num_indices = size / sizeof(uint16_t);
+
+	Transform transform;
+
+	if (registry.motions.has(entity)) {
+		Motion& motion = registry.motions.get(entity);
+		transform.translate(vec2(0.75,0.9));
+		transform.scale(vec2(motion.scale.x, motion.scale.y));
+	}
+
+	GLuint transform_loc = glGetUniformLocation(program, "transform");
+	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+	gl_has_errors();
 
 	// Drawing of num_indices/3 triangles specified in the index buffer
 	glDrawElements(GL_TRIANGLES, num_indices, GL_UNSIGNED_SHORT, nullptr);
@@ -651,6 +663,7 @@ void RenderSystem::draw()
 	
 	mat4 projection_3D = create3DProjectionMatrix(w, h);
 	mat4 view = createViewMatrix();
+	mat3 projection = createProjectionMatrix();
 
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
@@ -686,9 +699,10 @@ void RenderSystem::draw()
 		drawFire(registry.fire.entities.at(0), projection_3D, view);
 	}
 
-	if (registry.menus.entities.size() != 0) {
-		drawMenu(registry.menus.entities.at(0));
+	for (Entity entity : registry.menus.entities) {
+		drawMenu(entity, projection);
 	}
+
 	// Truely render to the screen
 	drawToScreen();
 
@@ -705,6 +719,23 @@ mat4 RenderSystem::createViewMatrix()
                        vec3(0.0f, 0.0f, 0.0f),
                        vec3(0.0f, 1.0f, 0.0f));
     return view;
+}
+
+mat3 RenderSystem::createProjectionMatrix()
+{
+	// Fake projection matrix, scales with respect to window coordinates
+	float left = 0.f;
+	float top = 0.f;
+
+	gl_has_errors();
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
+
+	float sx = 2.f / (right - left);
+	float sy = 2.f / (top - bottom);
+	float tx = -(right + left) / (right - left);
+	float ty = -(top + bottom) / (top - bottom);
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }
 
 mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
