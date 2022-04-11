@@ -741,7 +741,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 
 		// Fire release
-		if (action == GLFW_PRESS && key == GLFW_KEY_B && registry.fire.has(fire)) {
+		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER) {
+			if (!registry.fire.has(fire)) {
+				return;
+			}
 			Fire& fire_component = registry.fire.get(fire);
 			if (!(fire_component.inUse) && fire_component.active) {
 				// If fire is picked up and has yet to be shot, add to holdTimer
@@ -751,7 +754,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			Mix_PlayChannel(-1, fire_sound, 0);
 		}
 
-		if (action == GLFW_RELEASE && key == GLFW_KEY_B && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
 			HoldTimer& holdTimer = registry.holdTimers.get(fire_gauge);
 			float power = holdTimer.counter_ms / holdTimer.max_ms;
 			registry.remove_all_components_of(fire_gauge);
