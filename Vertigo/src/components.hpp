@@ -28,6 +28,7 @@ struct Object
 	float alpha = 0.7f;
 	bool burning = false;
 	bool burnable = false;
+	vec3 color = vec3(1);
 };
 
 struct Burnable
@@ -77,6 +78,7 @@ enum class TileState
 {
 	S = 18,		// Start
 	F = 5,		// Fire
+	H = 7,		// Target
 	V = 21,		// Valid
 	B = 1,		// Burnable
 	I = 8,		// Invisible
@@ -127,8 +129,7 @@ struct Tile
 };
 
 struct ControlTile : public Tile {
-	bool controled = 0; // 0 is not controlled, 1 is controlled
-	Tile* targetTile;
+	bool controled = 0;
 };
 
 struct UpTile : public Tile {
@@ -140,6 +141,7 @@ struct UpTile : public Tile {
 struct SwitchTile : public Tile {
 
 	Tile* targetTile;
+	TileState targetTileState;
 	Coordinates targetCoords;
 	bool toggled = false;
 	virtual void action();
@@ -451,7 +453,9 @@ enum class TEXTURE_ASSET_ID {
 	BUTTON_LEVELS = BUTTON_START + 1,
 	BUTTON_SOUND_OFF = BUTTON_LEVELS + 1,
 	BUTTON_SOUND_ON = BUTTON_SOUND_OFF + 1,
-	TEXTURE_COUNT = BUTTON_SOUND_ON + 1
+	BURN_TARGET_TILE = BUTTON_SOUND_ON + 1,
+	RESTART_TEXT = BURN_TARGET_TILE + 1,
+	TEXTURE_COUNT = RESTART_TEXT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
