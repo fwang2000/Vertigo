@@ -223,7 +223,30 @@ void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 		}
 	);
 
-	Oscillate& oscillate = registry.oscillations.emplace(entity);
+	Oscillate& o = registry.oscillations.emplace(entity);
+
+	float h = 0.1;
+
+	if (pos.f == 0) {
+		o.center = vec3({ 0, 0, h });
+	}
+	else if (pos.f == 1) {
+		o.center = vec3({ -h, 0, 0 });
+	}
+	else if (pos.f == 2) {
+		o.center = vec3({ h, 0, 0 });
+	}
+	else if (pos.f == 3) {
+		o.center = vec3({ 0, h, 0 });
+	}
+	else if (pos.f == 4) {
+		o.center = vec3({ 0, -h, 0});
+	}
+	else if (pos.f == 5) {
+		o.center = vec3({ 0, 0, -h });
+	}
+
+	o.amplitude = o.center;
 }
 
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
