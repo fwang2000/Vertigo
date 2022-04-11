@@ -134,7 +134,7 @@ GLFWwindow* WorldSystem::create_window() {
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
-	//Mix_PlayMusic(background_music, -1);
+	Mix_PlayMusic(background_music, -1);
 
 	// Set all states to default
 	restart_game();
@@ -663,7 +663,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_W:
 				dir = Direction::UP;
 				if (tile->tileState == TileState::B) { 
-					//Mix_PlayChannel(-1, move_fail_sound, 0);
+					Mix_PlayChannel(-1, move_fail_sound, 0);
 					break; }
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
@@ -677,7 +677,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_S:
 				dir = Direction::DOWN;
 				if (tile->tileState == TileState::B) {
-					//Mix_PlayChannel(-1, move_fail_sound, 0); 
+					Mix_PlayChannel(-1, move_fail_sound, 0); 
 					break;
 				}
 				if (tile->tileState == TileState::C) {
@@ -692,7 +692,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_A:
 				dir = Direction::LEFT;
 				if (tile->tileState == TileState::B) {
-					//Mix_PlayChannel(-1, move_fail_sound, 0); 
+					Mix_PlayChannel(-1, move_fail_sound, 0); 
 					break; }
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
@@ -706,7 +706,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_D:
 				dir = Direction::RIGHT;
 				if (tile->tileState == TileState::B) {
-					//Mix_PlayChannel(-1, move_fail_sound, 0);
+					Mix_PlayChannel(-1, move_fail_sound, 0);
 					break; }
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
@@ -720,13 +720,14 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			case GLFW_KEY_I:
 				if (tile->tileState == TileState::C) {
 					ControlTile* c_tile = (ControlTile*)tile;
-					//Mix_PlayChannel(-1, switch_sound, 0);
+					Mix_PlayChannel(-1, switch_sound, 0);
 					c_tile->controled = !c_tile->controled;
 					c_tile->targetTile->highlighted = !c_tile->targetTile->highlighted;
+					c_tile->targetTile->popup = !c_tile->targetTile->popup;
 					break;
 				}
 				if (tile->tileState == TileState::B) { break; }
-				//Mix_PlayChannel(-1, switch_sound, 0);
+				Mix_PlayChannel(-1, switch_sound, 0);
 				Interact(tile);
 				break;
 			default:
@@ -747,7 +748,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				Player& player = registry.players.get(player_explorer);
 				fire_gauge = createFireGauge(renderer, player.playerPos, player.model);
 			}
-			//Mix_PlayChannel(-1, fire_sound, 0);
+			Mix_PlayChannel(-1, fire_sound, 0);
 		}
 
 		if (action == GLFW_RELEASE && key == GLFW_KEY_B && registry.holdTimers.has(fire_gauge) && gameState != GameState::MENU) {
@@ -761,7 +762,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			if (!registry.restartTimer.has(player_explorer)) {
 				gameState = GameState::RESTARTING;
 				registry.restartTimer.emplace(player_explorer);
-				//Mix_PlayChannel(-1, restart_sound, 0);
+				Mix_PlayChannel(-1, restart_sound, 0);
 			}				
 		}
 		SetSprite(dir);
@@ -841,6 +842,7 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 		RenderRequest& next_request = registry.renderRequests.get(next_tile_entity);
 		ntile->tileState = TileState::M;
 		ntile->highlighted = true;
+		ntile->popup = true;
 		next_request.used_texture = TEXTURE_ASSET_ID::MOVE_TILE;
 
 		Entity cur_tile_entity = getTileFromRegistry(tile->coords);
@@ -848,6 +850,7 @@ void WorldSystem::tile_move(Direction direction, Tile* tile, ControlTile* ctile)
 		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
 		tile->tileState = TileState::E;
 		tile->highlighted = false;
+		tile->popup = false;
 
 		ctile->targetTile = ntile;
 	}
@@ -859,7 +862,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 	Player& player = registry.players.get(player_explorer);
 	Motion& motion = registry.motions.get(player_explorer);
 	if (motion.position != motion.destination){
-		//Mix_PlayChannel(-1, move_fail_sound, 0);
+		Mix_PlayChannel(-1, move_fail_sound, 0);
 		return;
 	}
 
@@ -880,7 +883,7 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 		UpTile* uptile = (UpTile*)tile;
 		if (direction != Direction::UP || uptile->dir != trueDirection)
 		{
-			//Mix_PlayChannel(-1, move_fail_sound, 0);
+			Mix_PlayChannel(-1, move_fail_sound, 0);
 			return;
 		}
 	}
@@ -1032,12 +1035,12 @@ void WorldSystem::player_move(vec3 movement, Direction direction)
 
 	if (tile->tileState == TileState::Z) {
 		rot.status = BOX_ANIMATION::STILL;
-		//Mix_PlayChannel(-1, finish_sound, 0);
+		Mix_PlayChannel(-1, finish_sound, 0);
 		next_level();
 	}
 	else
 	{
-		//Mix_PlayChannel(-1, move_success_sound, 0);
+		Mix_PlayChannel(-1, move_success_sound, 0);
 	}
 }
 
@@ -1228,7 +1231,7 @@ void WorldSystem::Burn(Entity entity) {
 	currBurnable = &registry.objects.get(entity);
 	if (currBurnable->burning == false)
 	{
-		//Mix_PlayChannel(-1, burn_sound, 0);
+		Mix_PlayChannel(-1, burn_sound, 0);
 	}
 	currBurnable->burning = true;
 }

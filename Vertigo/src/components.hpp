@@ -121,6 +121,7 @@ struct Tile
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
+	bool popup = false;
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
