@@ -629,6 +629,32 @@ void WorldSystem::load_level() {
 	gameState = GameState::IDLE;
 }
 
+void WorldSystem::load_level_menu(){
+	for (int i = 0; i < 1; i++){
+		for (int j = 0; j < 4; j++) {
+			for (int k = 0; k < 4; k++) {
+				ButtonTile* b_tile = new ButtonTile();
+				Entity tile = createTile((Tile*)b_tile);
+				createButtonTile(tile, 3.0f);
+			}
+		}
+	}
+
+	for (int i = 0; i < registry.buttons.size(); i++) {
+		Entity e = registry.buttons.entities[i];
+		Tile* tile = registry.tiles.get(e);
+		ButtonTile* b = (ButtonTile*)cube.getTile(tile->coords);
+		RenderRequest& r = registry.renderRequests.get(e);
+
+		if (b->button_id == (int)BUTTON::SOUND) {
+			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_SOUND_OFF + sound_on);
+		}
+		else {
+			r.used_texture = (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_START + b->button_id);
+		}
+	}
+}
+
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
