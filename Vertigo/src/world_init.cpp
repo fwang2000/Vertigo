@@ -118,9 +118,9 @@ void createRestartText(RenderSystem* renderer, vec2 position) {
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Initialize the motion
-	auto& motion = registry.motions.emplace(entity);
-	motion.position = vec3(0, position);
-	motion.scale = vec3(0, 0, 0);
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec3(0.5, 0.5, 1);
+	motion.scale = vec3(0.4, -0.075, 1);
 
 	registry.renderRequests.insert(
 		entity,
