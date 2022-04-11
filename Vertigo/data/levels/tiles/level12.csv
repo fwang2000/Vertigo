@@ -1,12 +1,12 @@
 4
 E,E,E,E
 E,E,E,E
-V,V,C,S
-E,E,E,M
+V,V,W,S
+E,E,E,C
 T,E,E,W
-E,I,C,E
-M,E,E,E
-M,E,C,F
+E,I,W,E
+H,E,E,E
+C,E,W,F
 E,V,V,V
 E,I,M,E
 E,W,E,W
@@ -20,6 +20,6 @@ E,Z,E,E
 E,I,E,E
 E,W,V,E
 V,M,E,W
-E,M,N,C
+E,C,N,W
 V,I,E,E
 E,V,E,E

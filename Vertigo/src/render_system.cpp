@@ -451,7 +451,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	// material properties
 	glUniform1i(glGetUniformLocation(currProgram, "material.diffuse"), 0);
 	glUniform3f(glGetUniformLocation(currProgram, "material.specular"), 0.5f, 0.5f, 0.5f);
-	glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
+	glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 30.f);
 
 	std::string pointLightStr = "pointLights[0]";
 	for (int i = 0; i < registry.lightSources.entities.size(); i++) {
@@ -481,6 +481,8 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	glUniformMatrix4fv(projection_loc, 1, GL_FALSE, (float*)&projection3D);
 	GLuint mainTexture = glGetUniformLocation(currProgram, "mainTexture");
 	glUniform1i(mainTexture, 0);
+	GLuint objColor = glGetUniformLocation(currProgram, "objColor");
+	glUniform3fv(objColor, 1, (float*)&object.color);
 	gl_has_errors();
 
 	/*GLuint texture_id =

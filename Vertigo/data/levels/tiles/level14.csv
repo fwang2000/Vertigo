@@ -2,13 +2,13 @@
 V,V,V,N
 V,E,E,T
 V,V,V,E
-E,S,E,M
+E,S,E,H
 E,E,V,E
 E,E,V,E
 E,E,V,V
 E,Z,E,E
-E,C,V,M
-C,E,E,M
+E,W,V,C
+W,E,E,C
 E,E,V,E
 E,E,E,E
 W,B,V,E
@@ -22,4 +22,4 @@ E,E,V,E
 E,V,E,E
 E,V,E,T
 E,V,V,E
-E,E,M,F
+E,E,H,F

@@ -56,15 +56,15 @@ private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
-	void on_mouse_click(int button, int action, int mod);
 
 	// Movement Functions
-	void tile_move(Direction direction, Tile* tile, ControlTile* ctile);
+	void tile_move(Direction direction, SwitchTile* tile);
 	void player_move(vec3 movement, Direction direction);
 	void Interact(Tile* tile);
 	void Burn(Entity entity);
 	void UsePower(Direction direction, float power);
 	float count = 0;
+	bool isControlTile(Tile* tile);
 
 	// Fire Attributes
 	vec2 fire_spot;
@@ -85,6 +85,7 @@ private:
 	void restart_game();
 	void load_level();
 	void next_level();
+	void initLevelStatus();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -105,6 +106,9 @@ private:
 	Entity currentObject;
 	GameState gameState = GameState::IDLE;
 	bool sound_on = true;
+
+	int currLevel = 0;
+	int maxLevel = 0;
 
 	Direction currDirection = Direction::RIGHT;
 

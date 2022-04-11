@@ -453,20 +453,6 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			modifications.push_back(value);
 		}
 
-		if (modifications.at(0) == "C") {
-			int f = std::stoi(modifications.at(1));
-			int r = std::stoi(modifications.at(2));
-			int c = std::stoi(modifications.at(3));
-
-			ControlTile* control_tile = (ControlTile*)getTile(Coordinates{ f, r, c });
-
-			int t_f = std::stoi(modifications.at(5));
-			int t_r = std::stoi(modifications.at(6));
-			int t_c = std::stoi(modifications.at(7));
-
-			control_tile->targetTile = (Tile*)getTile(Coordinates{ t_f, t_r, t_c });
-		}
-
 		if (modifications.at(0) == "W") {
 
 			int f = std::stoi(modifications.at(1));
@@ -482,14 +468,22 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			if (modifications.at(4) == "I") {
 
 				switch_tile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+				switch_tile->targetTileState = TileState::I;
+			}
+			else if (modifications.at(4) == "C") {
+
+				switch_tile->targetTile = (ControlTile*)getTile(Coordinates{ t_f, t_r, t_c });
+				switch_tile->targetTileState = TileState::C;
 			}
 			else {
 				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
 				if (target->tileState == TileState::W) {
 					switch_tile->targetTile = (SwitchTile*)target;
+					switch_tile->targetTileState = TileState::W;
 				}
 				else {
 					switch_tile->targetTile = target;
+					switch_tile->targetTileState = TileState::M;
 				}
 				switch_tile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) } ;
 			}
@@ -512,6 +506,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			cTile->startCoords = Coordinates{ f, r, c };
 			cTile->endCoords = Coordinates{ e_f, e_r, e_c };
 			cTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+			cTile->targetTileState = TileState::I;
 		}
 		else if (modifications.at(0) == "T") {
 
@@ -530,13 +525,16 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			if (modifications.at(4) == "I") {
 
 				throwTile->targetTile = (InvisibleTile*)getTile(Coordinates{ t_f, t_r, t_c });
+				throwTile->targetTileState = TileState::I;
 			}
 			else
 			{
 
 				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });
+				target->tileState = TileState::H;
 				throwTile->targetTile = target;
 				throwTile->targetCoords = Coordinates{ std::stoi(modifications.at(8)), std::stoi(modifications.at(9)), std::stoi(modifications.at(10)) };
+				throwTile->targetTileState = TileState::H;
 			}
 		}
 		else if (modifications.at(0) == "G"){
@@ -693,8 +691,6 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 void SwitchTile::action() {
 
-	printf("Switch\n");
-
 	if (toggled) {
 		return;
 	}
@@ -704,7 +700,10 @@ void SwitchTile::action() {
 		targetTile->action();
 	}
 
-	toggled = true;
+	if (targetTile->tileState != TileState::C) {
+
+		toggled = true;
+	}
 }
 
 void UpTile::action() {

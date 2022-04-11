@@ -15,6 +15,7 @@ uniform mat4 translate;
 uniform mat4 scale;
 uniform mat4 view;
 uniform mat4 proj;
+uniform vec3 objColor;
 
 void main()
 {

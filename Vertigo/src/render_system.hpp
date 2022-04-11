@@ -29,7 +29,8 @@ class RenderSystem {
 	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::FIRE, mesh_path("fire.obj")),
 	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::TREE, mesh_path("burnables/tree.obj")),
 	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::GAUGE, mesh_path("gauge.obj")),
-	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMY, mesh_path("enemy.obj"))
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::ENEMY, mesh_path("enemy.obj")),
+	  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::DEVICE, mesh_path("device.obj"))
 	};
 
 	// Make sure these paths remain in sync with the associated enumerators.
@@ -129,6 +130,8 @@ class RenderSystem {
 			textures_path("buttons/button_levels.png"),
 			textures_path("buttons/button_sound_off.png"),
 			textures_path("buttons/button_sound_on.png"),
+			textures_path("burn_target_tile.png"),
+			textures_path("restart.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

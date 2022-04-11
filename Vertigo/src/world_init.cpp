@@ -4,8 +4,6 @@
 Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
-	printf("created\n");
-
 	// Setting initial motion values
 	Motion& motion = registry.motions.emplace(entity);
 	motion.interpolate = true;
@@ -49,9 +47,6 @@ Entity createTile(Tile* tile)
 	case TileState::I:
 		id = TEXTURE_ASSET_ID::INVISIBLE_TILE;
 		break;
-	case TileState::W:
-		id = TEXTURE_ASSET_ID::SWITCH_TILE;
-		break;
 	case TileState::R:
 		id = TEXTURE_ASSET_ID::RIGHT_TILE;
 		break;
@@ -76,8 +71,8 @@ Entity createTile(Tile* tile)
 	case TileState::O:
 		id = TEXTURE_ASSET_ID::CONST_MOV_TILE;
 		break;
-	case TileState::T:
-		id = TEXTURE_ASSET_ID::SWITCH_TILE;
+	case TileState::H:
+		id = TEXTURE_ASSET_ID::BURN_TARGET_TILE;
 		break;
 	case TileState::Z:
 		id = TEXTURE_ASSET_ID::END_TILE;
@@ -112,6 +107,29 @@ Entity createText(Text text) {
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
 	return entity;
+}
+
+void createRestartText(RenderSystem* renderer, vec2 position) {
+	
+	auto entity = Entity();
+	Menu& menu = registry.menus.emplace(entity);
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = vec3(0, position);
+	motion.scale = vec3(0, 0, 0);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::RESTART_TEXT,
+			EFFECT_ASSET_ID::MENU,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
 }
 
 Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix)
@@ -184,6 +202,29 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	);
 }
 
+void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+	auto entity = Entity();
+
+	createObject(entity, pos, translateMatrix, true, vec3(0.3f), 1);
+
+	Object& device = registry.objects.get(entity);
+	device.alpha = 1.0;
+	 
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEVICE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::MARBLE,
+			EFFECT_ASSET_ID::OBJECT,
+			GEOMETRY_BUFFER_ID::DEVICE
+		}
+	);
+
+	Oscillate& oscillate = registry.oscillations.emplace(entity);
+}
+
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 
 	auto entity = Entity();
@@ -244,16 +285,6 @@ void createButtonTile(Entity entity){
 }
 
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scaleVec, int reflect){
-  
-	if (hasMotion){
-		// Setting initial motion values
-		Motion& motion = registry.motions.emplace(entity);
-		motion.interpolate = false;
-		motion.position = vec3(0, 0, 0);
-		motion.destination = vec3(0, 0, 0);
-		motion.velocity = { 0.f , 0.f , 0.f };
-		motion.scale = {1.0f, 1.0f, 1.0f};
-	}
 
 	Object& object = registry.objects.emplace(entity);
 	object.objectPos = pos;
@@ -283,6 +314,17 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 		break;
 	default:
 		break;
+	}
+
+
+	if (hasMotion) {
+		// Setting initial motion values
+		Motion& motion = registry.motions.emplace(entity);
+		motion.interpolate = false;
+		motion.position = vec3(object.model[0][3], object.model[1][3], object.model[2][3]);
+		motion.destination = vec3(0, 0, 0);
+		motion.velocity = { 0.f , 0.f , 0.f };
+		motion.scale = { 1.0f, 1.0f, 1.0f };
 	}
 }
 

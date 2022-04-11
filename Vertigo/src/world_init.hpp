@@ -24,12 +24,16 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 Entity createTile(Tile* tile);
 // the text
 Entity createText(Text text);
+// the restart text
+void createRestartText(RenderSystem* renderer, vec2 position);
 // the fire
 Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the fire's power gauge
 Entity createFireGauge(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the column
 void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+// the device
+void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the constantly moving tile
 void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // the throw tile

@@ -39,6 +39,7 @@ uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform int numLights;
 uniform float alpha;
+uniform vec3 objColor;
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
@@ -48,7 +49,7 @@ layout(location = 0) out vec4 color;
 void main()
 {
 	// ambient
-    vec3 ambient = dirLight.ambient * vcolor;
+    vec3 ambient = dirLight.ambient * vcolor * objColor;
   	
     // diffuse 
     vec3 norm = normalize(normal);
