@@ -713,8 +713,6 @@ void RenderSystem::draw()
 
 mat4 RenderSystem::createViewMatrix()
 {
-	// Not recommended to change as it is hard-coded to match with the 2d projection
-	// See motion
     mat4 view = lookAt(vec3(6.0f, 3.0f, 6.0f),
                        vec3(0.0f, 0.0f, 0.0f),
                        vec3(0.0f, 1.0f, 0.0f));
