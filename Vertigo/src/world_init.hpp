@@ -44,6 +44,5 @@ void createButtonTile(Entity entity, float length);
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
 // the burnable
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
-Entity createMenu(RenderSystem* renderer);
 void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
