@@ -120,8 +120,8 @@ void createRestartText(RenderSystem* renderer, vec2 position) {
 
 	// Initialize the motion
 	Motion& motion = registry.motions.emplace(entity);
-	motion.position = vec3(0.5, 0.5, 1);
-	motion.scale = vec3(0.4, -0.075, 1);
+	motion.position = vec3(0.8, 0.8, 1);
+	motion.scale = vec3(0.4, -0.4, 1);
 
 	registry.renderRequests.insert(
 		entity,

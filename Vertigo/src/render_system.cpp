@@ -87,6 +87,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 			trans = translate(mat4(1.f), motion.position);
 			sca = scale(mat4(1.0f), motion.scale);
 		}
+		if (boxRotate->popup) {
+			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.2f)) * trans;
+		}
 		// Setting uniform values to the currently bound program
 
 		// light properties
@@ -567,7 +570,7 @@ void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 
 	if (registry.motions.has(entity)) {
 		Motion& motion = registry.motions.get(entity);
-		transform.translate(vec2(0.75,0.9));
+		transform.translate(vec2(motion.position.x, motion.position.y));
 		transform.scale(vec2(motion.scale.x, motion.scale.y));
 	}
 
@@ -708,9 +711,9 @@ void RenderSystem::draw()
 	else{
 		for (Entity entity : registry.menuButtons.entities)
 		{
-			drawTexturedMesh(entity, projection_3D, lookAt(vec3(0.0f, 0.0f, 6.0f),
-													vec3(0.0f, 0.0f, 0.0f),
-													vec3(0.0f, 1.0f, 0.0f)));
+			drawTexturedMesh(entity, create3DProjectionMatrixPerspective(w, h), lookAt(vec3(0.0f, 0.0f, 8.0f),
+																				vec3(0.0f, 0.0f, 0.0f),
+																				vec3(0.0f, 1.0f, 0.0f)));
 		}
 		for (Entity entity : registry.menus.entities)
 		{
@@ -758,6 +761,16 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     float const aspect = (float)width / (float)height;
     float const view_distance = screen_cube.size + 0.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
+    return proj;
+}
+
+mat4 RenderSystem::create3DProjectionMatrixPerspective(int width, int height)
+{
+    mat4 proj = mat4(1.0f);
+
+    float const aspect = (float)width / (float)height;
+    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    proj = perspective(20.f, aspect, 1.f, 20.f);
     return proj;
 }
 

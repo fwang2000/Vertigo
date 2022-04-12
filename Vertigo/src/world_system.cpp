@@ -1371,7 +1371,7 @@ void WorldSystem::load_level_menu(){
 
 				glm::mat4 matrix = glm::mat4(1.0f);
 				matrix = scale(glm::mat4(1.0f), vec3(0.85f, -0.85f, 0.85f)) * matrix;
-				matrix = translate(glm::mat4(1.0f), vec3(k - (menu_size-1) / 2.f, -j + (menu_size-1) / 2.f, menu_size / 2.f)) * matrix;
+				matrix = translate(glm::mat4(1.0f), vec3(k - (menu_size-1) / 2.f, - j + (menu_size-1) / 2.f, menu_size / 2.f)) * matrix;
 		
 				b_tile->model = matrix;
 
@@ -1381,6 +1381,7 @@ void WorldSystem::load_level_menu(){
 
 				if (j * menu_size + k == 0){
 					b_tile->highlighted = true;
+					b_tile->popup = true;
 				}
 
 				if (j * menu_size + k < currLevel){
@@ -1449,7 +1450,9 @@ void WorldSystem::change_level_menu(int key){
 	}
 	if (move_to < currLevel){
 		registry.tiles.get(levels[selected_level])->highlighted = false;
+		registry.tiles.get(levels[selected_level])->popup = false;
 		selected_level = move_to;
 		registry.tiles.get(levels[selected_level])->highlighted = true;
+		registry.tiles.get(levels[selected_level])->popup = true;
 	}
 }
