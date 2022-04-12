@@ -278,7 +278,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			Tile* tile = cube.getTile(registry.players.get(player_explorer).playerPos);
 			int dir = static_cast<int>(faceDirection) * -1;
 			Direction trueDirection = mod(currDirection, dir);
-			Coordinates newCoords = searchForMoveTile(trueDirection, tile->coords);
+			Coordinates newCoords = searchForTile(trueDirection, tile->coords);
 			Tile* btile = cube.getTile(newCoords);
 			btile->tileState = TileState::V;
 		}
@@ -836,7 +836,7 @@ void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
 		if (direction == Direction::UP || direction == Direction::DOWN)
 			trueDirection = mod(trueDirection, 2);
 	}
-	Coordinates newCoords = searchForMoveTile(trueDirection, controlTile->coords);
+	Coordinates newCoords = searchForTile(trueDirection, controlTile->coords);
 	Tile* ntile = cube.getTile(newCoords);
 	ControlTile* new_ctile = (ControlTile*)ntile;
 
@@ -1245,47 +1245,6 @@ void WorldSystem::SetSprite(Direction direction) {
 	}
 
 	currDirection = direction;
-}
-
-Coordinates WorldSystem::searchForMoveTile(Direction direction, Coordinates coords) {
-
-	switch (direction)
-	{
-	case Direction::UP:
-		if (coords.r == 0) {
-			return cube.getTile(coords)->adjList[0].first;
-		}
-		else {
-			coords.r--;
-		}
-		break;
-	case Direction::RIGHT:
-		if (coords.c == cube.size - 1) {
-			return cube.getTile(coords)->adjList[1].first;
-		}
-		else {
-			coords.c++;
-		}
-		break;
-	case Direction::DOWN:
-		if (coords.r == cube.size - 1) {
-			return cube.getTile(coords)->adjList[2].first;
-		}
-		else {
-			coords.r++;
-		}
-		break;
-	case Direction::LEFT:
-		if (coords.c == 0) {
-			return cube.getTile(coords)->adjList[3].first;
-		}
-		else {
-			coords.c--;
-		}
-		break;
-	}
-
-	return coords;
 }
 
 Coordinates WorldSystem::searchForTile(Direction direction, Coordinates coords) {
