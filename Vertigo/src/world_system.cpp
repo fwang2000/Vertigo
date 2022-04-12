@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(25) {
+	: level(0) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -472,8 +472,11 @@ void WorldSystem::restart_game() {
 	while (registry.renderRequests.entities.size() > 0)
 		registry.remove_all_components_of(registry.renderRequests.entities.back());
 
+	while (registry.menuButtons.entities.size() > 0)
+		registry.remove_all_components_of(registry.menuButtons.entities.back());
+
 	while (registry.menus.entities.size() > 0)
-		registry.remove_all_components_of(registry.renderRequests.entities.back());
+		registry.remove_all_components_of(registry.menus.entities.back());
 
 	load_level();
 
@@ -535,7 +538,8 @@ void WorldSystem::load_level() {
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::G) {
-					createButtonTile(tile);
+					createButtonTile(tile, 3.0f);
+					cube.faces[i][j][k]->model = translate(glm::mat4(1.0f), vec3(1.0f, 0.f, 0.f)) * cube.faces[i][j][k]->model;
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::W || cube.faces[i][j][k]->tileState == TileState::T) {
@@ -673,7 +677,7 @@ bool WorldSystem::is_over() const {
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
 
-	if (gameState != GameState::IDLE && gameState != GameState::TITLE_SCREEN) {
+	if (gameState != GameState::IDLE && gameState != GameState::TITLE_SCREEN && gameState != GameState::MENU) {
 		return;
 	}
 
@@ -681,34 +685,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
 		if (gameState != GameState::MENU) {
 			gameState = GameState::MENU;
-			menu = createMenu(renderer);
+			load_level_menu();
+			return;
 		}
 	}
 
 	switch (gameState) {
 	case GameState::MENU:
-
 		if (action == GLFW_RELEASE) {
-			switch (key)
-			{
-			case GLFW_KEY_W:
-				changeMenu(0);
-				break;
-			case GLFW_KEY_S:
-				changeMenu(1);
-				break;
-			case GLFW_KEY_D:
-				changeMenu(2);
-				break;
-			case GLFW_KEY_A:
-				changeMenu(3);
-				break;
-			case GLFW_KEY_ENTER:
-				changeMenu(4);
-				break;
-			default:
-				break;
-			}
+			change_level_menu(key);
 		}
 		break;
 
@@ -786,7 +771,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			}
 		}
 
-		if (action == GLFW_PRESS && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ENTER && tile->tileState == TileState::G){
 			ButtonTile* bTile = (ButtonTile*) tile;
 			button_select(bTile);
 		}
@@ -1059,7 +1044,8 @@ void WorldSystem::button_select(ButtonTile* b) {
 			next_level();
 			break;
 		case static_cast<int>(BUTTON::LEVELS):
-			// TODO
+			gameState = GameState::MENU;
+			load_level_menu();
 			break;
 		case static_cast<int>(BUTTON::SOUND):
 			sound_on = !sound_on;
@@ -1077,54 +1063,6 @@ void WorldSystem::button_select(ButtonTile* b) {
 		default:
 			break;
 	}
-}
-
-void WorldSystem::changeMenu(int dir){
-	Menu& curr = registry.menus.get(menu);
-	
-	if ((dir == 4) && (curr.option == 0 || curr.option == 4)) {
-		gameState = GameState::IDLE;
-		cube.reset();
-		faceDirection = Direction::UP;
-		rot.status = BOX_ANIMATION::STILL;
-		restart_game();
-		return;
-	}
-	curr.changeOption(dir);
-
-	TEXTURE_ASSET_ID id = TEXTURE_ASSET_ID::ON_LEVELS;
-
-	switch (curr.option) {
-	case 0:
-		id = TEXTURE_ASSET_ID::ON_X;
-		break;
-	case 1:
-		id = TEXTURE_ASSET_ID::ON_LEVELS;
-		break;
-	case 2:
-		id = TEXTURE_ASSET_ID::ON_SOUND;
-		break;
-	case 3:
-		id = TEXTURE_ASSET_ID::ON_TUTORIAL;
-		break;
-	case 4:
-		id = TEXTURE_ASSET_ID::OFF_X;
-		break;
-	case 5:
-		id = TEXTURE_ASSET_ID::OFF_LEVELS;
-		break;
-	case 6:
-		id = TEXTURE_ASSET_ID::OFF_SOUND;
-		break;
-	case 7:
-		id = TEXTURE_ASSET_ID::OFF_TUTORIAL;
-		break;
-	default:
-		id = TEXTURE_ASSET_ID::ON_X;
-	}
-	
-	RenderRequest& menuRequest = registry.renderRequests.get(menu);
-	menuRequest.used_texture = id;
 }
 
 void WorldSystem::Interact(Tile* tile) 
@@ -1419,4 +1357,99 @@ void WorldSystem::next_level() {
 			Mix_PlayChannel(-1, restart_sound, 0);
 			registry.restartTimer.emplace(player_explorer);
 		}
+}
+
+
+void WorldSystem::load_level_menu(){
+	selected_level = 0;
+
+	for (int i = 0; i < 1; i++){
+		for (int j = 0; j < menu_size; j++) {
+			for (int k = 0; k < menu_size; k++) {
+				ButtonTile* b_tile = new ButtonTile();
+				b_tile->tileState = TileState::G;
+
+				glm::mat4 matrix = glm::mat4(1.0f);
+				matrix = scale(glm::mat4(1.0f), vec3(0.85f, -0.85f, 0.85f)) * matrix;
+				matrix = translate(glm::mat4(1.0f), vec3(k - (menu_size-1) / 2.f, -j + (menu_size-1) / 2.f, menu_size / 2.f)) * matrix;
+		
+				b_tile->model = matrix;
+
+				Entity entity = levels[j * menu_size + k];
+				registry.tiles.insert(entity, b_tile);
+				registry.menuButtons.emplace(entity);
+
+				if (j * menu_size + k == 0){
+					b_tile->highlighted = true;
+				}
+
+				if (j * menu_size + k < currLevel){
+					b_tile->activated = true;
+					registry.renderRequests.insert(
+						entity,
+						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_1 + j * menu_size + k),
+						EFFECT_ASSET_ID::TILE,
+						GEOMETRY_BUFFER_ID::LIGHTING }
+					);
+				}
+				else{
+					b_tile->activated = false;
+					registry.renderRequests.insert(
+						entity,
+						{ (TEXTURE_ASSET_ID)((int)TEXTURE_ASSET_ID::BUTTON_LEVEL_LOCK),
+						EFFECT_ASSET_ID::TILE,
+						GEOMETRY_BUFFER_ID::LIGHTING }
+					);
+				}
+			}
+		}
+	}
+}
+
+void WorldSystem::close_level_menu(){
+	while (registry.menuButtons.entities.size() > 0)
+		registry.remove_all_components_of(registry.menuButtons.entities.back());
+}
+
+void WorldSystem::change_level_menu(int key){
+	int move_to = 0;
+	
+	switch(key){
+	case GLFW_KEY_W:
+		move_to = max(selected_level - menu_size, 0);
+		break;
+	case GLFW_KEY_A:
+		move_to = max(selected_level - 1, 0);
+		break;
+	case GLFW_KEY_S:
+		move_to = min(selected_level + menu_size, maxLevel);
+		break;
+	case GLFW_KEY_D:
+		move_to = min(selected_level + 1, maxLevel);
+		break;
+	case GLFW_KEY_ENTER:
+		level = selected_level + 1;
+		close_level_menu();
+		
+		if (!registry.restartTimer.has(player_explorer)) {
+			gameState = GameState::RESTARTING;
+			Mix_PlayChannel(-1, restart_sound, 0);
+			registry.restartTimer.emplace(player_explorer);
+		}
+		return;
+
+	case GLFW_KEY_ESCAPE:
+		close_level_menu();
+		gameState = GameState::IDLE;
+		step(0);
+		return;
+
+	default:
+		return;
+	}
+	if (move_to < currLevel){
+		registry.tiles.get(levels[selected_level])->highlighted = false;
+		selected_level = move_to;
+		registry.tiles.get(levels[selected_level])->highlighted = true;
+	}
 }

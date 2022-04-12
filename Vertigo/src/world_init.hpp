@@ -39,11 +39,10 @@ void createConstMovingTile(Entity entity, Coordinates pos, glm::mat4 translateMa
 // the throw tile
 void createThrowTile(Entity entity, Coordinates pos, glm::mat4 translateMatrix);
 // the button tile
-void createButtonTile(Entity entity);
+void createButtonTile(Entity entity, float length);
 // general objects
 void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, bool hasMotion, vec3 scale, int reflect);
 // the burnable
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
-Entity createMenu(RenderSystem* renderer);
 void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);

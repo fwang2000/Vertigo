@@ -32,7 +32,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TILE || render_request.used_effect == EFFECT_ASSET_ID::MENU)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
@@ -666,42 +666,56 @@ void RenderSystem::draw()
 	mat4 view = createViewMatrix();
 	mat3 projection = createProjectionMatrix();
 
-	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		RenderRequest& request = registry.renderRequests.get(entity);
+	if (registry.menuButtons.entities.size() == 0){
+		// Draw all textured meshes that have a position and size component
+		for (Entity entity : registry.renderRequests.entities)
+		{
+			RenderRequest& request = registry.renderRequests.get(entity);
 
-		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
-			continue;
+			if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
+				continue;
+			}
+
+			if (request.used_effect == EFFECT_ASSET_ID::FIRE) {
+				continue;
+			}
+
+			if (request.used_effect == EFFECT_ASSET_ID::MENU) {
+				continue;
+			}
+			// Note, its not very efficient to access elements indirectly via the entity
+			// albeit iterating through all Sprites in sequence. A good point to optimize
+			drawTexturedMesh(entity, projection_3D, view);
 		}
 
-		if (request.used_effect == EFFECT_ASSET_ID::FIRE) {
-			continue;
+		for (Entity entity : registry.objects.entities) {
+
+			RenderRequest& request = registry.renderRequests.get(entity);
+
+			if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
+				drawObject(entity, projection_3D, view);
+			}
 		}
 
-		if (request.used_effect == EFFECT_ASSET_ID::MENU) {
-			continue;
+		if (registry.fire.entities.size() != 0) {
+			drawFire(registry.fire.entities.at(0), projection_3D, view);
 		}
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_3D, view);
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
+		}
 	}
-
-	for (Entity entity : registry.objects.entities) {
-
-		RenderRequest& request = registry.renderRequests.get(entity);
-
-		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
-			drawObject(entity, projection_3D, view);
+	else{
+		for (Entity entity : registry.menuButtons.entities)
+		{
+			drawTexturedMesh(entity, projection_3D, lookAt(vec3(0.0f, 0.0f, 6.0f),
+													vec3(0.0f, 0.0f, 0.0f),
+													vec3(0.0f, 1.0f, 0.0f)));
 		}
-	}
-
-	if (registry.fire.entities.size() != 0) {
-		drawFire(registry.fire.entities.at(0), projection_3D, view);
-	}
-
-	for (Entity entity : registry.menus.entities) {
-		drawMenu(entity, projection);
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
+		}
 	}
 
 	// Truely render to the screen
@@ -714,8 +728,6 @@ void RenderSystem::draw()
 
 mat4 RenderSystem::createViewMatrix()
 {
-	// Not recommended to change as it is hard-coded to match with the 2d projection
-	// See motion
     mat4 view = lookAt(vec3(6.0f, 3.0f, 6.0f),
                        vec3(0.0f, 0.0f, 0.0f),
                        vec3(0.0f, 1.0f, 0.0f));
