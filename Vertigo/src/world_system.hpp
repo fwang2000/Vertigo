@@ -99,7 +99,6 @@ private:
 	Cube cube;
 	Object* currBurnable;
 	Rotate rot; // command to rotate all tiles and text and objects
-	Entity menu;
 	Entity fire;
 	Entity fire_gauge;
 	Entity fire_shadow;
@@ -115,11 +114,18 @@ private:
 	// Helper Functions
 	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
 	void button_select(ButtonTile* b);
-	void changeMenu(int dir);
 	Coordinates searchForTile(Direction direction, Coordinates coords);
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateAll(float elapsed_ms_since_last_update);
+
+	// Menu
+	Entity levels[25];
+	int menu_size = 5;
+	void WorldSystem::load_level_menu();
+	void WorldSystem::close_level_menu();
+	void WorldSystem::change_level_menu(int key);
+	int selected_level = 0;
 
 	// Music references
 	Mix_Music* background_music;
@@ -127,6 +133,7 @@ private:
 	Mix_Chunk* finish_sound;
 	Mix_Chunk* fire_sound;
 	Mix_Chunk* switch_sound;
+	Mix_Chunk* switch_fail_sound;
 	Mix_Chunk* move_fail_sound;
 	Mix_Chunk* move_success_sound;
 	Mix_Chunk* restart_sound;

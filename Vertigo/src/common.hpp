@@ -5,6 +5,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+#include <array>
 
 // glfw (OpenGL)
 #define NOMINMAX
@@ -81,3 +82,12 @@ enum class Direction
 Direction mod(Direction a, int b);
 
 typedef float (*TransFuncPtr)(float);
+
+// green - cyan - white - black
+const std::array<vec3, 5> controlTileColors = { 
+	vec3(0.f, 1.f, 0.f),
+	vec3(0.f, 1.f, 1.f),
+	vec3(1.f, 1.f, 1.f),
+	vec3(1.f, 0.5f, 0.f), 
+	vec3(0.f, 0.f, 0.f)
+};

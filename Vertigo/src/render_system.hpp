@@ -130,6 +130,23 @@ class RenderSystem {
 			textures_path("buttons/button_levels.png"),
 			textures_path("buttons/button_sound_off.png"),
 			textures_path("buttons/button_sound_on.png"),
+			textures_path("buttons/levels/Slide1.PNG"),
+			textures_path("buttons/levels/Slide2.PNG"),
+			textures_path("buttons/levels/Slide3.PNG"),
+			textures_path("buttons/levels/Slide4.PNG"),
+			textures_path("buttons/levels/Slide5.PNG"),
+			textures_path("buttons/levels/Slide6.PNG"),
+			textures_path("buttons/levels/Slide7.PNG"),
+			textures_path("buttons/levels/Slide8.PNG"),
+			textures_path("buttons/levels/Slide9.PNG"),
+			textures_path("buttons/levels/Slide10.PNG"),
+			textures_path("buttons/levels/Slide11.PNG"),
+			textures_path("buttons/levels/Slide12.PNG"),
+			textures_path("buttons/levels/Slide13.PNG"),
+			textures_path("buttons/levels/Slide14.PNG"),
+			textures_path("buttons/levels/Slide15.PNG"),
+			textures_path("buttons/levels/Slide16.PNG"),
+			textures_path("buttons/levels/lock.png"),
 			textures_path("burn_target_tile.png"),
 			textures_path("restart.png")
 	};
@@ -187,6 +204,7 @@ public:
 	mat4 createViewMatrix();
 	mat3 RenderSystem::createProjectionMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
+	mat4 create3DProjectionMatrixPerspective(int width, int height);
 	void setCube(Cube cube);
 
 private:

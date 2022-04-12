@@ -433,8 +433,8 @@ bool Cube::loadTextFromExcelFile(std::string filename) {
 }
 
 bool Cube::loadModificationsFromExcelFile(std::string filename) {
-
 	std::ifstream file(filename);
+	unsigned int colorIdx = 0;	// for the control/move tile color
 
 	if (file.peek() == std::ifstream::traits_type::eof()) {
 		return true;
@@ -472,8 +472,16 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 			}
 			else if (modifications.at(4) == "C") {
 
-				switch_tile->targetTile = (ControlTile*)getTile(Coordinates{ t_f, t_r, t_c });
+				switch_tile->targetTile = (ControlTile*)getTile(Coordinates{ t_f, t_r, t_c });;
 				switch_tile->targetTileState = TileState::C;
+				switch_tile->color = colorIdx;
+				switch_tile->targetTile->color = colorIdx;
+				if (colorIdx < controlTileColors.size()) colorIdx++;
+				if (modifications.size() > 8) {
+					int direction = std::stoi(modifications.at(8));
+					switch_tile->diff = direction;
+				}
+
 			}
 			else {
 				Tile* target = getTile(Coordinates{ t_f, t_r, t_c });

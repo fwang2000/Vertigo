@@ -124,13 +124,14 @@ struct Tile
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
 	bool popup = false;
+	int color = -1;
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
 };
 
 struct ControlTile : public Tile {
-	bool controled = 0;
+	bool controled = 0; // 0 is not controlled, 1 is controlled
 };
 
 struct UpTile : public Tile {
@@ -145,6 +146,7 @@ struct SwitchTile : public Tile {
 	TileState targetTileState;
 	Coordinates targetCoords;
 	bool toggled = false;
+	int diff = 0; // to compensate for move tiles being on a different face
 	virtual void action();
 };
 
@@ -161,6 +163,7 @@ struct ConstMovingTile : public SwitchTile {
 
 struct ButtonTile : public Tile {
 	int button_id = 0;
+	bool activated = true;
 	virtual void action();
 };
 
@@ -242,6 +245,10 @@ struct Menu
 	bool sound = true;
 	void changeOption(int dir);
 	void toggleSound() {sound = !sound;}
+};
+
+struct MenuButtons
+{
 };
 
 struct Button
@@ -454,7 +461,24 @@ enum class TEXTURE_ASSET_ID {
 	BUTTON_LEVELS = BUTTON_START + 1,
 	BUTTON_SOUND_OFF = BUTTON_LEVELS + 1,
 	BUTTON_SOUND_ON = BUTTON_SOUND_OFF + 1,
-	BURN_TARGET_TILE = BUTTON_SOUND_ON + 1,
+	BUTTON_LEVEL_1 = BUTTON_SOUND_ON + 1,
+	BUTTON_LEVEL_2 = BUTTON_LEVEL_1 + 1,
+	BUTTON_LEVEL_3 = BUTTON_LEVEL_2 + 1,
+	BUTTON_LEVEL_4 = BUTTON_LEVEL_3 + 1,
+	BUTTON_LEVEL_5 = BUTTON_LEVEL_4 + 1,
+	BUTTON_LEVEL_6 = BUTTON_LEVEL_5 + 1,
+	BUTTON_LEVEL_7 = BUTTON_LEVEL_6 + 1,
+	BUTTON_LEVEL_8 = BUTTON_LEVEL_7 + 1,
+	BUTTON_LEVEL_9 = BUTTON_LEVEL_8 + 1,
+	BUTTON_LEVEL_10 = BUTTON_LEVEL_9 + 1,
+	BUTTON_LEVEL_11 = BUTTON_LEVEL_10 + 1,
+	BUTTON_LEVEL_12 = BUTTON_LEVEL_11 + 1,
+	BUTTON_LEVEL_13 = BUTTON_LEVEL_12 + 1,
+	BUTTON_LEVEL_14 = BUTTON_LEVEL_13 + 1,
+	BUTTON_LEVEL_15 = BUTTON_LEVEL_14 + 1,
+	BUTTON_LEVEL_16 = BUTTON_LEVEL_15 + 1,
+	BUTTON_LEVEL_LOCK = BUTTON_LEVEL_16 + 1,
+	BURN_TARGET_TILE = BUTTON_LEVEL_LOCK + 1,
 	RESTART_TEXT = BURN_TARGET_TILE + 1,
 	TEXTURE_COUNT = RESTART_TEXT + 1
 };

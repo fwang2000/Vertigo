@@ -42,16 +42,19 @@ uniform DirLight dirLight;
 uniform PointLight pointLights[NR_POINT_LIGHTS];
 uniform int numLights;
 uniform int highlighted;
+uniform vec3 color;
 
 vec3 CalcPointLight(PointLight light, vec3 normal, vec3 fragPos, vec3 viewDir);
 
 void main()
 {	
+    vec4 vcolor = texture(material.diffuse, texCoord);
+    vcolor = (vcolor * vcolor.w) + (vec4(color, 1.f) * (1 - vcolor.w));
     if (highlighted == 1) {
-        FragColor = texture(material.diffuse, texCoord);
+        FragColor = vcolor;
     } else {
         // ambient
-        vec3 ambient = dirLight.ambient * texture(material.diffuse, texCoord).rgb;
+        vec3 ambient = dirLight.ambient * vcolor.rgb;
 
         // diffuse 
         vec3 norm = normalize(normal);

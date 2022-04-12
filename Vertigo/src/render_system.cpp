@@ -32,7 +32,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TILE || render_request.used_effect == EFFECT_ASSET_ID::MENU)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
@@ -88,12 +88,12 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 			sca = scale(mat4(1.0f), motion.scale);
 		}
 		if (boxRotate->popup) {
-			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.5f)) * trans;
+			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.2f)) * trans;
 		}
 		// Setting uniform values to the currently bound program
 
 		// light properties
-		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
@@ -104,7 +104,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
         glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
 
 		std::string pointLightStr = "pointLights[0]";
-		for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+		for (unsigned int i = 0; i < registry.lightSources.entities.size(); i++) {
 			Billboard& object = registry.billboards.get(registry.lightSources.entities[i]);
 			pointLightStr[12] = '0' + i;
 			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), object.model[3].x, object.model[3].y, object.model[3].z);
@@ -117,6 +117,10 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 		}
 		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
 		glUniform1i(glGetUniformLocation(currProgram, "highlighted"), boxRotate->highlighted);
+		if (boxRotate->color != -1)
+			glUniform3fv(glGetUniformLocation(currProgram, "color"), 1, (float *)&controlTileColors[boxRotate->color]);
+		else
+			glUniform3f(glGetUniformLocation(currProgram, "color"), 0.f, 0.f, 0.f);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
 		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
@@ -443,7 +447,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	// Setting uniform values to the currently bound program
 
 	// light properties
-	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
@@ -454,7 +458,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 30.f);
 
 	std::string pointLightStr = "pointLights[0]";
-	for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+	for (unsigned int i = 0; i < registry.lightSources.entities.size(); i++) {
 		Billboard& billboard = registry.billboards.get(registry.lightSources.entities[i]);
 		pointLightStr[12] = '0' + i;
 		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), billboard.model[3].x, billboard.model[3].y, billboard.model[3].z);
@@ -566,7 +570,7 @@ void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 
 	if (registry.motions.has(entity)) {
 		Motion& motion = registry.motions.get(entity);
-		transform.translate(vec2(0.75,0.9));
+		transform.translate(vec2(motion.position.x, motion.position.y));
 		transform.scale(vec2(motion.scale.x, motion.scale.y));
 	}
 
@@ -665,42 +669,56 @@ void RenderSystem::draw()
 	mat4 view = createViewMatrix();
 	mat3 projection = createProjectionMatrix();
 
-	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
-	{
-		RenderRequest& request = registry.renderRequests.get(entity);
+	if (registry.menuButtons.entities.size() == 0){
+		// Draw all textured meshes that have a position and size component
+		for (Entity entity : registry.renderRequests.entities)
+		{
+			RenderRequest& request = registry.renderRequests.get(entity);
 
-		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
-			continue;
+			if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
+				continue;
+			}
+
+			if (request.used_effect == EFFECT_ASSET_ID::FIRE) {
+				continue;
+			}
+
+			if (request.used_effect == EFFECT_ASSET_ID::MENU) {
+				continue;
+			}
+			// Note, its not very efficient to access elements indirectly via the entity
+			// albeit iterating through all Sprites in sequence. A good point to optimize
+			drawTexturedMesh(entity, projection_3D, view);
 		}
 
-		if (request.used_effect == EFFECT_ASSET_ID::FIRE) {
-			continue;
+		for (Entity entity : registry.objects.entities) {
+
+			RenderRequest& request = registry.renderRequests.get(entity);
+
+			if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
+				drawObject(entity, projection_3D, view);
+			}
 		}
 
-		if (request.used_effect == EFFECT_ASSET_ID::MENU) {
-			continue;
+		if (registry.fire.entities.size() != 0) {
+			drawFire(registry.fire.entities.at(0), projection_3D, view);
 		}
-		// Note, its not very efficient to access elements indirectly via the entity
-		// albeit iterating through all Sprites in sequence. A good point to optimize
-		drawTexturedMesh(entity, projection_3D, view);
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
+		}
 	}
-
-	for (Entity entity : registry.objects.entities) {
-
-		RenderRequest& request = registry.renderRequests.get(entity);
-
-		if (request.used_effect == EFFECT_ASSET_ID::OBJECT) {
-			drawObject(entity, projection_3D, view);
+	else{
+		for (Entity entity : registry.menuButtons.entities)
+		{
+			drawTexturedMesh(entity, create3DProjectionMatrixPerspective(w, h), lookAt(vec3(0.0f, 0.0f, 8.0f),
+																				vec3(0.0f, 0.0f, 0.0f),
+																				vec3(0.0f, 1.0f, 0.0f)));
 		}
-	}
-
-	if (registry.fire.entities.size() != 0) {
-		drawFire(registry.fire.entities.at(0), projection_3D, view);
-	}
-
-	for (Entity entity : registry.menus.entities) {
-		drawMenu(entity, projection);
+		for (Entity entity : registry.menus.entities)
+		{
+			drawMenu(entity, projection);
+		}
 	}
 
 	// Truely render to the screen
@@ -713,8 +731,6 @@ void RenderSystem::draw()
 
 mat4 RenderSystem::createViewMatrix()
 {
-	// Not recommended to change as it is hard-coded to match with the 2d projection
-	// See motion
     mat4 view = lookAt(vec3(6.0f, 3.0f, 6.0f),
                        vec3(0.0f, 0.0f, 0.0f),
                        vec3(0.0f, 1.0f, 0.0f));
@@ -743,8 +759,18 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    float const view_distance = screen_cube.size + 0.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
+    return proj;
+}
+
+mat4 RenderSystem::create3DProjectionMatrixPerspective(int width, int height)
+{
+    mat4 proj = mat4(1.0f);
+
+    float const aspect = (float)width / (float)height;
+    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    proj = perspective(20.f, aspect, 1.f, 20.f);
     return proj;
 }
 
