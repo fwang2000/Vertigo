@@ -204,6 +204,7 @@ public:
 	mat4 createViewMatrix();
 	mat3 RenderSystem::createProjectionMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
+	mat4 create3DProjectionMatrixPerspective(int width, int height);
 	void setCube(Cube cube);
 
 private:
