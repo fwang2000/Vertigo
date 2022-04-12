@@ -1,7 +1,7 @@
 # Vertigo
 Isometric Puzzle Game built with C++ and OpenGL
 
-run chicken.exe to start the program
+run vertigo.exe to start the program
 
 world_init.cpp (called in world_syste.cpp to generate objects):
 * createExplorer - creating player (main character)
@@ -9,6 +9,8 @@ world_init.cpp (called in world_syste.cpp to generate objects):
 * createTileShadow - creating the shadows under the tiles for parallax effect (moves slower/faster when nearer/further from the player)
 * createFire - creating fire (main character will pick up and have interaction with different object)
 * createObject - creating objects (objects will block main character to move and have interaction with fire)
+* createEnemy - creating the enemy AI
+* createLight - creating a point light
 
 world_system.cpp:
 * step - Update our game world
@@ -30,6 +32,6 @@ render_system.cpp:
 physics_system.cpp:
 * PhysicsSystem::oscillate - Oscillate objects will have a offset of a certain amount which varies based on time
 
-grace day remarks:
-Is it possible to carry over our granted graceday to future milestones?
-One of our groupmates drop the course so we were granted for 3 extra grace days from discussion with Alla.
+ai_system.cpp:
+* AISystem::step - checks if its the enemy's turn, then does a BFS search to find the shortest path to the player
+* enemyTranslate/enemyTranslateFace - sets up the enemy's animation when moving to another tile
