@@ -332,6 +332,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Entity entity : registry.oscillations.entities) {
+
+		if (!registry.objects.has(entity)) {
+			continue;
+		}
+
+		Object& device = registry.objects.get(entity);
+		Motion& motion = registry.motions.get(entity);
+		device.model = device.model * rotate(glm::mat4(1.0f), radians(motion.rotation), vec3(0,1,0));
+	}
+
 	return true;
 }
 
