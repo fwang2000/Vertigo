@@ -41,6 +41,7 @@ const int window_width_px = 1200;
 const int window_height_px = 1200;
 
 const float restart_time = 900.f;
+const float popup_height = 0.2f;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

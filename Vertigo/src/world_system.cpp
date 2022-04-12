@@ -841,6 +841,7 @@ void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
 		new_ctile->highlighted = true;
 		new_ctile->controled = 1;
 		new_ctile->color = controlTile->color;
+		new_ctile->popup = true;
 		next_request.used_texture = TEXTURE_ASSET_ID::CONTROL_TILE;
 
 		Entity cur_tile_entity = getTileFromRegistry(controlTile->coords);
@@ -849,6 +850,7 @@ void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
 		controlTile->tileState = TileState::E;
 		controlTile->highlighted = false;
     	controlTile->color = -1;
+		controlTile->popup = false;
 
 		tile->targetTile = new_ctile;
 	}
@@ -1107,6 +1109,7 @@ void WorldSystem::Interact(Tile* tile)
 		}
 		c_tile->controled = !c_tile->controled;
 		c_tile->highlighted = !c_tile->highlighted;
+		c_tile->popup = !c_tile->popup;
 	}
 	else {
 
