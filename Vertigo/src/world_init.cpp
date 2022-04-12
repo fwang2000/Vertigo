@@ -209,7 +209,7 @@ void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	createObject(entity, pos, translateMatrix, true, vec3(0.3f), 1);
 
 	Object& device = registry.objects.get(entity);
-	device.alpha = 1.0;
+	device.alpha = 0.5;
 	 
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::DEVICE);
 	registry.meshPtrs.emplace(entity, &mesh);
@@ -247,6 +247,10 @@ void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	}
 
 	o.amplitude = o.center;
+
+	Motion& motion = registry.motions.get(entity);
+	motion.rotation = rand() % 10 + 1;
+
 }
 
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
