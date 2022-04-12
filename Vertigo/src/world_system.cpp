@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(12) {
+	: level(25) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -31,6 +31,8 @@ WorldSystem::~WorldSystem() {
 		Mix_FreeChunk(fire_sound);
 	if (switch_sound != nullptr)
 		Mix_FreeChunk(switch_sound);
+	if (switch_fail_sound != nullptr)
+		Mix_FreeChunk(switch_fail_sound);
 	if (move_fail_sound != nullptr)
 		Mix_FreeChunk(move_fail_sound);
 	if (move_success_sound != nullptr)
@@ -109,12 +111,14 @@ GLFWwindow* WorldSystem::create_window() {
 	finish_sound = Mix_LoadWAV(audio_path("finish.wav").c_str());
 	fire_sound = Mix_LoadWAV(audio_path("fire.wav").c_str());
 	switch_sound = Mix_LoadWAV(audio_path("switch.wav").c_str());
+	switch_fail_sound = Mix_LoadWAV(audio_path("switchfail.wav").c_str());
 	move_fail_sound = Mix_LoadWAV(audio_path("movefail.wav").c_str());
 	move_success_sound = Mix_LoadWAV(audio_path("movesuccess.wav").c_str());
 	restart_sound = Mix_LoadWAV(audio_path("restart.wav").c_str());
 
-	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || move_fail_sound == nullptr || move_success_sound == nullptr || restart_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
+	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || 
+		move_fail_sound == nullptr || move_success_sound == nullptr || restart_sound == nullptr || switch_fail_sound == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("time-9307.wav").c_str(),
 			audio_path("burn.wav").c_str(),
 			audio_path("finish.wav").c_str(),
@@ -122,7 +126,8 @@ GLFWwindow* WorldSystem::create_window() {
 			audio_path("switch.wav").c_str(),
 			audio_path("movefail.wav").c_str(),
 			audio_path("movesuccess.wav").c_str(),
-			audio_path("restart.wav").c_str());
+			audio_path("restart.wav").c_str(),
+			audio_path("switchfail.wav").c_str());
 		return nullptr;
 	}
 
@@ -289,6 +294,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			if (tile->tileState == TileState::Z) {
 				Mix_PlayChannel(-1, finish_sound, 0);
 				next_level();
+				return true;
 			}
 
 			// check if enemies need to move
@@ -602,7 +608,10 @@ void WorldSystem::load_level() {
 				device.color = vec3(1, 1, 0);
 				break;
 			case TileState::C:
-				device.color = vec3(1, 0, 1);
+				if (t->color == -1)
+					device.color = vec3(1, 0, 1);
+				else
+					device.color = controlTileColors[t->color];
 				break;
 			case TileState::M:
 			case TileState::W:
@@ -766,8 +775,10 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 				}
 				break;
 			case GLFW_KEY_I:
-				if (tile->tileState == TileState::B) { break; }
-				Mix_PlayChannel(-1, switch_sound, 0);
+				if (tile->tileState == TileState::B) {
+					Mix_PlayChannel(-1, switch_fail_sound, 0);
+					break; 
+				}
 				Interact(tile);
 				break;
 			default:
@@ -818,11 +829,17 @@ void WorldSystem::on_mouse_move(vec2 mouse_position)
 }
 
 void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
+	ControlTile* controlTile = (ControlTile*)tile->targetTile;
 
-	Tile* controlTile = tile->targetTile;
-
-	int dir = static_cast<int>(faceDirection) * -1;
+	int dir = (static_cast<int>(faceDirection) + tile->diff) * -1;
 	Direction trueDirection = mod(direction, dir);
+	if (controlTile->direction == FACE_DIRECTION::LEFT || controlTile->direction == FACE_DIRECTION::BACK) {
+		if (direction == Direction::LEFT || direction == Direction::RIGHT)
+			trueDirection = mod(trueDirection, 2);
+	} else if (controlTile->direction == FACE_DIRECTION::BOTTOM) {
+		if (direction == Direction::UP || direction == Direction::DOWN)
+			trueDirection = mod(trueDirection, 2);
+	}
 	Coordinates newCoords = searchForMoveTile(trueDirection, controlTile->coords);
 	Tile* ntile = cube.getTile(newCoords);
 	ControlTile* new_ctile = (ControlTile*)ntile;
@@ -838,7 +855,7 @@ void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
 		new_ctile->tileState = TileState::C;
 		new_ctile->highlighted = true;
 		new_ctile->controled = 1;
-    new_ctile->popup = true;
+		new_ctile->color = controlTile->color;
 		next_request.used_texture = TEXTURE_ASSET_ID::CONTROL_TILE;
 
 		Entity cur_tile_entity = getTileFromRegistry(controlTile->coords);
@@ -846,7 +863,7 @@ void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {
 		cur_request.used_texture = TEXTURE_ASSET_ID::EMPTY;
 		controlTile->tileState = TileState::E;
 		controlTile->highlighted = false;
-    controlTile->popup = false;
+    	controlTile->color = -1;
 
 		tile->targetTile = new_ctile;
 	}
@@ -1112,7 +1129,9 @@ void WorldSystem::changeMenu(int dir){
 
 void WorldSystem::Interact(Tile* tile) 
 {
+
 	if (tile->tileState != TileState::W && tile->tileState != TileState::O && tile->tileState != TileState::T) {
+		Mix_PlayChannel(-1, switch_fail_sound, 0);
 		return;
 	}
 	SwitchTile* s_tile = (SwitchTile*)tile;
@@ -1129,24 +1148,32 @@ void WorldSystem::Interact(Tile* tile)
 	RenderRequest& switchRequest = registry.renderRequests.get(successTile);
 
 	if (s_tile->targetTile->tileState == TileState::I) {
-
 		Entity t = getTileFromRegistry(s_tile->targetTile->coords);
 		RenderRequest& request = registry.renderRequests.get(t);
 		request.used_texture = TEXTURE_ASSET_ID::TILE;
 	}
 	else if (s_tile->targetTile->tileState == TileState::C) {
 
-		Entity tile_entity = getTileFromRegistry(s_tile->targetTile->coords);
-		Tile* tile = cube.getTile(s_tile->targetTile->coords);
-		ControlTile* c_tile = (ControlTile*)tile;
-		Mix_PlayChannel(-1, switch_sound, 0);
+		// Entity tile_entity = getTileFromRegistry(s_tile->targetTile->coords);
+		ControlTile* c_tile = (ControlTile*)cube.getTile(s_tile->targetTile->coords);
+		// ControlTile* c_tile = (ControlTile*)tile;
+		// if enemy is on the tile, make error sound and do nothing
+		if (registry.enemies.entities.size() > 0) {
+			Entity enemy = registry.enemies.entities[0];
+			Object& obj = registry.objects.get(enemy);
+			if (c_tile->currentPos.equal(obj.objectPos)) {
+				Mix_PlayChannel(-1, switch_fail_sound, 0);
+				gameState = GameState::IDLE;
+				return;
+			}
+		}
 		c_tile->controled = !c_tile->controled;
 		c_tile->highlighted = !c_tile->highlighted;
 	}
 	else {
 
 		if (s_tile->targetTile->tileState == TileState::E) {
-
+			Mix_PlayChannel(-1, switch_fail_sound, 0);
 			gameState = GameState::IDLE;
 			return;
 		}
@@ -1183,7 +1210,7 @@ void WorldSystem::Interact(Tile* tile)
 		RenderRequest& s_request = registry.renderRequests.get(stile_entity);
 		s_request.used_texture = TEXTURE_ASSET_ID::CONST_MOV_TILE_SUCCESS;
 	}
-
+	Mix_PlayChannel(-1, switch_sound, 0);
 	s_tile->action();
 
 	gameState = GameState::IDLE;

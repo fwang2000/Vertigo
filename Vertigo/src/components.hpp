@@ -123,14 +123,14 @@ struct Tile
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
-	bool popup = false;
+	int color = -1;
 	virtual void action() { return; };
 	
 	void move(vec2 translation, vec2 delta_coords);
 };
 
 struct ControlTile : public Tile {
-	bool controled = 0;
+	bool controled = 0; // 0 is not controlled, 1 is controlled
 };
 
 struct UpTile : public Tile {
@@ -145,6 +145,7 @@ struct SwitchTile : public Tile {
 	TileState targetTileState;
 	Coordinates targetCoords;
 	bool toggled = false;
+	int diff = 0; // to compensate for move tiles being on a different face
 	virtual void action();
 };
 

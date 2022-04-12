@@ -87,13 +87,10 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 			trans = translate(mat4(1.f), motion.position);
 			sca = scale(mat4(1.0f), motion.scale);
 		}
-		if (boxRotate->popup) {
-			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.5f)) * trans;
-		}
 		// Setting uniform values to the currently bound program
 
 		// light properties
-		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
@@ -104,7 +101,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
         glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 64.f);
 
 		std::string pointLightStr = "pointLights[0]";
-		for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+		for (unsigned int i = 0; i < registry.lightSources.entities.size(); i++) {
 			Billboard& object = registry.billboards.get(registry.lightSources.entities[i]);
 			pointLightStr[12] = '0' + i;
 			glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), object.model[3].x, object.model[3].y, object.model[3].z);
@@ -117,6 +114,10 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 		}
 		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
 		glUniform1i(glGetUniformLocation(currProgram, "highlighted"), boxRotate->highlighted);
+		if (boxRotate->color != -1)
+			glUniform3fv(glGetUniformLocation(currProgram, "color"), 1, (float *)&controlTileColors[boxRotate->color]);
+		else
+			glUniform3f(glGetUniformLocation(currProgram, "color"), 0.f, 0.f, 0.f);
 		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
 		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
 		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
@@ -443,7 +444,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	// Setting uniform values to the currently bound program
 
 	// light properties
-	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 0.f, 0.f, 6.0f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
@@ -454,7 +455,7 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	glUniform1f(glGetUniformLocation(currProgram, "material.shininess"), 30.f);
 
 	std::string pointLightStr = "pointLights[0]";
-	for (int i = 0; i < registry.lightSources.entities.size(); i++) {
+	for (unsigned int i = 0; i < registry.lightSources.entities.size(); i++) {
 		Billboard& billboard = registry.billboards.get(registry.lightSources.entities[i]);
 		pointLightStr[12] = '0' + i;
 		glUniform3f(glGetUniformLocation(currProgram, (pointLightStr + ".position").c_str()), billboard.model[3].x, billboard.model[3].y, billboard.model[3].z);
@@ -743,7 +744,7 @@ mat4 RenderSystem::create3DProjectionMatrix(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    float const view_distance = screen_cube.size + 0.5f; // this number should match the dimension of our box - 0.5;
     proj = ortho(-aspect * view_distance, aspect * view_distance, -view_distance, view_distance, -1000.f, 1000.f);
     return proj;
 }

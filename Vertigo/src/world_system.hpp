@@ -127,6 +127,7 @@ private:
 	Mix_Chunk* finish_sound;
 	Mix_Chunk* fire_sound;
 	Mix_Chunk* switch_sound;
+	Mix_Chunk* switch_fail_sound;
 	Mix_Chunk* move_fail_sound;
 	Mix_Chunk* move_success_sound;
 	Mix_Chunk* restart_sound;

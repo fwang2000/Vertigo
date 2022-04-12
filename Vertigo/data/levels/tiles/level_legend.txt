@@ -1,5 +1,6 @@
 Letter Reference of Tiles:
 
+A: AI enemy
 B: Burnable
 E: Empty
 F: Fire
