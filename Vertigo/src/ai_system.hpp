@@ -13,6 +13,7 @@ public:
 	AISystem(WorldSystem& wrldSystem): worldSystem(wrldSystem) {};
 
 	void step();
+	bool BFS(Entity entity);
 private:
 	WorldSystem& worldSystem;
 };

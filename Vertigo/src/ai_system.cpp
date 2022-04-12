@@ -105,13 +105,10 @@ void enemyTranslateFace(Tile* current, Tile* destination, Enemy& enemy) {
 	}
 }
 
-void AISystem::step()
+// BFS that finds the shortest path from player to enemy
+bool AISystem::BFS(Entity entity)
 {
-	if (registry.enemies.entities.size() == 0) return;
-	Entity entity = registry.enemies.entities[0];
 	Enemy& enemy = registry.enemies.get(entity);
-	if (worldSystem.gameState != GameState::ENEMY_MOVE || enemy.moving) return;
-	// BFS that finds the shortest path from player to enemy
 	Player& player = registry.players.components[0]; // assuming only one player
 	Object& object = registry.objects.get(entity);
 	Cube& cube = worldSystem.cube;
@@ -148,15 +145,29 @@ void AISystem::step()
 
 				enemy.moving = true;
 				object.objectPos = cur;
-				return;
+				return true;
 			} else {
 				if (newTile->tileState != TileState::B && newTile->tileState != TileState::E && newTile->tileState != TileState::I &&
-					newTile->tileState != TileState::N && newTile->tileState != TileState::O) { // TODO: figure out all tiles that cannot be moved to
+					newTile->tileState != TileState::N && newTile->tileState != TileState::O && !worldSystem.enemyOnTile(newTile->coords)) { // TODO: figure out all tiles that cannot be moved to
 						q.push(newCoord);
 					}
 			}
 		}
 	}
-	// if here then there is no way to reach the player
-	worldSystem.gameState = GameState::IDLE;
+	return false;
+}
+
+void AISystem::step()
+{
+	if (worldSystem.gameState != GameState::ENEMY_SEARCH) return;
+	for (Entity entity : registry.enemies.entities) {
+		// BFS that finds the shortest path from player to enemy
+		if (BFS(entity))
+			worldSystem.moving_enemies.insert(int(entity));
+	}
+	if (worldSystem.moving_enemies.empty()) {
+		worldSystem.gameState = GameState::IDLE;
+	} else {
+		worldSystem.gameState = GameState::ENEMY_MOVE;
+	}
 }
