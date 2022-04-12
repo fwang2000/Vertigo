@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(6) {
+	: level(0) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
