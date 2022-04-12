@@ -567,7 +567,7 @@ void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 
 	if (registry.motions.has(entity)) {
 		Motion& motion = registry.motions.get(entity);
-		transform.translate(vec2(0.75,0.9));
+		transform.translate(vec2(motion.position.x, motion.position.y));
 		transform.scale(vec2(motion.scale.x, motion.scale.y));
 	}
 
