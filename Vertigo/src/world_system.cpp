@@ -1119,6 +1119,16 @@ void WorldSystem::Interact(Tile* tile)
 			return;
 		}
 
+		// if enemy is on the move tile, disable the switch
+		if (registry.enemies.entities.size() > 0) {
+			Entity enemy = registry.enemies.entities[0];
+			Object& obj = registry.objects.get(enemy);
+			if (s_tile->targetTile->coords.equal(obj.objectPos)) {
+				Mix_PlayChannel(-1, switch_fail_sound, 0);
+				gameState = GameState::IDLE;
+				return;
+			}
+		}
 		Entity src_tile_entity = getTileFromRegistry(s_tile->targetTile->coords);
 		Tile* src_tile = cube.getTile(s_tile->targetTile->coords);
 		RenderRequest& src_request = registry.renderRequests.get(src_tile_entity);
