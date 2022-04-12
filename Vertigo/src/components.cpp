@@ -258,7 +258,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(s_tile);
 						s_tile->coords = { i, y_coord, x_coord };
-						s_tile->currentPos = s_tile->coords;
 						s_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -270,7 +269,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(u_tile);
 						u_tile->coords = { i, y_coord, x_coord };
-						u_tile->currentPos = u_tile->coords;
 						u_tile->direction = static_cast<FACE_DIRECTION>(i);
 						u_tile->dir = Direction::DOWN;
 						break;
@@ -283,7 +281,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(u_tile);
 						u_tile->coords = { i, y_coord, x_coord };
-						u_tile->currentPos = u_tile->coords;
 						u_tile->direction = static_cast<FACE_DIRECTION>(i);
 						u_tile->dir = Direction::RIGHT;
 						break;
@@ -296,7 +293,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(u_tile);
 						u_tile->coords = { i, y_coord, x_coord };
-						u_tile->currentPos = u_tile->coords;
 						u_tile->direction = static_cast<FACE_DIRECTION>(i);
 						u_tile->dir = Direction::UP;
 						break;
@@ -309,7 +305,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(u_tile);
 						u_tile->coords = { i, y_coord, x_coord };
-						u_tile->currentPos = u_tile->coords;
 						u_tile->direction = static_cast<FACE_DIRECTION>(i);
 						u_tile->dir = Direction::LEFT;
 						break;
@@ -322,7 +317,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(i_tile);
 						i_tile->coords = { i, y_coord, x_coord };
-						i_tile->currentPos = i_tile->coords;
 						i_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -334,7 +328,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(c_tile);
 						c_tile->coords = { i, y_coord, x_coord };
-						c_tile->currentPos = c_tile->coords;
 						c_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -346,7 +339,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(c_tile);
 						c_tile->coords = { i, y_coord, x_coord };
-						c_tile->currentPos = c_tile->coords;
 						c_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -358,7 +350,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(c_tile);
 						c_tile->coords = { i, y_coord, x_coord };
-						c_tile->currentPos = c_tile->coords;
 						c_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -370,7 +361,6 @@ bool Cube::loadFromExcelFile(std::string filename) {
 
 						row.push_back(tile);
 						tile->coords = { i, y_coord, x_coord };
-						tile->currentPos = tile->coords;
 						tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
@@ -770,38 +760,6 @@ void BurnableTile::action() {
 		this->tileState = TileState::V;
 	}
 }
-
-void Tile::move(vec2 t, vec2 delta_coord) {
-
-	vec3 translation = vec3(0);
-
-	switch (direction) {
-	case FACE_DIRECTION::FRONT:
-		translation = vec3(t.x, t.y, 0);
-		break;
-	case FACE_DIRECTION::LEFT:
-		translation = vec3(0, t.y, -t.x);
-		break;
-	case FACE_DIRECTION::RIGHT:
-		translation = vec3(0, t.y, -t.x);
-		break;
-	case FACE_DIRECTION::TOP:
-		translation = vec3(t.x, 0, -t.y);
-		break;
-	case FACE_DIRECTION::BOTTOM:
-		translation = vec3(t.x, 0, t.y);
-		break;
-	case FACE_DIRECTION::BACK:
-		translation = vec3(-t.x, -t.y, 0);
-		break;
-	default:
-		break;
-	}
-
-	model = translate(glm::mat4(1.f), translation) * model;
-	currentPos = Coordinates{ currentPos.f, currentPos.r - (int)delta_coord.y , currentPos.c + (int)delta_coord.x };
-}
-
 
 // Screen states:
 // 0: on_x

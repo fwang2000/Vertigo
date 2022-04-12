@@ -119,15 +119,12 @@ struct Tile
 	FACE_DIRECTION direction;
 	glm::mat4 model;
 	Coordinates coords;
-	Coordinates currentPos; // TODO: do we need this?
 	TileState tileState = TileState::E;
 	std::unordered_map<int, std::pair<Coordinates, int>> adjList; // map of direction to Coordinates and direction to add
 	bool highlighted = false;
 	bool popup = false;
 	int color = -1;
 	virtual void action() { return; };
-	
-	void move(vec2 translation, vec2 delta_coords);
 };
 
 struct ControlTile : public Tile {

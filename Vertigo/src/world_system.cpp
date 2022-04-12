@@ -1101,7 +1101,7 @@ void WorldSystem::Interact(Tile* tile)
 		if (registry.enemies.entities.size() > 0) {
 			Entity enemy = registry.enemies.entities[0];
 			Object& obj = registry.objects.get(enemy);
-			if (c_tile->currentPos.equal(obj.objectPos)) {
+			if (c_tile->coords.equal(obj.objectPos)) {
 				Mix_PlayChannel(-1, switch_fail_sound, 0);
 				gameState = GameState::IDLE;
 				return;
