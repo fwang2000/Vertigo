@@ -87,6 +87,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 			trans = translate(mat4(1.f), motion.position);
 			sca = scale(mat4(1.0f), motion.scale);
 		}
+		if (boxRotate->popup) {
+			trans = translate(mat4(1.f), vec3(0.f, 0.f, 0.5f)) * trans;
+		}
 		// Setting uniform values to the currently bound program
 
 		// light properties
