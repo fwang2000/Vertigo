@@ -70,6 +70,8 @@ class RenderSystem {
 			textures_path("text/Fourteen.png"),
 			textures_path("text/Fifteen.png"),
 			textures_path("text/Sixteen.png"),
+			textures_path("text/Seventeen.png"),
+			textures_path("text/Eighteen.png"),
 			textures_path("text/Invisible.png"),
 			textures_path("text/Switch.png"),
 			textures_path("explorer_down.png"),
