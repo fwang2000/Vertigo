@@ -6,7 +6,6 @@ run vertigo.exe to start the program
 world_init.cpp (called in world_syste.cpp to generate objects):
 * createExplorer - creating player (main character)
 * createTile - creating tiles (main space for character to move)
-* createTileShadow - creating the shadows under the tiles for parallax effect (moves slower/faster when nearer/further from the player)
 * createFire - creating fire (main character will pick up and have interaction with different object)
 * createObject - creating objects (objects will block main character to move and have interaction with fire)
 * createEnemy - creating the enemy AI
