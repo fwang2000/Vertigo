@@ -212,6 +212,7 @@ struct Motion
 	bool move_z = false;
 	vec3 position = {0, 0, 0};
 	vec3 scale = {1, 1, 1};
+	float rotation;
 
 	// Extrapolation
 	vec3 velocity = {0, 0, 0}; // Used if extrapolating
