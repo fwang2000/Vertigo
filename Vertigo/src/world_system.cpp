@@ -672,6 +672,7 @@ void WorldSystem::load_level() {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
+	if (gameState == GameState::MENU) return;
 	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
