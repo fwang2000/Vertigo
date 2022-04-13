@@ -132,8 +132,10 @@ bool AISystem::BFS(Entity entity)
 				Tile* curTile = cube.getTile(cur);
 				if (newCoord.f == cur.f) {
 					enemyTranslate(newTile, curTile, enemy);
+					Mix_PlayChannel(-1, worldSystem.rook_slide, 0);
 				} else {
 					enemyTranslateFace(newTile, curTile, enemy);
+					Mix_PlayChannel(-1, worldSystem.rook_jump, 0);
 				}
 				// round startingPos because we have numerical instability
 				enemy.startingPos = object.model[3];

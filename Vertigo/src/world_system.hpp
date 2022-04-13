@@ -142,6 +142,8 @@ private:
 	Mix_Chunk* move_fail_sound;
 	Mix_Chunk* move_success_sound;
 	Mix_Chunk* restart_sound;
+	Mix_Chunk* rook_slide;
+	Mix_Chunk* rook_jump;
 
 	// C++ random number generator
 	// std::default_random_engine rng;

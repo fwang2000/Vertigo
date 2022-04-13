@@ -112,9 +112,9 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 		// Setting uniform values to the currently bound program
 
 		// light properties
-		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
-		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
-		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 3.f, 3.f, 3.f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.3f, 0.3f, 0.3f);
+		glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.8f, 0.8f, 0.8f);
 		glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
 
 		// material properties
@@ -466,9 +466,9 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 	// Setting uniform values to the currently bound program
 
 	// light properties
-	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 6.f, 6.f, 6.0f);
-	glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.2f, 0.2f, 0.2f);
-	glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.4f, 0.4f, 0.4f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.position"), 3.f, 3.f, 3.f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.ambient"), 0.3f, 0.3f, 0.3f);
+	glUniform3f(glGetUniformLocation(currProgram, "dirLight.diffuse"), 0.8f, 0.8f, 0.8f);
 	glUniform3f(glGetUniformLocation(currProgram, "dirLight.specular"), 0.5f, 0.5f, 0.5f);
 
 	// material properties

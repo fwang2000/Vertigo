@@ -14,7 +14,7 @@
 
 // Create the world
 WorldSystem::WorldSystem()
-	: level(26) {
+	: level(0) {
 	// Seeding rng with random device
 	// rng = std::default_random_engine(std::random_device()());
 }
@@ -39,6 +39,10 @@ WorldSystem::~WorldSystem() {
 		Mix_FreeChunk(move_success_sound);
 	if (restart_sound != nullptr)
 		Mix_FreeChunk(restart_sound);
+	if (rook_slide != nullptr)
+		Mix_FreeChunk(rook_slide);
+	if (rook_jump != nullptr)
+		Mix_FreeChunk(rook_jump);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -115,10 +119,12 @@ GLFWwindow* WorldSystem::create_window() {
 	move_fail_sound = Mix_LoadWAV(audio_path("movefail.wav").c_str());
 	move_success_sound = Mix_LoadWAV(audio_path("movesuccess.wav").c_str());
 	restart_sound = Mix_LoadWAV(audio_path("restart.wav").c_str());
+	rook_slide = Mix_LoadWAV(audio_path("rook_slide.wav").c_str());;
+	rook_jump = Mix_LoadWAV(audio_path("rook_jump.wav").c_str());
 
-	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || 
-		move_fail_sound == nullptr || move_success_sound == nullptr || restart_sound == nullptr || switch_fail_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
+	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || move_fail_sound == nullptr
+		|| move_success_sound == nullptr || restart_sound == nullptr || switch_fail_sound == nullptr || rook_slide == nullptr || rook_jump == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("time-9307.wav").c_str(),
 			audio_path("burn.wav").c_str(),
 			audio_path("finish.wav").c_str(),
@@ -127,7 +133,9 @@ GLFWwindow* WorldSystem::create_window() {
 			audio_path("movefail.wav").c_str(),
 			audio_path("movesuccess.wav").c_str(),
 			audio_path("restart.wav").c_str(),
-			audio_path("switchfail.wav").c_str());
+			audio_path("switchfail.wav").c_str(),
+			audio_path("rook_slide.wav").c_str(),
+			audio_path("rook_jump.wav").c_str());
 		return nullptr;
 	}
 
@@ -299,11 +307,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 			// check if enemies need to move
 			gameState = registry.enemies.entities.size() > 0 ? GameState::ENEMY_SEARCH : GameState::IDLE;
-			// if (registry.enemies.entities.size() > 0) {
-			// 	gameState = GameState::ENEMY_MOVE;
-			// } else {
-			// 	gameState = GameState::IDLE;
-			// }
 		}
 	}
 
