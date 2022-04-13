@@ -70,8 +70,10 @@ void main()
 
         vec3 result = ambient + diffuse + specular;
 
-        for(int i = 0; i < numLights; i++)
-            result += CalcPointLight(pointLights[i], norm, fragPos, viewDir);
+        if (gl_FrontFacing) {
+            for(int i = 0; i < numLights; i++)
+                result += CalcPointLight(pointLights[i], norm, fragPos, viewDir);
+        }
 
         FragColor = vec4(result, 1.0);
     }

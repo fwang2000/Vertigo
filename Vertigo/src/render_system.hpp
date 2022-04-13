@@ -227,6 +227,7 @@ private:
 	// Internal drawing functions for each entity type
 	void drawTexturedMesh(Entity entity, const mat4& projection3D, const mat4 &view);
 	void drawToScreen();
+	void setLighting(GLint currProgram);
 
 	// Window handle
 	GLFWwindow* window;
@@ -238,6 +239,7 @@ private:
 
 	Entity screen_state_entity;
 	Cube screen_cube;
+	vec3 viewPos;
 };
 
 bool loadEffectFromFile(
