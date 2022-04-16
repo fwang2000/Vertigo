@@ -218,7 +218,7 @@ public:
 	void drawMenu(Entity entity, const mat3& projection);
 
 	mat4 createViewMatrix();
-	mat3 RenderSystem::createProjectionMatrix();
+	mat3 createProjectionMatrix();
 	mat4 create3DProjectionMatrix(int width, int height);
 	mat4 create3DProjectionMatrixPerspective(int width, int height);
 	void setCube(Cube cube);

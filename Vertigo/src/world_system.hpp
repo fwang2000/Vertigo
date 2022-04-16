@@ -127,9 +127,9 @@ private:
 	// Menu
 	Entity levels[25];
 	int menu_size = 5;
-	void WorldSystem::load_level_menu();
-	void WorldSystem::close_level_menu();
-	void WorldSystem::change_level_menu(int key);
+	void load_level_menu();
+	void close_level_menu();
+	void change_level_menu(int key);
 	int selected_level = 0;
 
 	// Music references

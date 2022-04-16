@@ -1,7 +1,6 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
-#include <Windows.h>
 
 // stlib
 #include <cassert>
