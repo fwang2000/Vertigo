@@ -162,7 +162,7 @@ void RenderSystem::initializeGlGeometryBuffers()
 
 	const std::vector<uint16_t> textured_indices = {
 		// back
-		0, 1, 2,
+		0, 2, 1,
 		0, 3, 2};
 	bindVBOandIBO(GEOMETRY_BUFFER_ID::SPRITE, textured_vertices, textured_indices);
 
