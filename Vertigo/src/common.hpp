@@ -28,7 +28,7 @@ using namespace glm;
 // Get defintion of PROJECT_SOURCE_DIR from:
 #include "../ext/project_path.hpp"
 inline std::string data_path() { return std::string(PROJECT_SOURCE_DIR) + "data"; };
-inline std::string shader_path(const std::string& name) { return std::string(PROJECT_SOURCE_DIR) + "/shaders/" + std::string(name); };
+inline std::string shader_path(const std::string& name) { return std::string(PROJECT_SOURCE_DIR) + "shaders/" + std::string(name); };
 inline std::string textures_path(const std::string& name) { return data_path() + "/textures/" + std::string(name); };
 inline std::string audio_path(const std::string& name) { return data_path() + "/audio/" + std::string(name); };
 inline std::string mesh_path(const std::string& name) { return data_path() + "/meshes/" + std::string(name); };
@@ -47,13 +47,6 @@ const float popup_height = 0.2f;
 #define M_PI 3.14159265358979323846f
 #endif
 
-enum class ROTATION_AXIS
-{
-	X_AXIS,
-	Y_AXIS,
-	Z_AXIS
-};
-
 // The 'Transform' component handles transformations passed to the Vertex shader
 // (similar to the gl Immediate mode equivalent, e.g., glTranslate()...)
 // We recomment making all components non-copyable by derving from ComponentNonCopyable
@@ -67,7 +60,6 @@ struct Transform {
 				  { 0.f, 1.f, 0.f, 0.f },
 				  { 0.f, 0.f, 1.f, 0.f },
 				  { 0.f, 0.f, 0.f, 1.f } };
-	void rotate3D(ROTATION_AXIS axis, bool negative);
 };
 
 bool gl_has_errors();

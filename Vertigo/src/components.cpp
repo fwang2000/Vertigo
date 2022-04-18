@@ -261,6 +261,17 @@ bool Cube::loadFromExcelFile(std::string filename) {
 						s_tile->direction = static_cast<FACE_DIRECTION>(i);
 						break;
 					}
+					case TileState::T:
+					{
+						ThrowTile* s_tile = new ThrowTile();
+						s_tile->model = tileStartingMatrix(i, x, y, distance);
+						s_tile->tileState = static_cast<TileState>(value[0] - 'A');
+
+						row.push_back(s_tile);
+						s_tile->coords = { i, y_coord, x_coord };
+						s_tile->direction = static_cast<FACE_DIRECTION>(i);
+						break;
+					}
 					case TileState::U:
 					{
 						UpTile* u_tile = new UpTile();
@@ -466,7 +477,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				switch_tile->targetTileState = TileState::C;
 				switch_tile->color = colorIdx;
 				switch_tile->targetTile->color = colorIdx;
-				if (colorIdx < controlTileColors.size()) colorIdx++;
+				if (colorIdx < controlTileColors.size()-1) colorIdx++;
 				if (modifications.size() > 8) {
 					int direction = std::stoi(modifications.at(8));
 					switch_tile->diff = direction;

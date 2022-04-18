@@ -1,7 +1,6 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
-#include <Windows.h>
 
 // stlib
 #include <cassert>
@@ -39,6 +38,10 @@ WorldSystem::~WorldSystem() {
 		Mix_FreeChunk(move_success_sound);
 	if (restart_sound != nullptr)
 		Mix_FreeChunk(restart_sound);
+	if (rook_slide != nullptr)
+		Mix_FreeChunk(rook_slide);
+	if (rook_jump != nullptr)
+		Mix_FreeChunk(rook_jump);
 	Mix_CloseAudio();
 
 	// Destroy all created components
@@ -115,10 +118,12 @@ GLFWwindow* WorldSystem::create_window() {
 	move_fail_sound = Mix_LoadWAV(audio_path("movefail.wav").c_str());
 	move_success_sound = Mix_LoadWAV(audio_path("movesuccess.wav").c_str());
 	restart_sound = Mix_LoadWAV(audio_path("restart.wav").c_str());
+	rook_slide = Mix_LoadWAV(audio_path("rook_slide.wav").c_str());;
+	rook_jump = Mix_LoadWAV(audio_path("rook_jump.wav").c_str());
 
-	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || 
-		move_fail_sound == nullptr || move_success_sound == nullptr || restart_sound == nullptr || switch_fail_sound == nullptr) {
-		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
+	if (background_music == nullptr || burn_sound == nullptr || finish_sound == nullptr || fire_sound == nullptr || switch_sound == nullptr || move_fail_sound == nullptr
+		|| move_success_sound == nullptr || restart_sound == nullptr || switch_fail_sound == nullptr || rook_slide == nullptr || rook_jump == nullptr) {
+		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("time-9307.wav").c_str(),
 			audio_path("burn.wav").c_str(),
 			audio_path("finish.wav").c_str(),
@@ -127,7 +132,9 @@ GLFWwindow* WorldSystem::create_window() {
 			audio_path("movefail.wav").c_str(),
 			audio_path("movesuccess.wav").c_str(),
 			audio_path("restart.wav").c_str(),
-			audio_path("switchfail.wav").c_str());
+			audio_path("switchfail.wav").c_str(),
+			audio_path("rook_slide.wav").c_str(),
+			audio_path("rook_jump.wav").c_str());
 		return nullptr;
 	}
 
@@ -298,31 +305,30 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			}
 
 			// check if enemies need to move
-			if (registry.enemies.entities.size() > 0) {
-				gameState = GameState::ENEMY_MOVE;
-			} else {
-				gameState = GameState::IDLE;
-			}
+			gameState = registry.enemies.entities.size() > 0 ? GameState::ENEMY_SEARCH : GameState::IDLE;
 		}
 	}
-	
+
 	// check if enemy has finished moving
 	if (gameState == GameState::ENEMY_MOVE) {
-		Enemy& enemy = registry.enemies.components[0];
-		if (enemy.elapsed >= 500.f) {
-			enemy.moving = false;
-			enemy.elapsed = 0.f;
+		for (Entity entity : registry.enemies.entities) {
+			Enemy& enemy = registry.enemies.get(entity);
+			if (enemy.elapsed >= 500.f) {
+				enemy.moving = false;
+				enemy.elapsed = 0.f;
+				// gameState = GameState::IDLE;
+				moving_enemies.erase(int(entity));
+			}
+		}
+		if (moving_enemies.empty()) {
 			gameState = GameState::IDLE;
-			
 		}
 	}
 
 	// check if enemy has captured
 	if (gameState == GameState::IDLE && registry.enemies.entities.size() > 0) {
-		Entity e = registry.enemies.entities[0];
-		Object object = registry.objects.get(e);
 		Player& player = registry.players.get(player_explorer);
-		if (object.objectPos.equal(player.playerPos)) {
+		if (enemyOnTile(player.playerPos)) {
 			// restart
 			if (!registry.restartTimer.has(player_explorer)) {
 				gameState = GameState::RESTARTING;
@@ -458,6 +464,15 @@ void WorldSystem::rotateAll(float elapsed_ms_since_last_update) {
 	{
 		rot.status = BOX_ANIMATION::STILL;
 	}
+}
+
+bool WorldSystem::enemyOnTile(Coordinates coordinates)
+{
+	for (Entity entity : registry.enemies.entities) {
+		Object& obj = registry.objects.get(entity);
+		if (obj.objectPos.equal(coordinates)) return true;
+	}
+	return false;
 }
 
 // Reset the world state to its initial state
@@ -656,6 +671,7 @@ void WorldSystem::load_level() {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
+	if (gameState == GameState::MENU) return;
 	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
@@ -1109,14 +1125,10 @@ void WorldSystem::Interact(Tile* tile)
 		ControlTile* c_tile = (ControlTile*)cube.getTile(s_tile->targetTile->coords);
 		// ControlTile* c_tile = (ControlTile*)tile;
 		// if enemy is on the tile, make error sound and do nothing
-		if (registry.enemies.entities.size() > 0) {
-			Entity enemy = registry.enemies.entities[0];
-			Object& obj = registry.objects.get(enemy);
-			if (c_tile->coords.equal(obj.objectPos)) {
-				Mix_PlayChannel(-1, switch_fail_sound, 0);
-				gameState = GameState::IDLE;
-				return;
-			}
+		if (enemyOnTile(c_tile->coords)) {
+			Mix_PlayChannel(-1, switch_fail_sound, 0);
+			gameState = GameState::IDLE;
+			return;
 		}
 		c_tile->controled = !c_tile->controled;
 		c_tile->highlighted = !c_tile->highlighted;
@@ -1131,14 +1143,10 @@ void WorldSystem::Interact(Tile* tile)
 		}
 
 		// if enemy is on the move tile, disable the switch
-		if (registry.enemies.entities.size() > 0) {
-			Entity enemy = registry.enemies.entities[0];
-			Object& obj = registry.objects.get(enemy);
-			if (s_tile->targetTile->coords.equal(obj.objectPos)) {
-				Mix_PlayChannel(-1, switch_fail_sound, 0);
-				gameState = GameState::IDLE;
-				return;
-			}
+		if (enemyOnTile(s_tile->targetTile->coords)) {
+			Mix_PlayChannel(-1, switch_fail_sound, 0);
+			gameState = GameState::IDLE;
+			return;
 		}
 		Entity src_tile_entity = getTileFromRegistry(s_tile->targetTile->coords);
 		Tile* src_tile = cube.getTile(s_tile->targetTile->coords);

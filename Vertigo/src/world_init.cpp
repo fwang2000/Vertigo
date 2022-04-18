@@ -144,6 +144,8 @@ Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::FIRE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
+	registry.lightSources.emplace(entity);
+
 	registry.renderRequests.insert(
 		entity,
 		{

@@ -5,7 +5,7 @@
 
 // stlib
 #include <vector>
-// #include <random>
+#include <unordered_set>
 
 #define SDL_MAIN_HANDLED
 #include <SDL.h>
@@ -22,7 +22,8 @@ enum class GameState {
 	MENU = 4,
 	ENEMY_MOVE = 5,
 	RESTARTING = 6,
-	TITLE_SCREEN = 7
+	TITLE_SCREEN = 7,
+	ENEMY_SEARCH = 8
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -111,6 +112,9 @@ private:
 
 	Direction currDirection = Direction::RIGHT;
 
+	// Enemies
+	std::unordered_set<int> moving_enemies;
+
 	// Helper Functions
 	Coordinates searchForMoveTile(Direction direction, Coordinates coords);
 	void button_select(ButtonTile* b);
@@ -118,13 +122,14 @@ private:
 	Entity getCurrentTileEntity();
 	Entity getTileFromRegistry(Coordinates coordinates);
 	void rotateAll(float elapsed_ms_since_last_update);
+	bool enemyOnTile(Coordinates coordinates);
 
 	// Menu
 	Entity levels[25];
 	int menu_size = 5;
-	void WorldSystem::load_level_menu();
-	void WorldSystem::close_level_menu();
-	void WorldSystem::change_level_menu(int key);
+	void load_level_menu();
+	void close_level_menu();
+	void change_level_menu(int key);
 	int selected_level = 0;
 
 	// Music references
@@ -137,6 +142,8 @@ private:
 	Mix_Chunk* move_fail_sound;
 	Mix_Chunk* move_success_sound;
 	Mix_Chunk* restart_sound;
+	Mix_Chunk* rook_slide;
+	Mix_Chunk* rook_jump;
 
 	// C++ random number generator
 	// std::default_random_engine rng;
