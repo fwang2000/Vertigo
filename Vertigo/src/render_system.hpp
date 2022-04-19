@@ -164,7 +164,8 @@ class RenderSystem {
 			textures_path("tutorial/follows.png"),
 			textures_path("tutorial/tile_ai_interaction.png"),
 			textures_path("title_page/Enter.png"),
-			textures_path("tutorial/target.png")
+			textures_path("tutorial/target.png"),
+			textures_path("instruction.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -109,7 +109,31 @@ Entity createText(Text text) {
 	return entity;
 }
 
-void createRestartText(RenderSystem* renderer, vec2 position) {
+void createRestartText(RenderSystem* renderer) {
+	
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	Menu& menu = registry.menus.emplace(entity);
+
+	// Initialize the motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec3(0.6, -0.85, 1);
+	motion.scale = vec3(0.8, -0.2, 1);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::RESTART_TEXT,
+			EFFECT_ASSET_ID::MENU,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+}
+
+void createInstructionsText(RenderSystem* renderer) {
 	
 	auto entity = Entity();
 
@@ -126,7 +150,7 @@ void createRestartText(RenderSystem* renderer, vec2 position) {
 	registry.renderRequests.insert(
 		entity,
 		{
-			TEXTURE_ASSET_ID::RESTART_TEXT,
+			TEXTURE_ASSET_ID::INSTRUCTION_TEXT,
 			EFFECT_ASSET_ID::MENU,
 			GEOMETRY_BUFFER_ID::SPRITE
 		}

@@ -25,7 +25,9 @@ Entity createTile(Tile* tile);
 // the text
 Entity createText(Text text);
 // the restart text
-void createRestartText(RenderSystem* renderer, vec2 position);
+void createRestartText(RenderSystem* renderer);
+// the instructions text
+void createInstructionsText(RenderSystem* renderer);
 // the fire
 Entity createFire(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 // the fire's power gauge
