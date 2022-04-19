@@ -5,6 +5,8 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <filesystem>
+#include <chrono>
 
 #include "physics_system.hpp"
 #include <iostream>
@@ -143,12 +145,80 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
+	
 	// Playing background music indefinitely
-	initLevelStatus();
 	Mix_PlayMusic(background_music, -1);
+
+	initLevelStatus();
+
+	// Play intro cutscene
+	load_intro();
+	play_intro();
   
 	// Set all states to default
 	restart_game();
+}
+
+void WorldSystem::load_intro() {
+	gameState = GameState::CUTSCENE;
+
+	using std::experimental::filesystem::directory_iterator;
+
+    int num_files = std::distance(directory_iterator(textures_path("/cutscene/")), directory_iterator{});
+	texture = (GLuint*) malloc(num_files * sizeof(GLuint));
+	glGenTextures(num_files, texture);
+
+	stbi_uc *data;
+	int width, height;
+	num_frames = 0;
+
+	for (const auto & file :std::experimental::filesystem::directory_iterator(textures_path("/cutscene/"))){
+		glfwPollEvents();
+		std::cout << file.path().string() << std::endl; // check filepaths are printed in alphabetical order
+
+		data = stbi_load(file.path().string().c_str(), &width, &height, NULL, 4);
+		if (data)
+		{
+			glBindTexture(GL_TEXTURE_2D, texture[num_frames]);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
+			stbi_image_free(data);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+			num_frames++;
+		}
+		else
+		{
+			std::cout << "Failed to load texture" << std::endl;
+			return;
+		}
+	}
+}
+
+void WorldSystem::play_intro(){
+	gameState = GameState::CUTSCENE;
+	
+	Entity scene = createCutscene(renderer, texture[0]);
+	RenderRequest& r = registry.renderRequests.get(scene);
+
+	using Clock = std::chrono::high_resolution_clock;
+	auto t = Clock::now();
+	int i = 0;
+	float elapsed_ms = 0;
+	
+	while(i < num_frames){
+		glfwPollEvents();
+		// Calculating elapsed times in milliseconds from the previous iteration
+		auto now = Clock::now();
+		elapsed_ms += (float)(std::chrono::duration_cast<std::chrono::microseconds>(now - t)).count() / 1000;
+		t = now;
+		if (elapsed_ms > 100){
+			r.used_texture = (TEXTURE_ASSET_ID) texture[i];
+			renderer->draw();
+			elapsed_ms -= 100;
+			i++;
+		}
+	}
+	registry.remove_all_components_of(scene);
 }
 
 void WorldSystem::initLevelStatus() {

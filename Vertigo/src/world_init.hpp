@@ -46,3 +46,4 @@ void createObject(Entity entity, Coordinates pos, glm::mat4 translateMatrix, boo
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 void createLight(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
 void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix);
+Entity createCutscene(RenderSystem* renderer, unsigned int texture_id);

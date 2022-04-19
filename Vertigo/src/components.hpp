@@ -243,6 +243,9 @@ struct Menu
 	bool sound = true;
 	void changeOption(int dir);
 	void toggleSound() {sound = !sound;}
+
+	// used for cutscenes
+	bool auto_texture_id = false;
 };
 
 struct MenuButtons
