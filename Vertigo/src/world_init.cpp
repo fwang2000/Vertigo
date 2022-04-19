@@ -442,3 +442,30 @@ void createEnemy(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMat
 		}
 	);
 }
+
+Entity createCutscene(RenderSystem* renderer, GLuint texture_id) {
+	
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	Menu& menu = registry.menus.emplace(entity);
+	menu.auto_texture_id = true;
+
+	// Initialize the motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec3(0, 0, 1);
+	motion.scale = vec3(2, -2, 1);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			(TEXTURE_ASSET_ID) texture_id,
+			EFFECT_ASSET_ID::MENU,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+
+	return entity;
+}

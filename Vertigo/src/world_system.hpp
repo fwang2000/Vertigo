@@ -23,7 +23,8 @@ enum class GameState {
 	ENEMY_MOVE = 5,
 	RESTARTING = 6,
 	TITLE_SCREEN = 7,
-	ENEMY_SEARCH = 8
+	ENEMY_SEARCH = 8,
+	CUTSCENE = 9
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -131,6 +132,12 @@ private:
 	void close_level_menu();
 	void change_level_menu(int key);
 	int selected_level = 0;
+
+	// Cutscenes
+	void load_intro();
+	void play_intro();
+	int num_frames;
+	GLuint* texture;
 
 	// Music references
 	Mix_Music* background_music;

@@ -523,6 +523,9 @@ void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 	assert(registry.renderRequests.has(entity));
 	const RenderRequest& render_request = registry.renderRequests.get(entity);
 
+	assert(registry.menus.has(entity));
+	const Menu& menu = registry.menus.get(entity);
+
 	const GLuint used_effect_enum = (GLuint)render_request.used_effect;
 	assert(used_effect_enum != (GLuint)EFFECT_ASSET_ID::EFFECT_COUNT);
 	const GLuint program = (GLuint)effects[used_effect_enum];
@@ -561,8 +564,16 @@ void RenderSystem::drawMenu(Entity entity, const mat3 &projection)
 	gl_has_errors();
 
 	assert(registry.renderRequests.has(entity));
-	GLuint texture_id =
-		texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
+
+	RenderRequest& r = registry.renderRequests.get(entity);
+	GLuint texture_id;
+
+	if (menu.auto_texture_id){
+		texture_id = (GLuint)r.used_texture;
+	}
+	else{
+		texture_id = texture_gl_handles[(GLuint)r.used_texture];
+	}
 
 	glBindTexture(GL_TEXTURE_2D, texture_id);
 	gl_has_errors();
