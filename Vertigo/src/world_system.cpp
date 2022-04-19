@@ -778,23 +778,20 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		return;
 	}
 
-	// Menu page esc
-	if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
-		if (gameState != GameState::MENU) {
-			gameState = GameState::MENU;
-			load_level_menu();
-			return;
-		}
-	}
-
 	switch (gameState) {
 	case GameState::MENU:
 		if (action == GLFW_RELEASE) {
 			change_level_menu(key);
 		}
 		break;
-
 	default:
+		// Menu page esc
+		if (action == GLFW_RELEASE && key == GLFW_KEY_ESCAPE) {
+			gameState = GameState::MENU;
+			load_level_menu();
+			return;
+		}
+
 
 		Direction dir = currDirection;
 
