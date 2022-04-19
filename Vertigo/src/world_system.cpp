@@ -580,7 +580,7 @@ void WorldSystem::load_level() {
 		createText(cube.text[i]);
 	}
 
-	if (level > 0) { createRestartText(renderer, vec2(0.8, 0.1)); }
+	if (level > 0) { createInstructionsText(renderer); }
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
 
@@ -1106,6 +1106,16 @@ void WorldSystem::Interact(Tile* tile)
 	if (s_tile->toggled) {
 		gameState = GameState::IDLE;
 		return;
+	}
+	
+	if (level == 6 && tile->coords.f == 3 && tile->coords.c == 1 && tile->coords.r == 0){
+		Coordinates c = Coordinates();
+		c.f = 3;
+		c.c = 2;
+		c.r = 2;
+		if (!((SwitchTile*)cube.getTile(c))->toggled){
+			createRestartText(renderer);
+		}
 	}
 
 	gameState = GameState::INTERACTING;
