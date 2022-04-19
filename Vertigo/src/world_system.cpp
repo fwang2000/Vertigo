@@ -1112,7 +1112,7 @@ void WorldSystem::Interact(Tile* tile)
 		Coordinates c = Coordinates();
 		c.f = 3;
 		c.c = 2;
-		c.r = 1;
+		c.r = 2;
 		if (!((SwitchTile*)cube.getTile(c))->toggled){
 			createRestartText(renderer);
 		}
