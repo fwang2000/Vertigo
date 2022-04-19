@@ -792,6 +792,15 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			return;
 		}
 
+		if (action == GLFW_RELEASE && key == GLFW_KEY_C) {
+			play_intro();
+			level = 0;
+			
+			gameState = GameState::RESTARTING;
+			registry.restartTimer.emplace(player_explorer);
+
+			return;
+		}
 
 		Direction dir = currDirection;
 
