@@ -342,6 +342,15 @@ struct RestartTimer
 	float counter_ms = restart_time;
 };
 
+struct TrackBallInfo
+{
+	bool leftClick = false;
+	double prevX;
+	double prevY;
+	quat prevQuat = quat(1,0,0,0);
+	quat rotation = quat(1,0,0,0);
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -506,7 +515,9 @@ enum class TEXTURE_ASSET_ID {
 	NUM_4 = RIGHT + 1,
 	NUM_5 = NUM_4 + 1,
 	NUM_6 = NUM_5 + 1,
-	TEXTURE_COUNT = NUM_6 + 1
+	TRACKBALL_ROTATE = NUM_6 + 1,
+	TRACKBALL_RESET = TRACKBALL_ROTATE + 1,
+	TEXTURE_COUNT = TRACKBALL_RESET + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

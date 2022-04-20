@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "trackball.hpp"
 
 enum class GameState {
 
@@ -24,7 +25,9 @@ enum class GameState {
 	RESTARTING = 6,
 	TITLE_SCREEN = 7,
 	ENEMY_SEARCH = 8,
-	CUTSCENE = 9
+	CUTSCENE = 9,
+	TRACKBALL = 10,
+	RESET_TRACKBALL = 11
 };
 
 // Container for all our entities and game logic. Individual rendering / update is
@@ -58,6 +61,7 @@ private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void on_mouse_click(int button, int action, int mods);
 
 	// Movement Functions
 	void tile_move(Direction direction, SwitchTile* tile);
@@ -82,6 +86,10 @@ private:
 
 	// Object Attributes
 	bool activated = false;
+
+	// trackball attributes
+	Trackball trackBallClass;
+	Entity trackBallText;
 
 	// restart level
 	void restart_game();

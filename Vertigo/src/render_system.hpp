@@ -173,7 +173,9 @@ class RenderSystem {
 			textures_path("text/Right.png"),
 			textures_path("text/4.png"),
 			textures_path("text/5.png"),
-			textures_path("text/6.png")
+			textures_path("text/6.png"),
+			textures_path("trackball_rotate.png"),
+			textures_path("trackball_reset.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

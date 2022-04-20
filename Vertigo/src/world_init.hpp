@@ -26,6 +26,8 @@ Entity createTile(Tile* tile);
 Entity createText(Text text);
 // the restart text
 void createRestartText(RenderSystem* renderer);
+// the trackball instructions text
+Entity createTrackBallText(RenderSystem* renderer);
 // the instructions text
 void createInstructionsText(RenderSystem* renderer);
 // the fire

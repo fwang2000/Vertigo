@@ -67,7 +67,7 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TILE || render_request.used_effect == EFFECT_ASSET_ID::MENU)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TILE)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "aPos");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "aTex");
@@ -144,8 +144,13 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 					break;
 			}
 		}
-		// Setting uniform values to the currently bound program
+		model = model * sca;
+		model = trans * model;
+		TrackBallInfo& trackball = registry.trackBall.components[0];
+		mat4 mouseRotation = toMat4(trackball.rotation);
+		model = mouseRotation * model;
 
+		// Setting uniform values to the currently bound program
 		setLighting(currProgram);
 		glUniform1i(glGetUniformLocation(currProgram, "numLights"), (int)registry.lightSources.entities.size());
 		glUniform1i(glGetUniformLocation(currProgram, "highlighted"), boxRotate->highlighted);
@@ -153,10 +158,6 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 			glUniform3fv(glGetUniformLocation(currProgram, "color"), 1, (float *)&controlTileColors[boxRotate->color]);
 		else
 			glUniform3f(glGetUniformLocation(currProgram, "color"), 0.f, 0.f, 0.f);
-		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
-		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
-		GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
-		glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float *)&sca);
 		GLuint viewPos_loc = glGetUniformLocation(currProgram, "viewPos");
 		glUniform3fv(viewPos_loc, 1, (float *)&viewPos);
 		gl_has_errors();
@@ -210,12 +211,11 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 		model = player.model;
 
 		Motion& motion = registry.motions.get(entity);
-		mat4 trans = translate(mat4(1.f), motion.position);
+		model = translate(mat4(1.f), motion.position) * model;
 
-		// Setting uniform values to the currently bound program
-		GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
-		glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float *)&trans);
-		gl_has_errors();
+		TrackBallInfo& trackball = registry.trackBall.components[0];
+		mat4 mouseRotation = toMat4(trackball.rotation);
+		model = mouseRotation * model;
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::TEXT)
 	{
@@ -244,6 +244,10 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 
 		Text& boxRotate = registry.text.get(entity);
 		model = boxRotate.model;
+
+		TrackBallInfo& trackball = registry.trackBall.components[0];
+		mat4 mouseRotation = toMat4(trackball.rotation);
+		model = mouseRotation * model;
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::BILLBOARD)
 	{
@@ -267,13 +271,17 @@ void RenderSystem::drawTexturedMesh(Entity entity, const mat4& projection3D, con
 		Billboard& obj = registry.billboards.get(entity);
 		model = obj.model;
 
+		TrackBallInfo& trackball = registry.trackBall.components[0];
+		mat4 mouseRotation = toMat4(trackball.rotation);
+		model = mouseRotation * model;
+
 		// set the upper 3x3 matrix to identity matrix OR the transpose of the view matrix
 		model[0][0] = view[0][0];
 		model[0][1] = view[1][0];
 		model[0][2] = view[2][0];
 
 		model[1][0] = view[0][1];
-		model[1][1] = view[1][1]; // set equal to scale
+		model[1][1] = view[1][1];
 		model[1][2] = view[2][1];
 
 		model[2][0] = view[0][2];
@@ -357,11 +365,16 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 	GLsizei num_indices = size / sizeof(uint16_t);
 
 	Motion& motion = registry.motions.get(entity);
-	mat4 trans = translate(mat4(1.f), motion.position);
-	mat4 sca = scale(mat4(1.f), motion.scale);
 
 	Object& object = registry.objects.get(entity);
 	model = object.model;
+	model = scale(model, motion.scale);
+	model = translate(mat4(1.f), motion.position) * model;
+
+	TrackBallInfo& trackball = registry.trackBall.components[0];
+	mat4 mouseRotation = toMat4(trackball.rotation);
+	model = mouseRotation * model;
+
 	Fire& fire = registry.fire.get(entity);
 	int index = (int)floor(fire.index);
 
@@ -375,10 +388,6 @@ void RenderSystem::drawFire(Entity entity, const mat4& projection3D, const mat4&
 	glUniform1i(index_loc, index);
 	GLuint model_loc = glGetUniformLocation(currProgram, "model");
 	glUniformMatrix4fv(model_loc, 1, GL_FALSE, (float*)&model);
-	GLuint translate_loc = glGetUniformLocation(currProgram, "translate");
-	glUniformMatrix4fv(translate_loc, 1, GL_FALSE, (float*)&trans);
-	GLuint scale_loc = glGetUniformLocation(currProgram, "scale");
-	glUniformMatrix4fv(scale_loc, 1, GL_FALSE, (float*)&sca);
 	GLuint view_loc = glGetUniformLocation(currProgram, "view");
 	glUniformMatrix4fv(view_loc, 1, GL_FALSE, (float*)&view);
 	GLuint projection_loc = glGetUniformLocation(currProgram, "proj");
@@ -459,6 +468,10 @@ void RenderSystem::drawObject(Entity entity, const mat4& projection3D, const mat
 
 	Object& object = registry.objects.get(entity);
 	model = object.model;
+
+	TrackBallInfo& trackball = registry.trackBall.components[0];
+	mat4 mouseRotation = toMat4(trackball.rotation);
+	model = mouseRotation * model;
 
 	mat4 trans = mat4(1.f);
 	mat4 sca = mat4(1.f);
@@ -794,7 +807,7 @@ mat4 RenderSystem::create3DProjectionMatrixPerspective(int width, int height)
     mat4 proj = mat4(1.0f);
 
     float const aspect = (float)width / (float)height;
-    float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
+    // float const view_distance = screen_cube.size + 0.5; // this number should match the dimension of our box - 0.5;
     proj = perspective(20.f, aspect, 1.f, 20.f);
     return proj;
 }

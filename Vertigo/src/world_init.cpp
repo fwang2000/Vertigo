@@ -16,7 +16,6 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
 	explorer.model = translateMatrix * explorer.model;
-	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.f)) * explorer.model;
 
 	registry.renderRequests.insert(
 		entity,
@@ -131,6 +130,30 @@ void createRestartText(RenderSystem* renderer) {
 			GEOMETRY_BUFFER_ID::SPRITE
 		}
 	);
+}
+
+Entity createTrackBallText(RenderSystem* renderer) {
+	auto entity = Entity();
+
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+	registry.menus.emplace(entity);
+
+	// Initialize the motion
+	Motion& motion = registry.motions.emplace(entity);
+	motion.position = vec3(-0.5, -0.95, 1);
+	motion.scale = vec3(1.0, -0.1, 1);
+
+	registry.renderRequests.insert(
+		entity,
+		{
+			TEXTURE_ASSET_ID::TRACKBALL_ROTATE,
+			EFFECT_ASSET_ID::MENU,
+			GEOMETRY_BUFFER_ID::SPRITE
+		}
+	);
+
+	return entity;
 }
 
 void createInstructionsText(RenderSystem* renderer) {

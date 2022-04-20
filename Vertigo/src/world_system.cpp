@@ -97,8 +97,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto mouse_button_callback = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_click(_0, _1, _2); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, mouse_button_callback);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -154,6 +156,15 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 	// Play intro cutscene
 	load_intro();
 	play_intro();
+	// create TrackBall
+	auto entity = Entity();
+	registry.trackBall.emplace(entity);
+	float sphereRadius;
+	if (window_width_px > window_height_px)
+		sphereRadius = window_height_px * radius_scale;
+	else
+		sphereRadius = window_width_px * radius_scale;
+	trackBallClass.set(sphereRadius, window_width_px, window_height_px);
   
 	// Set all states to default
 	restart_game();
@@ -266,11 +277,34 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
             cube.reset();
 			faceDirection = Direction::UP;
 			rot.status = BOX_ANIMATION::STILL;
+			TrackBallInfo& trackball = registry.trackBall.components[0];
+			trackball.rotation = quat(1,0,0,0);
+			trackball.prevQuat = quat(1,0,0,0);
 			restart_game();
 			return true;
 		}
 	}
 	screen.darken_screen_factor = 1 - min_counter_ms / restart_time;
+
+	if (gameState == GameState::RESET_TRACKBALL) {
+		quat unitQuaternion = quat(1,0,0,0);
+		TrackBallInfo& trackball = registry.trackBall.components[0];
+		float matching = dot(trackball.rotation, unitQuaternion);
+		if ( abs(matching-1.0) < 0.00001 ){
+			gameState = GameState::IDLE;
+
+			// change text
+			RenderRequest& request = registry.renderRequests.get(trackBallText);
+			request.used_texture = TEXTURE_ASSET_ID::TRACKBALL_ROTATE;
+
+			trackball.rotation = unitQuaternion;
+			trackball.prevQuat = unitQuaternion;
+		} else {
+			trackball.prevQuat = trackball.rotation;
+			trackball.rotation = slerp(trackball.rotation, unitQuaternion, 0.1f);
+			return true;
+		}
+	}
 
 	rotateAll(elapsed_ms_since_last_update);
 
@@ -650,6 +684,7 @@ void WorldSystem::load_level() {
 		createText(cube.text[i]);
 	}
 
+	trackBallText = createTrackBallText(renderer);
 	if (level > 0) { createInstructionsText(renderer); }
 
 	cube.loadModificationsFromExcelFile(modifications_path("modifications" + std::to_string(level) + ".csv"));
@@ -773,6 +808,14 @@ bool WorldSystem::is_over() const {
 
 // On key callback
 void WorldSystem::on_key(int key, int, int action, int mod) {
+
+	if (action == GLFW_RELEASE && key == GLFW_KEY_SPACE) {
+		if(trackBallClass.getMode() == Trackball::ARC)
+            trackBallClass.setMode(Trackball::PROJECT);
+        else
+            trackBallClass.setMode(Trackball::ARC);
+		return;
+	}
 
 	if (gameState != GameState::IDLE && gameState != GameState::TITLE_SCREEN && gameState != GameState::MENU) {
 		return;
@@ -913,7 +956,53 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) 
 {
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	if (registry.trackBall.components.size() == 0) return;
+	TrackBallInfo& trackball = registry.trackBall.components[0];
+	if (trackball.leftClick) {
+		vec3 v1 = trackBallClass.getUnitVector(trackball.prevX, trackball.prevY);
+        vec3 v2 = trackBallClass.getUnitVector(mouse_position.x, mouse_position.y);
+
+		// offset by camera position
+		float angle = glm::radians(48.189685104221404f);
+		vec3 normal = vec3(-1.f/3.f, 2.f/3.f, 0.f);
+		v1 = rotate(v1, angle, normal);
+		v2 = rotate(v2, angle, normal);
+
+		quat delta = RotationBetweenVectors(v1, v2);
+        trackball.rotation = delta * trackball.prevQuat;
+	}
+}
+
+void WorldSystem::on_mouse_click(int button, int action, int mods)
+{
+	if (registry.trackBall.components.size() == 0) return;
+	TrackBallInfo& trackball = registry.trackBall.components[0];
+	if (gameState != GameState::IDLE && gameState != GameState::TRACKBALL && gameState != GameState::RESET_TRACKBALL) {
+		return;
+	}
+
+	if (button == GLFW_MOUSE_BUTTON_LEFT) {
+		if (action == GLFW_PRESS) {
+			gameState = GameState::TRACKBALL;
+
+			// change text
+			RenderRequest& request = registry.renderRequests.get(trackBallText);
+			request.used_texture = TEXTURE_ASSET_ID::TRACKBALL_RESET;
+
+			trackball.leftClick = true;
+			double xpos, ypos;     
+        	glfwGetCursorPos(window, &xpos, &ypos);
+
+			// remember mouse coords and quaternion before rotation
+            trackball.prevX = xpos;
+            trackball.prevY = ypos;
+            trackball.prevQuat = trackball.rotation;
+		} else if (action == GLFW_RELEASE) {
+			trackball.leftClick = false;
+		}
+	} else if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE) {
+		gameState = GameState::RESET_TRACKBALL;
+	}
 }
 
 void WorldSystem::tile_move(Direction direction, SwitchTile* tile) {

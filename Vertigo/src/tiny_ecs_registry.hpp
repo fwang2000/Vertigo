@@ -35,6 +35,7 @@ public:
 	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<RestartTimer> restartTimer;
 	ComponentContainer<Enemy> enemies;
+	ComponentContainer<TrackBallInfo> trackBall;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -62,6 +63,7 @@ public:
 		registry_list.push_back(&lightSources);
 		registry_list.push_back(&restartTimer);
 		registry_list.push_back(&enemies);
+		registry_list.push_back(&trackBall);
 	}
 
 	void clear_all_components() {
