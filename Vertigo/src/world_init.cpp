@@ -16,7 +16,6 @@ Entity createExplorer(RenderSystem* renderer, Coordinates pos, glm::mat4 transla
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(90.0f), vec3(0.0f, 1.0f, 0.0f)) * explorer.model;
 	explorer.model = rotate(glm::mat4(1.0f), (float)radians(-90.0f), vec3(1.0f, 0.0f, 0.0f)) * explorer.model;
 	explorer.model = translateMatrix * explorer.model;
-	explorer.model = translate(glm::mat4(1.0f), vec3(0.f, 0.f, 0.f)) * explorer.model;
 
 	registry.renderRequests.insert(
 		entity,

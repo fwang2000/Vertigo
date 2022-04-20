@@ -19,6 +19,14 @@
 #include <glm/mat3x3.hpp>           // mat3
 #include <glm/vec4.hpp>				// vec4
 #include <glm/gtc/matrix_transform.hpp>
+
+#ifdef _MSC_VER
+#pragma warning(disable:4201)
+#endif
+
+#include <glm/gtc/quaternion.hpp>
+#include <glm/gtx/quaternion.hpp>
+#include <glm/gtx/rotate_vector.hpp>
 using namespace glm;
 
 #include "tiny_ecs.hpp"
@@ -42,6 +50,7 @@ const int window_height_px = 1200;
 
 const float restart_time = 900.f;
 const float popup_height = 0.2f;
+const float radius_scale = 0.5f;	// for trackball
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f
@@ -73,6 +82,8 @@ enum class Direction
 };
 
 Direction mod(Direction a, int b);
+
+quat RotationBetweenVectors(vec3 start, vec3 dest);
 
 typedef float (*TransFuncPtr)(float);
 

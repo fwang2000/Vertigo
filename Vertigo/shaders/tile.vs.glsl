@@ -14,8 +14,6 @@ out vec3 normal;
 
 // Inputs the matrices needed for 3D viewing with perspective
 uniform mat4 model;
-uniform mat4 translate;
-uniform mat4 scale;
 uniform mat4 view;
 uniform mat4 proj;
 
@@ -27,9 +25,8 @@ uniform int index = 0;
 void main()
 {
 	// Outputs the positions/coordinates of all vertices
-	mat4 trueModel = translate * model * scale;
-	gl_Position = proj * view * trueModel * vec4(aPos, 1.0);
-	fragPos = vec3(trueModel * vec4(aPos, 1.0));
+	gl_Position = proj * view * model * vec4(aPos, 1.0);
+	fragPos = vec3(model * vec4(aPos, 1.0));
 	// Assigns the texture coordinates from the Vertex Data to "texCoord"
 	if (animated) {
 		texCoord = vec2((aTex.x + index)/ sheet_length, aTex.y);
@@ -37,5 +34,5 @@ void main()
 	else {
 		texCoord = vec2(aTex.x, aTex.y);
 	}
-	normal = mat3(transpose(inverse(trueModel))) * aNormal;
+	normal = mat3(transpose(inverse(model))) * aNormal;
 }
