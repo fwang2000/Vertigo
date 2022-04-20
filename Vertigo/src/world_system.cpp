@@ -1504,7 +1504,7 @@ void WorldSystem::next_level() {
 		int w, h;
 		glfwGetWindowSize(window, &w, &h);
 		cube.reset();
-		level = (level + 1) % maxLevel;
+		level = level == 20 ? 25 : (level + 1) % maxLevel;
 		faceDirection = Direction::UP;
 		gameState = GameState::IDLE;
 		rot.status = BOX_ANIMATION::STILL;
