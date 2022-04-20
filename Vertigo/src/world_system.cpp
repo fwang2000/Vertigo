@@ -674,7 +674,8 @@ void WorldSystem::load_level() {
 				}
 
 				if (cube.faces[i][j][k]->tileState == TileState::W || cube.faces[i][j][k]->tileState == TileState::T) {
-					createDevice(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
+					SwitchTile* s_tile = (SwitchTile*)cube.faces[i][j][k];
+					s_tile->device = createDevice(renderer, Coordinates{ i, j, k }, cube.faces[i][j][k]->model);
 				}
 			}
 		}
@@ -1271,6 +1272,7 @@ void WorldSystem::Interact(Tile* tile)
 
 	if (s_tile->toggled) {
 		gameState = GameState::IDLE;
+		Mix_PlayChannel(-1, switch_fail_sound, 0);
 		return;
 	}
 	
@@ -1355,6 +1357,8 @@ void WorldSystem::Interact(Tile* tile)
 		Entity stile_entity = getTileFromRegistry(s_tile->coords);
 		RenderRequest& s_request = registry.renderRequests.get(stile_entity);
 		s_request.used_texture = TEXTURE_ASSET_ID::CONST_MOV_TILE_SUCCESS;
+	} else if (s_tile->targetTile->tileState != TileState::C) {
+		if (registry.oscillations.has(s_tile->device)) registry.oscillations.remove(s_tile->device);
 	}
 	Mix_PlayChannel(-1, switch_sound, 0);
 	s_tile->action();

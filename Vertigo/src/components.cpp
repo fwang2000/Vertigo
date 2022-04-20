@@ -477,7 +477,7 @@ bool Cube::loadModificationsFromExcelFile(std::string filename) {
 				switch_tile->targetTileState = TileState::C;
 				switch_tile->color = colorIdx;
 				switch_tile->targetTile->color = colorIdx;
-				if (colorIdx < controlTileColors.size()-1) colorIdx++;
+				if (colorIdx < controlTileColors.size()-1 && switch_tile->targetTile->tileState != TileState::E) colorIdx++;
 				if (modifications.size() > 8) {
 					int direction = std::stoi(modifications.at(8));
 					switch_tile->diff = direction;

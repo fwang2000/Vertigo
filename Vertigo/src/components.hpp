@@ -142,6 +142,7 @@ struct SwitchTile : public Tile {
 	Tile* targetTile;
 	TileState targetTileState;
 	Coordinates targetCoords;
+	Entity device;
 	bool toggled = false;
 	int diff = 0; // to compensate for move tiles being on a different face
 	virtual void action();

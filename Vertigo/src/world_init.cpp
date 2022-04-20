@@ -252,7 +252,7 @@ void createColumn(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	);
 }
 
-void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
+Entity createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
 	auto entity = Entity();
 
 	createObject(entity, pos, translateMatrix, true, vec3(0.3f), 1);
@@ -300,6 +300,7 @@ void createDevice(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMa
 	Motion& motion = registry.motions.get(entity);
 	motion.rotation = rand() % 10 + 1;
 
+	return entity;
 }
 
 Entity createBurnable(RenderSystem* renderer, Coordinates pos, glm::mat4 translateMatrix) {
