@@ -162,7 +162,7 @@ void WorldSystem::init(RenderSystem* renderer_arg) {
 void WorldSystem::load_intro() {
 	gameState = GameState::CUTSCENE;
 
-	using std::experimental::filesystem::directory_iterator;
+	using std::filesystem::directory_iterator;
 
     int num_files = std::distance(directory_iterator(textures_path("/cutscene/")), directory_iterator{});
 	texture = (GLuint*) malloc(num_files * sizeof(GLuint));
@@ -172,7 +172,7 @@ void WorldSystem::load_intro() {
 	int width, height;
 	num_frames = 0;
 
-	for (const auto & file :std::experimental::filesystem::directory_iterator(textures_path("/cutscene/"))){
+	for (const auto & file :std::filesystem::directory_iterator(textures_path("/cutscene/"))){
 		glfwPollEvents();
 		std::cout << file.path().string() << std::endl; // check filepaths are printed in alphabetical order
 
