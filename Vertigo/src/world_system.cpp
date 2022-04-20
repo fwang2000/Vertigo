@@ -290,7 +290,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		quat unitQuaternion = quat(1,0,0,0);
 		TrackBallInfo& trackball = registry.trackBall.components[0];
 		float matching = dot(trackball.rotation, unitQuaternion);
-		if ( abs(matching-1.0) < 0.00001 ){
+		if ( abs(matching) > 1.0 - 0.00001 ){
 			gameState = GameState::IDLE;
 
 			// change text
