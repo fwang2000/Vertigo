@@ -1,11 +1,11 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
+#include "filesystem.hpp"
 
 // stlib
 #include <cassert>
 #include <sstream>
-#include <filesystem>
 #include <chrono>
 
 #include "physics_system.hpp"
@@ -147,15 +147,16 @@ GLFWwindow* WorldSystem::create_window() {
 
 void WorldSystem::init(RenderSystem* renderer_arg) {
 	this->renderer = renderer_arg;
-	
-	// Playing background music indefinitely
-	Mix_PlayMusic(background_music, -1);
 
 	initLevelStatus();
 
 	// Play intro cutscene
 	load_intro();
 	play_intro();
+	
+	// Playing background music indefinitely
+	Mix_PlayMusic(background_music, -1);
+
 	// create TrackBall
 	auto entity = Entity();
 	registry.trackBall.emplace(entity);
