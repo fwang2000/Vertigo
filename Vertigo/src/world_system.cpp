@@ -1358,7 +1358,13 @@ void WorldSystem::Interact(Tile* tile)
 		RenderRequest& s_request = registry.renderRequests.get(stile_entity);
 		s_request.used_texture = TEXTURE_ASSET_ID::CONST_MOV_TILE_SUCCESS;
 	} else if (s_tile->targetTile->tileState != TileState::C) {
-		if (registry.oscillations.has(s_tile->device)) registry.oscillations.remove(s_tile->device);
+		if (registry.oscillations.has(s_tile->device)) {
+			registry.oscillations.remove(s_tile->device);
+			Object& device = registry.objects.get(s_tile->device);
+			device.color = vec3(0.5);
+			Motion& motion = registry.motions.get(s_tile->device);
+			motion.position = vec3(0, 0, 0.2);
+		}
 	}
 	Mix_PlayChannel(-1, switch_sound, 0);
 	s_tile->action();
