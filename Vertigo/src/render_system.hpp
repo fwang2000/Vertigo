@@ -175,7 +175,13 @@ class RenderSystem {
 			textures_path("text/5.png"),
 			textures_path("text/6.png"),
 			textures_path("trackball_rotate.png"),
-			textures_path("trackball_reset.png")
+			textures_path("trackball_reset.png"),
+			textures_path("text/TwentyOne.png"),
+			textures_path("text/TwentyTwo.png"),
+			textures_path("text/TwentyThree.png"),
+			textures_path("text/TwentyFour.png"),
+			textures_path("text/TwentyFive.png"),
+			textures_path("text/Congratulations.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
