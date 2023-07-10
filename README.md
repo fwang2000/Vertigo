@@ -1,5 +1,5 @@
 # Vertigo
-Isometric Puzzle Game built with C++ and OpenGL
+Isometric Puzzle Game built with C++ and OpenGL. Trailer here: https://www.youtube.com/watch?v=ptA22Ele9fc&ab_channel=RachelKoh.
 
 run vertigo.exe to start the program
 
