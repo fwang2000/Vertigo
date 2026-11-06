@@ -30,7 +30,7 @@ public:
 	ComponentContainer<Animated> animated;
 	ComponentContainer<Menu> menus;
 	ComponentContainer<Menu> menuButtons;
-	ComponentContainer<Button> buttons;
+	ComponentContainer<struct Button> buttons;
 	ComponentContainer<Billboard> billboards;
 	ComponentContainer<LightSource> lightSources;
 	ComponentContainer<RestartTimer> restartTimer;

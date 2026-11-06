@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.5)
 project(vertigo)
 
 # Set c++11
@@ -6,7 +6,7 @@ project(vertigo)
 if (POLICY CMP0025)
   cmake_policy(SET CMP0025 NEW)
 endif ()
-set (CMAKE_CXX_STANDARD 14)
+set (CMAKE_CXX_STANDARD 17)
 
 # nice hierarchichal structure in MSVC
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -32,8 +32,8 @@ file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
 
 # external libraries will be installed into /usr/local/include and /usr/local/lib but that folder is not automatically included in the search on MACs
 if (IS_OS_MAC)
-  include_directories(/usr/local/include)
-  link_directories(/usr/local/lib)
+  include_directories(/usr/local/include /opt/homebrew/include)
+  link_directories(/usr/local/lib /opt/homebrew/lib)
 endif()
 
 add_executable(${PROJECT_NAME} ${SOURCE_FILES})
@@ -41,6 +41,9 @@ target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream
 set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS 0)
+
+# Newer glm (e.g. Homebrew glm 1.x) gates gtx/ headers behind this define
+target_compile_definitions(${PROJECT_NAME} PUBLIC GLM_ENABLE_EXPERIMENTAL)
 
 # External header-only libraries in the ext/
 target_include_directories(${PROJECT_NAME} PUBLIC ext/stb_image/)
@@ -65,8 +68,8 @@ if (IS_OS_LINUX OR IS_OS_MAC)
 
     pkg_search_module(GLFW REQUIRED glfw3)
 
-    pkg_search_module(SDL2 REQUIRED sdl)
-    pkg_search_module(SDL2MIXER REQUIRED SDL_mixer)
+    pkg_search_module(SDL2 REQUIRED sdl2)
+    pkg_search_module(SDL2MIXER REQUIRED SDL2_mixer)
 
     # Link Frameworks on OSX
     if (IS_OS_MAC)
